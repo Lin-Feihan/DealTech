@@ -1,0 +1,11 @@
+human_review_rules:
+  enabled: true
+  propagation_sources:
+    - claim_to_evidence_map.human_review_required
+    - hard_filter_table.human_review_required
+    - er_brb_scoring_table.human_review_required
+    - risk_matrix.human_review_required
+    - dd_evidence_table.verification_status
+  external_final_effect: "Needs Human Review"
+  internal_trace_effect: "Needs Human Review"
+  never_auto_clear: true

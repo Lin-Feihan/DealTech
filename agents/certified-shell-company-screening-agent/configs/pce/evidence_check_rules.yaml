@@ -1,0 +1,26 @@
+evidence_check_rules:
+  enabled: true
+  required_upstream_tables:
+    - dd_evidence_table.csv
+    - claim_to_evidence_map.csv
+  external_final_requirements:
+    require_source_link_or_file: true
+    allow_metadata_only: false
+    allow_title_only: false
+    allowed_verification_status:
+      - verified
+      - document_derived
+      - sufficient
+    caveat_verification_status:
+      - partial_support
+      - inferred_from_verified_facts
+    human_review_verification_status:
+      - needs_review
+      - unresolved
+      - metadata_only
+      - title_only
+  metadata_only_markers:
+    - metadata-level evidence only
+    - title-level signal
+    - document review still required
+    - underlying PDFs/HTML not parsed yet

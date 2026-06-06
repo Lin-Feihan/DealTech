@@ -1,0 +1,8 @@
+﻿step,workflow_stage,agent_action,er_brb_role,pce_certification_check,output_artifact
+0,Mandate,"Capture user objective, market scope and delivery boundary",Not a scoring step; defines rule boundary,Mandate is explicit and final delivery does not exceed scope,mandate_record.md
+1,Universe Construction,Build HK-listed candidate universe,Not primary decision point,Universe rows trace to permitted sources,candidate_universe_table.csv
+2,Hard Filter,Apply mechanical and rule-based exclusion/retention filters,HF-level ER/BRB fuses preliminary evidence into pass/exclude/watchlist/DD escalation + confidence,"Filter decisions have source, rule, rationale and uncertainty label",hard_filter_table.csv; exclusion_reason_table.csv; er_brb_scoring_table.csv
+3,Deep Due Diligence,"Review control, debt/litigation, compliance, announcements, carrying cost",DD-level ER/BRB aggregates deep evidence and calibrates reranking/recommendation,"Material DD risks are reflected in risk matrix, claim map and human review flags",dd_evidence_table.csv; risk_matrix.csv
+4,Certified Research Trace,"Link mandate, source, retrieval, HF, DD, ER/BRB and claims",Both HF-ER/BRB and DD-ER/BRB must be trace-linked,No unsupported material claims or broken evidence chains,claim_to_evidence_map.csv; certified_research_trace_definition.md
+5,PCE Certification,External gate checks trajectory,Certifies ER/BRB use; does not create new business judgment,Certified / DD issues / revision / escalation / rejected,trajectory_certification_report.md; claim_level_audit.xlsx
+6,Execution,Release final certified materials,Uses certified DD-ER/BRB-supported recommendation only,Final report only uses certified claims,certified_final_report.md; certified_case_study.md; certified_dd_pack.md

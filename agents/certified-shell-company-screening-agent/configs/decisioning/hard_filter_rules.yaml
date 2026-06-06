@@ -1,0 +1,4 @@
+hard_exclusions:
+  - non_equity_instrument
+  - obvious_spac_counter
+  - unavailable_listing_status

@@ -1,0 +1,3 @@
+﻿retrieval_id,retrieval_datetime,stage,company_name,source_id,query_or_document,action_taken,output_file,result_status,notes
+RTL-00001,2026-06-02T06:45:48.289197+00:00,market_snapshot,ALL,AKSHARE_HK_SNAPSHOT_CACHE,load_existing_market_snapshot,generator_market_snapshot,candidate_universe_table.csv,ok,
+RTL-00002,2026-06-02T06:45:48.289207+00:00,hkexnews,pass/watchlist candidates,HKEXNEWS_OFFICIAL,years_back=; candidate_count=,generator_hkexnews_title_search,dd_evidence_table.csv,skipped_by_user,Title metadata is not full document-body DD.

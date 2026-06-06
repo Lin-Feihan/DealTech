@@ -1,0 +1,8 @@
+calculation_replay_rules:
+  enabled: true
+  required_for_external_final: true
+  required_when_calculation_required_yes: true
+  accepted_replay_values:
+    - "Yes"
+  failure_effect: "Needs Human Review"
+  unsupported_metric_effect: "Needs Human Review"

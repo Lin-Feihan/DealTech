@@ -1,0 +1,4 @@
+rules:
+  small_market_cap: configurable
+  low_pb: configurable
+  listing_status: active_or_review

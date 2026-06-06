@@ -1,0 +1,14 @@
+workflow:
+  - mandate
+  - market_adapter_source_hierarchy
+  - universe_construction
+  - extraction_normalization
+  - hard_filter
+  - hf_level_er_brb_decisioning
+  - filtered_candidate_set
+  - deep_due_diligence
+  - dd_level_er_brb_decisioning
+  - scoring_ranking_recommendation_draft
+  - certified_research_trace
+  - pce_certification_gate
+  - certified_final_delivery

@@ -1,0 +1,74 @@
+stage: deep_due_diligence
+purpose: "Internal ER/BRB decisioning over document-level DD evidence before recommendation drafting."
+principle: "DD-level ER/BRB calibrates risk and recommendation support; it does not certify final delivery. PCE remains the delivery gate."
+inputs:
+  required_tables:
+    - dd_evidence_table.csv
+    - risk_matrix.csv
+    - er_brb_scoring_table.csv
+    - financial_calculation_sheet.csv
+    - claim_to_evidence_map.csv
+evidence_reliability:
+  parsed_official_pdf_body:
+    reliability: 0.92
+    external_delivery_allowed_if_consistent: true
+  official_pdf_metadata_or_title_only:
+    reliability: 0.55
+    external_delivery_allowed_if_consistent: false
+    pce_effect: "Needs Human Review for external_final claims"
+  annual_report_fact_extracted:
+    reliability: 0.88
+    external_delivery_allowed_if_consistent: true
+  analyst_inference_from_verified_facts:
+    reliability: 0.70
+    external_delivery_allowed_if_consistent: "Certified with Caveat"
+  non_official_structured_cache:
+    reliability: 0.60
+    external_delivery_allowed_if_consistent: false
+belief_states:
+  low_risk:
+    description: "Document evidence supports low transaction/compliance/control risk."
+  medium_risk:
+    description: "Risk is manageable but requires caveat or next-step review."
+  high_risk:
+    description: "Risk materially weakens or blocks recommendation support."
+  unresolved:
+    description: "Evidence is missing, metadata-only, contradictory, or unparsed."
+  confidence_buffer:
+    description: "Residual uncertainty retained in final risk calibration."
+aggregation_logic:
+  method: "risk-weighted evidential reasoning"
+  steps:
+    - "Group DD evidence by company and risk category."
+    - "Weight official parsed facts above metadata/title-only evidence."
+    - "Promote conflicting high-severity signals to unresolved/high-risk even if other signals are positive."
+    - "Carry unresolved evidence to human-review queue."
+    - "Export DD-level ER/BRB result into claim-level PCE status."
+confidence_calibration:
+  base_confidence: 0.75
+  penalties:
+    needs_review_status: 0.30
+    metadata_only_or_title_only: 0.30
+    unparsed_pdf_body: 0.25
+    contradictory_risk_signals: 0.25
+    unresolved_control_path: 0.20
+    unresolved_connected_transaction: 0.20
+  thresholds:
+    external_certified_min_confidence: 0.70
+    caveat_min_confidence: 0.50
+    human_review_below: 0.70
+missing_evidence_handling:
+  action: "Needs Human Review"
+  external_final_status: "Needs Human Review"
+  internal_trace_status: "Internal Trace Only"
+conflicting_evidence_handling:
+  action: "Needs Human Review unless reviewed and caveated"
+  external_final_status: "Needs Human Review"
+outputs:
+  columns:
+    - dd_adjusted_risk
+    - ranking_support
+    - recommendation_support
+    - confidence
+    - caveat
+    - human_review_required

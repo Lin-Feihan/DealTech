@@ -1,0 +1,8 @@
+case_id: tuntun_hk
+case_name: Tuntun Health HK shell-company screening example
+framework: certified-shell-company-screening-agent
+market_adapter: hk
+trace_origin: imported_from_original_bundle_validated_by_clean_repo_pipeline
+certification_mode: pce_gate
+allow_final_delivery_without_pce: false
+human_review_required: true

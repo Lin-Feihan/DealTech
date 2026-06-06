@@ -1,0 +1,8 @@
+﻿source_id,source_name,source_category,priority_level,official_status,allowed_use,restrictions,default_confidence
+HKEXNEWS_OFFICIAL,HKEXnews / 披露易,official,1,official,financial facts; filings; audit opinions; transactions; regulatory disclosures,preferred source for material claims,high
+HKEX_LISTED_COMPANY_LIST,HKEX listed company list,official,1,official,universe construction; listing status,cannot alone support DD-level conclusions,high
+AKSHARE_HK,AKShare HK market data,structured,2,non_official,market snapshot; first-pass screening,not sufficient alone for final material claims,medium
+COMPANY_IR,Company IR / official website,corporate,3,non_official,business description; channels; brand narrative,cannot replace audited or filing-based facts,medium
+INDUSTRY_AND_COMPARABLES,Industry / comparable sources,secondary,3,non_official,commercial thesis; industry context; optionality,cannot be treated as high-confidence fact,low
+FINANCIAL_CALCULATION_SHEET,Deterministic financial calculation sheet,derived,2,derived_from_trace,replayed ranking calculations; score math,must be replayed from trace inputs before clean external delivery,medium
+DD_SCAFFOLD,Candidate DD scaffold,derived,3,non_official,internal DD queueing; issue scaffolding,not sufficient alone for clean external factual claims,low
