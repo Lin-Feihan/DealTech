@@ -93,7 +93,7 @@ Only certified research traces should be converted into final reports, investmen
 
 ---
 
-## 6.Crtification Logic: PCE
+## Crtification Logic: PCE
 
 The project uses a **Proposal → Certification → Execution** logic.
 
@@ -139,10 +139,9 @@ Certifying Layer = applies Policy π and certifies, caveats, blocks, or escalate
 
 At the current prototype stage, the certifier is implemented mainly as an independent PCE certification module / workflow rather than a fully separate LLM agent. However, it is separated from the generator in responsibility and logic. Future versions can package this PCE layer as a standalone certifying agent.
 
-
 ---
 
-## 7.Decision Logic: ER/BRB
+## Decision Logic: ER/BRB
 
 The project also explores an internal decision layer based on **Evidential Reasoning / Belief Rule Base**.
 
