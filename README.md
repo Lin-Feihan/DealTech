@@ -165,6 +165,7 @@ ER/BRB helps the agent decide:
 - which conclusions require human escalation
 - whether the final recommendation is sufficiently supported
 ```
+---
 
 ## Demo Links
 
