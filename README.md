@@ -59,15 +59,15 @@ Mandate
 → Final Deliverable
 ```
 
-### 1. Mandate
+### 1.Mandate
 
 Defines the transaction background, user requirements, research scope, screening criteria, and risk preferences.
 
-### 2. Research Execution
+### 2.Research Execution
 
 The agent performs structured research, such as candidate pool construction, source retrieval, hard filtering, due diligence, risk analysis, financial calculation, and report drafting.
 
-### 3. Certified Research Trace
+### 3.Certified Research Trace
 
 The agent preserves the intermediate artifacts behind the final output, including:
 
@@ -83,24 +83,24 @@ The agent preserves the intermediate artifacts behind the final output, includin
 - run logs
 ```
 
-### 4. Certification Gate
+### 4.Certification Gate
 
 Before final delivery, the research trace is checked for evidence quality, completeness, reproducibility, risk coverage, and human-review readiness.
 
-### 5. Final Deliverable
+### 5.Final Deliverable
 
 Only certified research traces should be converted into final reports, investment memos, presentation materials, or due diligence packages.
 
 ---
 
-## Certification Logic: PCE
+## 6.Crtification Logic: PCE
 
 The project uses a **Proposal → Certification → Execution** logic.
 
 ```text
 Proposal      = the agent generates research results and supporting traces
-Certification = the system checks whether the trace is reliable
-Execution     = the certified trace becomes a final deliverable
+Certification = an independent PCE layer checks the trace against Policy π
+Execution     = only certified or caveated claims can enter the final deliverable
 ```
 
 The principle is:
@@ -109,9 +109,40 @@ The principle is:
 
 A generated report is not automatically ready for use. It must first pass a certification process.
 
+In this repository, **Policy π** refers to the claim-level certification policy used by the PCE layer. It is not the same as the generator prompt. The generator proposes research outputs, while Policy π decides whether each claim is deliverable.
+
+Conceptually:
+
+```text
+π(claim, source, evidence, ER/BRB result, calculation record, human-review flag)
+→ certification status
+```
+
+The certification status can be:
+
+```text
+Certified
+Certified with Caveat
+Needs Human Review
+Not Certified
+Internal Trace Only
+```
+
+The PCE layer checks whether a claim has a registered source, specific evidence, sufficient source quality, replayable calculations when needed, preserved ER/BRB risk flags, and visible human-review boundaries.
+
+Therefore, the system separates two roles:
+
+```text
+Generator Agent  = produces claims, evidence tables, calculations, and research traces
+Certifying Layer = applies Policy π and certifies, caveats, blocks, or escalates claims
+```
+
+At the current prototype stage, the certifier is implemented mainly as an independent PCE certification module / workflow rather than a fully separate LLM agent. However, it is separated from the generator in responsibility and logic. Future versions can package this PCE layer as a standalone certifying agent.
+
+
 ---
 
-## Decision Logic: ER/BRB
+## 7.Decision Logic: ER/BRB
 
 The project also explores an internal decision layer based on **Evidential Reasoning / Belief Rule Base**.
 
@@ -136,6 +167,14 @@ ER/BRB helps the agent decide:
 - whether the final recommendation is sufficiently supported
 ```
 
+## Demo Links
+
+| Demo | Link |
+|---|---|
+| Shell Company Screening Agent | [Open Demo](https://462852416-glitch.github.io/shell-screening-agent-user-test-page/) |
+| SPAC Target Acquisition Agent | [Open Demo](https://462852416-glitch.github.io/soren-spac-target-screening-demo/)|
+| Acquisition Strategy Agent — Buyer Side | [Open Demo](https://462852416-glitch.github.io/acquisition-strategy-agent-portable-demo/buyer.html) |
+| Acquisition Strategy Agent — Target Side | [Open Demo](https://462852416-glitch.github.io/acquisition-strategy-agent-portable-demo/target.html)|
 ---
 
 ## Technical Stack
