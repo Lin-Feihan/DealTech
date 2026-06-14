@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Evidence Table Row",
+  "type": "object",
+  "required": [
+    "evidence_id",
+    "claim_id",
+    "source_id",
+    "extracted_fact",
+    "evidence_type",
+    "confidence",
+    "limitations",
+    "human_review_required",
+    "PCE_status"
+  ],
+  "properties": {
+    "evidence_id": {
+      "type": "string"
+    },
+    "claim_id": {
+      "type": "string"
+    },
+    "source_id": {
+      "type": "string"
+    },
+    "extracted_fact": {
+      "type": "string"
+    },
+    "evidence_type": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "string"
+    },
+    "limitations": {
+      "type": "string"
+    },
+    "human_review_required": {
+      "type": "string"
+    },
+    "PCE_status": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

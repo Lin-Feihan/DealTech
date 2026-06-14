@@ -1,0 +1,8 @@
+claim_id,claim_text,source_id,evidence_id,calculation_required,calculation_replayed,human_review_required,certification_status
+CLM-ACQ-T01,The imported target-side report can support DarwinAI board-level conclusions.,SRC-ACQ-T01,EVI-ACQ-T01,No,No,Yes,Needs Human Review
+CLM-ACQ-T02,DarwinAI is the private target in this case and has a public technology description.,SRC-ACQ-T03,EVI-ACQ-T02,No,No,Yes,Certified with Caveat
+CLM-ACQ-T03,Public reporting indicates Apple acquired DarwinAI; terms are not disclosed in this package.,SRC-ACQ-T04,EVI-ACQ-T03,No,No,Yes,Certified with Caveat
+CLM-ACQ-T04,Strategic alternatives framework can be delivered for human review.,SRC-ACQ-T06,EVI-ACQ-T04,No,No,Yes,Certified with Caveat
+CLM-ACQ-T05,Financial fairness or offer attractiveness can be certified.,SRC-ACQ-T05,EVI-ACQ-T05,Yes,No,Yes,Not Certified
+CLM-ACQ-T06,"Remain independent, raise financing, seek another buyer, license technology, or partner without sale are valid alternatives to evaluate.",SRC-ACQ-T06,EVI-ACQ-T06,No,No,Yes,Certified with Caveat
+CLM-ACQ-T07,"DarwinAI should accept, reject, or negotiate the offer.",SRC-ACQ-T05,EVI-ACQ-T07,Yes,No,Yes,Needs Human Review

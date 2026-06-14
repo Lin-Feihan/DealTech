@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "strategic_alternatives",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "alternative_id": {
+      "type": [
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ]
+    },
+    "alternative_name": {
+      "type": [
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ]
+    },
+    "description": {
+      "type": [
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ]
+    },
+    "value_driver": {
+      "type": [
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ]
+    },
+    "key_risk": {
+      "type": [
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ]
+    },
+    "source_id": {
+      "type": [
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ]
+    },
+    "evidence_id": {
+      "type": [
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ]
+    },
+    "data_quality": {
+      "type": [
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ]
+    },
+    "human_review_required": {
+      "type": [
+        "boolean",
+        "string",
+        "null"
+      ]
+    },
+    "linked_claim_id": {
+      "type": [
+        "string",
+        "number",
+        "boolean",
+        "null"
+      ]
+    },
+    "claim_class": {
+      "enum": [
+        "source-backed fact",
+        "evidence-supported inference",
+        "assumption",
+        "unknown",
+        "human_review_required"
+      ]
+    },
+    "PCE_status": {
+      "enum": [
+        "Certified",
+        "Certified with Caveat",
+        "Needs Human Review",
+        "Not Certified",
+        "Human Review Required",
+        "Internal Trace Only"
+      ]
+    }
+  },
+  "required": [
+    "alternative_id",
+    "alternative_name"
+  ]
+}

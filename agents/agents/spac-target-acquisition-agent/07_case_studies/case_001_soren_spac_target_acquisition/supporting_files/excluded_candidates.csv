@@ -1,0 +1,5 @@
+candidate_id,candidate_name,exclusion_stage,exclusion_reason_category,detailed_reason,source_id,evidence_id,human_review_required
+SPAC-CAND-004,Modeled Healthcare Platform Alpha (hypothetical from old report),Candidate universe construction,Hypothetical / modeled row,Explicitly blocked from candidate universe as a real company.,SRC-SPAC-001,EVI-SPAC-004,No
+SPAC-CAND-005,Modeled Healthcare Platform Beta (hypothetical from old report),Candidate universe construction,Hypothetical / modeled row,Not eligible for PCE or final delivery.,SRC-SPAC-001,EVI-SPAC-005,No
+SPAC-CAND-006,Modeled Healthcare Platform Gamma (hypothetical from old report),Candidate universe construction,Hypothetical / modeled row,Cannot be screened as a real acquisition target.,SRC-SPAC-001,EVI-SPAC-006,No
+SPAC-CAND-007,Future Apify-sourced candidate placeholder,Candidate universe construction,No authenticated dataset / source replay missing,No candidate fact exists yet.,SRC-SPAC-004,EVI-SPAC-007,Yes

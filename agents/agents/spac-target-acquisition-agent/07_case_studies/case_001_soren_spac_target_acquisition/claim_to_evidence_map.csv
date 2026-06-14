@@ -1,0 +1,14 @@
+claim_id,claim_text,source_id,evidence_id,calculation_required,calculation_replayed,human_review_required,certification_status
+CLM-SPAC-101,Aledade is a real source-replayed healthcare candidate identity/business-description row.,SRC-SPAC-101,EVI-SPAC-101,No,No,No,Certified
+CLM-SPAC-102,Cityblock Health is a real source-replayed healthcare candidate identity/business-description row.,SRC-SPAC-102,EVI-SPAC-102,No,No,No,Certified
+CLM-SPAC-103,DispatchHealth is a real source-replayed healthcare candidate identity/business-description row.,SRC-SPAC-103,EVI-SPAC-103,No,No,No,Certified
+CLM-SPAC-104,Lyra Health is a real source-replayed healthcare candidate identity/business-description row.,SRC-SPAC-104,EVI-SPAC-104,No,No,No,Certified
+CLM-SPAC-105,SEC ticker lookup supports a caveated screening note that the real candidate rows were not matched to public tickers in the sampled lookup.,SRC-SPAC-105,EVI-SPAC-105,No,No,Yes,Certified with Caveat
+CLM-SPAC-001,The imported Soren report reconstructed a prior healthcare SPAC target shortlist.,SRC-SPAC-001,EVI-SPAC-001,No,No,Yes,Needs Human Review
+CLM-SPAC-002,The legacy candidate background and company identity claims require source replay.,SRC-SPAC-002,EVI-SPAC-003,No,No,Yes,Needs Human Review
+CLM-SPAC-003,An authenticated Apify run discovered candidate records for this case.,SRC-SPAC-004,EVI-SPAC-007,No,No,Yes,Not Certified
+CLM-SPAC-004,"Revenue, EBITDA, or deal value support SPAC deal-size fit.",SRC-SPAC-005,EVI-SPAC-009,Yes,No,Yes,Needs Human Review
+CLM-SPAC-005,Modeled/hypothetical old-report names are excluded from the real candidate universe.,SRC-SPAC-005,EVI-SPAC-004,No,No,No,Certified with Caveat
+CLM-SPAC-006,The mandate is a first-pass U.S. private healthcare SPAC target screen.,SRC-SPAC-006,EVI-SPAC-008,No,No,No,Certified with Caveat
+CLM-SPAC-007,"ER/BRB screening is a business screen, not final certification.",SRC-SPAC-005,EVI-SPAC-010,No,No,No,Certified with Caveat
+CLM-SPAC-008,Soren should pursue any retained candidate as an acquisition target.,SRC-SPAC-005,EVI-SPAC-009,Yes,No,Yes,Needs Human Review

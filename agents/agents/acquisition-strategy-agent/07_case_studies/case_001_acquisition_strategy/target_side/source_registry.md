@@ -1,0 +1,11 @@
+# Source Registry — Apple → DarwinAI Target-side
+
+Expanded source registry for private-target acquisition strategy. Pending replay sources are not PCE-eligible until a real URL/file and completed replay status are present. Secondary public reporting supports caveated facts only and cannot certify fairness, board response, or accept/reject/negotiate recommendations.
+
+|source_id|source_name|source_type|url_or_file|used_for|reliability_tier|PCE_eligible|source_replay_status|limitations|
+|---|---|---|---|---|---|---|---|---|
+|SRC-ACQ-T01|Imported Apple → DarwinAI Target-side report artifact|imported artifact|reports/apple_darwinai_target_report.md|migration context and prior narrative reconstruction|Imported Artifact|no|not_applicable|Imported artifact; not primary evidence by itself.|
+|SRC-ACQ-T03|MacRumors report on DarwinAI target profile|secondary public reporting|https://www.macrumors.com/2024/03/14/apple-acquires-darwinai/|DarwinAI target identity and public technology description|Tier 2 secondary public report|yes|completed|Public report cites Bloomberg and includes Apple's standard acquisition-confirmation statement; no DarwinAI revenue, EBITDA, customer base, ownership, valuation, or board materials.|
+|SRC-ACQ-T04|MacRumors report on Apple acquiring DarwinAI|transaction_news_source / secondary public reporting|https://www.macrumors.com/2024/03/14/apple-acquires-darwinai/|Apple → DarwinAI transaction occurrence and undisclosed terms context|Tier 2 transaction news source|yes|completed|Caveated source for transaction occurrence only; cannot certify deal value, fairness, board response, accept/reject/negotiate, synergy, or EPS.|
+|SRC-ACQ-T05|Target-side valuation / fairness calculation model|calculation artifact pending replay|pending replay file|valuation, fairness, offer attractiveness, accept/reject/negotiate claims|Not Evidence until replayed|no|pending|calculation not replayed; deal value, target financials, fairness opinion, and board materials are Unknown.|
+|SRC-ACQ-T06|Target-side certification boundary ledger|case control artifact|supporting_files/target_side_PCE_audit.csv|strategic alternatives framework and certification-boundary status|Controlled case artifact|yes|completed|Certifies framework/process-boundary status only; does not certify valuation, fairness, board response, or transaction recommendation.|

@@ -1,0 +1,11 @@
+flowchart TD
+ A[SPAC Sponsor Mandate] --> B[Migrated Soren Artifact Review]
+ B --> C[Candidate Universe Reconstruction]
+ C --> D[Connector Design Check: Apify]
+ D --> E{Authenticated Dataset?}
+ E -- No --> F[Source Replay Pending]
+ E -- Yes --> G[Structured Candidate Dataset]
+ F --> H[ER/BRB Conservative Review]
+ G --> H
+ H --> I[PCE Claim Checks]
+ I --> J[Needs Human Review Output]

@@ -1,0 +1,5 @@
+risk_id,risk_category,risk_description,target_impact,likelihood,severity,mitigation_or_next_check,source_id,evidence_id,human_review_required,linked_claim_id
+TRISK-001,fairness_unknown,"Fairness cannot be assessed without deal value, financials, and alternatives.",Blocks board-level use.,High,High,Replay valuation/fairness workpapers.,SRC-ACQ-T05,EVI-ACQ-T05,Yes,CLM-ACQ-T05
+TRISK-002,financial_disclosure_gap,DarwinAI revenue and EBITDA are not disclosed.,Blocks multiples and standalone valuation.,High,High,Obtain target financials.,SRC-ACQ-T05,EVI-ACQ-T05,Yes,CLM-ACQ-T05
+TRISK-003,alternative_buyer_risk,No alternative-buyer process evidence in package.,Cannot compare Apple offer against market check.,Unknown,Medium,Replay process/market-check evidence.,SRC-ACQ-T06,EVI-ACQ-T06,Yes,CLM-ACQ-T06
+TRISK-004,source_quality,Imported target-side report is context only.,Blocks direct use of old accept/negotiate framing.,High,High,Use registered sources only.,SRC-ACQ-T01,EVI-ACQ-T01,Yes,CLM-ACQ-T01

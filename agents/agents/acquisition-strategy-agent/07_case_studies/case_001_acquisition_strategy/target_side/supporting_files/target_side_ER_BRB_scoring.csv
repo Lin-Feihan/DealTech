@@ -1,0 +1,4 @@
+claim_id,evidence_reliability_score,business_relevance_score,business_risk_score,regulatory_risk_score,strategic_fit_score,data_quality_score,overall_ER_BRB_status,reason,linked_evidence_ids,human_review_required
+CLM-ACQ-T02,4/5,3/5,Low,Low,N/A,4/5,Certified,Target identity/background is supported inside the case boundary.,EVI-ACQ-T02,No
+CLM-ACQ-T04,3/5,4/5,Medium,Low,3/5,3/5,Certified with Caveat,Alternatives are a framework and remain caveated.,EVI-ACQ-T04;EVI-ACQ-T06,Yes
+CLM-ACQ-T05,0/5,5/5,High,Medium,Unknown,0/5,Needs Human Review,Fairness/valuation claims require source and calculation replay.,EVI-ACQ-T05,Yes

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Merger Strategy Input Schema",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "buyer_name",
+    "target_name",
+    "transaction_type",
+    "sector",
+    "geography",
+    "transaction_timing",
+    "user_objective",
+    "available_sources"
+  ],
+  "properties": {
+    "case_id": {
+      "type": "string"
+    },
+    "buyer_name": {
+      "type": "string"
+    },
+    "target_name": {
+      "type": "string"
+    },
+    "transaction_type": {
+      "type": "string"
+    },
+    "sector": {
+      "type": "string"
+    },
+    "geography": {
+      "type": "string"
+    },
+    "transaction_timing": {
+      "type": "string"
+    },
+    "user_objective": {
+      "type": "string"
+    },
+    "available_sources": {
+      "type": ["array", "string"]
+    },
+    "financial_model": {
+      "type": "string"
+    }
+  }
+}

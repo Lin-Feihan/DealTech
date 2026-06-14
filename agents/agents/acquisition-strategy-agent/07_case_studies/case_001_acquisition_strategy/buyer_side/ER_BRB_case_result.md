@@ -1,0 +1,23 @@
+# ER/BRB Case Result — Acquisition Strategy
+
+Case: `case_001_acquisition_strategy` / View: `buyer_side`
+
+|claim_id|claim_text|evidence_id|source_id|evidence_reliability|business_risk|regulatory_risk|reputational_risk|certification_status|human_review_required|reason|
+|---|---|---|---|---|---|---|---|---|---|---|
+|CLM-ACQ-B01|The imported buyer-side report can support Apple → DarwinAI conclusions.|EVI-ACQ-B01|SRC-ACQ-B01|Medium|Medium|Low|Medium|Needs Human Review|yes|Evidence chain is incomplete, imported, non-PCE-eligible, or source replay is pending.|
+|CLM-ACQ-B02|Apple is the buyer-side public company in this case.|EVI-ACQ-B02|SRC-ACQ-B02|High|Low|Low|Low|Certified|no|PCE-eligible source with sufficient non-imported evidence.|
+|CLM-ACQ-B09|Apple has substantial FY2024 liquidity capacity based on replayed SEC XBRL cash and marketable-securities facts.|EVI-ACQ-B09|SRC-ACQ-B07|High|High|Low|Medium|Certified|no|PCE-eligible source with sufficient non-imported evidence.|
+|CLM-ACQ-B-TARGET-001|DarwinAI target identity is supported by current public reporting.|EVI-ACQ-B-TARGET-001|SRC-ACQ-B03|Medium|High|Medium|Medium|Certified with Caveat|yes|Evidence exists and source is PCE-eligible, but human review/caveat flags remain visible.|
+|CLM-ACQ-B-TARGET-002|DarwinAI public technology description is supported by current public reporting.|EVI-ACQ-B-TARGET-002|SRC-ACQ-B03|Medium|High|Medium|Medium|Certified with Caveat|yes|Evidence exists and source is PCE-eligible, but human review/caveat flags remain visible.|
+|CLM-ACQ-B-TARGET-003|DarwinAI technology may be strategically relevant to Apple AI and on-device deployment.|EVI-ACQ-B-TARGET-003|SRC-ACQ-B03|Medium|High|Medium|Medium|Certified with Caveat|yes|Evidence exists and source is PCE-eligible, but human review/caveat flags remain visible.|
+|CLM-ACQ-B-TARGET-004|DarwinAI revenue, EBITDA, deal value, valuation multiple, ownership, customer base, and detailed integration plan are unknown.|EVI-ACQ-B-TARGET-004|SRC-ACQ-B05|Low|High|Low|Medium|Needs Human Review|yes|Evidence chain is incomplete, imported, non-PCE-eligible, or source replay is pending.|
+|CLM-ACQ-B03|DarwinAI technology may be strategically relevant to Apple AI capabilities.|EVI-ACQ-B03|SRC-ACQ-B03|Medium|High|Medium|Medium|Certified with Caveat|yes|Evidence exists and source is PCE-eligible, but human review/caveat flags remain visible.|
+|CLM-ACQ-B-TXN-001|Public reporting indicates Apple acquired DarwinAI.|EVI-ACQ-B-TXN-001|SRC-ACQ-B04|Medium|High|Medium|Medium|Certified with Caveat|yes|Evidence exists and source is PCE-eligible, but human review/caveat flags remain visible.|
+|CLM-ACQ-B-TXN-002|Apple → DarwinAI deal value is not disclosed / Unknown.|EVI-ACQ-B-TXN-002|SRC-ACQ-B05|Low|Low|Low|Low|Needs Human Review|yes|Evidence chain is incomplete, imported, non-PCE-eligible, or source replay is pending.|
+|CLM-ACQ-B-TXN-003|Apple → DarwinAI deal economics, valuation multiple, consideration type, offer premium, fairness opinion, synergy, and EPS impact are not certifiable from current sources.|EVI-ACQ-B-TXN-003|SRC-ACQ-B05|Low|High|Low|Medium|Needs Human Review|yes|Evidence chain is incomplete, imported, non-PCE-eligible, or source replay is pending.|
+|CLM-ACQ-B-TXN-004|Apple → DarwinAI strategic context can be discussed only with caveat.|EVI-ACQ-B-TXN-004|SRC-ACQ-B04|Medium|High|Medium|Medium|Certified with Caveat|yes|Evidence exists and source is PCE-eligible, but human review/caveat flags remain visible.|
+|CLM-ACQ-B04|Public reporting indicates Apple acquired DarwinAI; terms are not disclosed in this package.|EVI-ACQ-B04|SRC-ACQ-B04|Medium|High|Medium|Medium|Certified with Caveat|yes|Evidence exists and source is PCE-eligible, but human review/caveat flags remain visible.|
+|CLM-ACQ-B05|DarwinAI valuation, pricing, or deal value can be concluded.|EVI-ACQ-B05|SRC-ACQ-B05|Low|High|Low|Medium|Needs Human Review|yes|Evidence chain is incomplete, imported, non-PCE-eligible, or source replay is pending.|
+|CLM-ACQ-B06|Integration risk framework can be delivered as caveated diligence prompts.|EVI-ACQ-B06|SRC-ACQ-B06|Medium|High|Low|Medium|Certified with Caveat|yes|Evidence exists and source is PCE-eligible, but human review/caveat flags remain visible.|
+|CLM-ACQ-B07|Apple should proceed / go-no-go recommendation.|EVI-ACQ-B07|SRC-ACQ-B05|Low|High|Low|Medium|Needs Human Review|yes|Evidence chain is incomplete, imported, non-PCE-eligible, or source replay is pending.|
+|CLM-ACQ-B08|Synergy or EPS impact can be quantified.|EVI-ACQ-B08|SRC-ACQ-B05|Low|High|Low|Medium|Needs Human Review|yes|Evidence chain is incomplete, imported, non-PCE-eligible, or source replay is pending.|

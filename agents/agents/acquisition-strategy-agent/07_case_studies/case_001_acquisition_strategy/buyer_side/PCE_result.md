@@ -1,0 +1,25 @@
+# PCE Case Result — Acquisition Strategy
+
+Case: `case_001_acquisition_strategy` / View: `buyer_side`
+
+Overall status: **Needs Human Review**
+
+|claim_id|claim_text|source_id|evidence_id|PCE_status|reason|human_review_required|
+|---|---|---|---|---|---|---|
+|CLM-ACQ-B01|The imported buyer-side report can support Apple → DarwinAI conclusions.|SRC-ACQ-B01|EVI-ACQ-B01|Needs Human Review|source is not PCE eligible; imported artifact cannot serve as primary evidence by itself; human_review_required flag is visible and blocks pure Certified status|yes|
+|CLM-ACQ-B02|Apple is the buyer-side public company in this case.|SRC-ACQ-B02|EVI-ACQ-B02|Certified|PCE executed; claim is certified within the current registered evidence boundary.|no|
+|CLM-ACQ-B09|Apple has substantial FY2024 liquidity capacity based on replayed SEC XBRL cash and marketable-securities facts.|SRC-ACQ-B07|EVI-ACQ-B09|Certified|PCE executed; claim is certified within the current registered evidence boundary.|no|
+|CLM-ACQ-B-TARGET-001|DarwinAI target identity is supported by current public reporting.|SRC-ACQ-B03|EVI-ACQ-B-TARGET-001|Certified with Caveat|secondary source only; primary replay pending; human_review_required flag is visible and blocks pure Certified status|yes|
+|CLM-ACQ-B-TARGET-002|DarwinAI public technology description is supported by current public reporting.|SRC-ACQ-B03|EVI-ACQ-B-TARGET-002|Certified with Caveat|secondary source only; primary replay pending; human_review_required flag is visible and blocks pure Certified status|yes|
+|CLM-ACQ-B-TARGET-003|DarwinAI technology may be strategically relevant to Apple AI and on-device deployment.|SRC-ACQ-B03|EVI-ACQ-B-TARGET-003|Certified with Caveat|secondary source only; primary replay pending; human_review_required flag is visible and blocks pure Certified status|yes|
+|CLM-ACQ-B-TARGET-004|DarwinAI revenue, EBITDA, deal value, valuation multiple, ownership, customer base, and detailed integration plan are unknown.|SRC-ACQ-B05|EVI-ACQ-B-TARGET-004|Needs Human Review|source is not PCE eligible; source replay pending; calculation replay required before certification; human_review_required flag is visible and blocks pure Certified status|yes|
+|CLM-ACQ-B03|DarwinAI technology may be strategically relevant to Apple AI capabilities.|SRC-ACQ-B03|EVI-ACQ-B03|Certified with Caveat|secondary source only; primary replay pending; human_review_required flag is visible and blocks pure Certified status|yes|
+|CLM-ACQ-B-TXN-001|Public reporting indicates Apple acquired DarwinAI.|SRC-ACQ-B04|EVI-ACQ-B-TXN-001|Certified with Caveat|secondary source only; primary replay pending; human_review_required flag is visible and blocks pure Certified status|yes|
+|CLM-ACQ-B-TXN-002|Apple → DarwinAI deal value is not disclosed / Unknown.|SRC-ACQ-B05|EVI-ACQ-B-TXN-002|Needs Human Review|source is not PCE eligible; source replay pending; calculation replay required before certification; human_review_required flag is visible and blocks pure Certified status|yes|
+|CLM-ACQ-B-TXN-003|Apple → DarwinAI deal economics, valuation multiple, consideration type, offer premium, fairness opinion, synergy, and EPS impact are not certifiable from current sources.|SRC-ACQ-B05|EVI-ACQ-B-TXN-003|Needs Human Review|source is not PCE eligible; source replay pending; calculation replay required before certification; human_review_required flag is visible and blocks pure Certified status|yes|
+|CLM-ACQ-B-TXN-004|Apple → DarwinAI strategic context can be discussed only with caveat.|SRC-ACQ-B04|EVI-ACQ-B-TXN-004|Certified with Caveat|secondary source only; primary replay pending; human_review_required flag is visible and blocks pure Certified status|yes|
+|CLM-ACQ-B04|Public reporting indicates Apple acquired DarwinAI; terms are not disclosed in this package.|SRC-ACQ-B04|EVI-ACQ-B04|Certified with Caveat|secondary source only; primary replay pending; human_review_required flag is visible and blocks pure Certified status|yes|
+|CLM-ACQ-B05|DarwinAI valuation, pricing, or deal value can be concluded.|SRC-ACQ-B05|EVI-ACQ-B05|Needs Human Review|source is not PCE eligible; source replay pending; calculation replay required before certification; human_review_required flag is visible and blocks pure Certified status|yes|
+|CLM-ACQ-B06|Integration risk framework can be delivered as caveated diligence prompts.|SRC-ACQ-B06|EVI-ACQ-B06|Certified with Caveat|human_review_required flag is visible and blocks pure Certified status|yes|
+|CLM-ACQ-B07|Apple should proceed / go-no-go recommendation.|SRC-ACQ-B05|EVI-ACQ-B07|Needs Human Review|source is not PCE eligible; source replay pending; calculation replay required before certification; human_review_required flag is visible and blocks pure Certified status|yes|
+|CLM-ACQ-B08|Synergy or EPS impact can be quantified.|SRC-ACQ-B05|EVI-ACQ-B08|Needs Human Review|source is not PCE eligible; source replay pending; calculation replay required before certification; human_review_required flag is visible and blocks pure Certified status|yes|

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PCE Claim-Level Result Row",
+  "type": "object",
+  "required": [
+    "claim_id",
+    "claim_text",
+    "source_id",
+    "evidence_id",
+    "PCE_status",
+    "reason",
+    "human_review_required"
+  ],
+  "properties": {
+    "claim_id": {
+      "type": "string"
+    },
+    "claim_text": {
+      "type": "string"
+    },
+    "source_id": {
+      "type": "string"
+    },
+    "evidence_id": {
+      "type": "string"
+    },
+    "PCE_status": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "human_review_required": {
+      "type": ["boolean", "string"]
+    },
+    "checks": {
+      "type": "object"
+    },
+    "status": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

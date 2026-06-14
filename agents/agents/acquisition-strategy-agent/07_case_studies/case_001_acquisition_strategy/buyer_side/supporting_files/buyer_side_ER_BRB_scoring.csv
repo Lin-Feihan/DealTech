@@ -1,0 +1,9 @@
+claim_id,evidence_strength,business_relevance,source_risk,calculation_risk,strategic_fit_score,overall_confidence,recommended_status,rationale,evidence_id,human_review_required
+CLM-ACQ-B02,5/5,3/5,Low,Low,N/A,4/5,Certified,Apple identity/background is source-backed by official public-company source.,EVI-ACQ-B02,No
+CLM-ACQ-B09,5/5,4/5,Low,Low,N/A,4/5,Certified,Apple liquidity-capacity context is replayed from SEC structured data.,EVI-ACQ-B09,No
+CLM-ACQ-B-TARGET-001,3/5,4/5,Medium,Low,N/A,3/5,Certified with Caveat,Target identity is supported by secondary public reporting only.,EVI-ACQ-B-TARGET-001,Yes
+CLM-ACQ-B-TARGET-002,3/5,4/5,Medium,Low,N/A,3/5,Certified with Caveat,Technology description is source-backed but secondary and not benchmarked.,EVI-ACQ-B-TARGET-002,Yes
+CLM-ACQ-B-TARGET-003,3/5,5/5,Medium,Low,4/5,3/5,Certified with Caveat,Strategic relevance is an evidence-supported inference rather than fact.,EVI-ACQ-B-TARGET-003,Yes
+CLM-ACQ-B-TXN-001,3/5,4/5,Medium,Low,N/A,3/5,Certified with Caveat,Transaction occurrence is supported by credible public reporting but remains caveated.,EVI-ACQ-B-TXN-001,Yes
+CLM-ACQ-B-TXN-003,0/5,5/5,High,High,Unknown,0/5,Needs Human Review,Deal economics require primary source inputs and calculation replay.,EVI-ACQ-B-TXN-003,Yes
+CLM-ACQ-B07,0/5,5/5,High,High,Unknown,0/5,Needs Human Review,Go/no-go recommendation is blocked without deal economics and human review.,EVI-ACQ-B07,Yes

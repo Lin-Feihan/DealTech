@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "certified-deep-research-agents-dealtech"
+version = "1.0.0"
+description = "Runnable Certified Deep Research Agents for AI-Native DealTech"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["PyYAML>=6.0"]
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests", "agents/*/tests"]
+addopts = ["--import-mode=importlib"]
