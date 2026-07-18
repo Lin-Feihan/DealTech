@@ -216,3 +216,26 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local credentials and secrets
+.env.*
+!.env.example
+*credentials*.json
+
+# Local tooling and editor state
+.codex/
+.idea/
+.vscode/
+*.swp
+*.tmp
+*.temp
+
+# Buyer-side agent generated and confidential local artifacts
+**/run_output/
+**/raw_live_provider_responses/
+**/local_confidential_attachments/
+agents/docs/acquisition-loop-upgrade/
+
+# Curated, sanitized release artifacts remain publishable
+!agents/agents/buyer-side-acquisition-loop-agent/06_examples/recorded_full_pipeline_case/sample_output/
+!agents/agents/buyer-side-acquisition-loop-agent/06_examples/recorded_full_pipeline_case/sample_output/**

@@ -1,0 +1,86 @@
+{
+  "schema_version": "milestone-5-a5",
+  "case_id": "RECORDED-A5-PILOT-001",
+  "module_id": "A5",
+  "mandate_id": "MANDATE-RECORDED-A5-001",
+  "research_contract_id": "RC-RECORDED-A5-001",
+  "provider": {
+    "mode": "recorded",
+    "recording_path": "recordings/a5_recording.json"
+  },
+  "research": {
+    "buyer": {
+      "identity": "Northstar Buyer",
+      "description": "A recorded diversified workflow-software buyer used only for deterministic provider testing."
+    },
+    "target": {
+      "identity": "Orion Systems",
+      "description": "A recorded workflow-platform target used only for deterministic provider testing."
+    },
+    "transaction_context": "Recorded buyer-side acquisition screening before price and structure analysis.",
+    "buyer_strategic_need": "The buyer needs a mature workflow capability that can shorten enterprise deployment cycles.",
+    "strategic_rationale": "Acquisition is being tested as one route to access a mature operating capability; superiority to build or partner is not assumed.",
+    "research_question": "Which target capabilities and Business Quality characteristics are supported by recoverable public Sources and the registered attachment, and which material limitations remain?",
+    "decision_relevance": "A5 evidence informs whether Target Capability & Business Quality is sufficient to become an input to Strategic Fit and Gate A dependencies.",
+    "required_claim_types": [
+      "Target Capability",
+      "Business Quality",
+      "capability maturity",
+      "revenue quality",
+      "customer quality",
+      "scalability",
+      "defensibility"
+    ],
+    "preferred_source_types": [
+      "regulator or government material",
+      "official disclosures",
+      "audited reports",
+      "reliable industry sources",
+      "registered attachments"
+    ],
+    "excluded_source_types": [
+      "search-result snippets",
+      "model-generated prose",
+      "unrecoverable URLs",
+      "anonymous unsupported assertions"
+    ],
+    "evidence_threshold": {
+      "minimum_independent_sources_per_material_claim": 2,
+      "exact_locator_required": true,
+      "counterevidence_required": true
+    },
+    "counterevidence_requirement": "Preserve evidence that limits capability transferability, durability, customer quality or operating scalability.",
+    "material_unknowns": [
+      "private customer concentration schedule",
+      "independently audited retention cohorts",
+      "supplier dependency schedule"
+    ],
+    "confidentiality_constraints": [
+      "No credential or secret may be serialized.",
+      "No confidential attachment may be sent without explicit permission."
+    ],
+    "as_of_date": "2026-06-30",
+    "jurisdictions": ["United States"],
+    "search_budget": {
+      "maximum_loop_iterations": 2,
+      "maximum_tool_calls": 6,
+      "maximum_provider_attempts": 2,
+      "maximum_estimated_tokens": 12000,
+      "timeout_seconds": 180
+    },
+    "attachments": [
+      {
+        "attachment_id": "A5-ATT-001",
+        "source_id": "SRC-A5-ATT-001",
+        "path": "attachments/target_capability_brief.md",
+        "original_filename": "target_capability_brief.md",
+        "file_type": "md",
+        "confidentiality": "public",
+        "supplied_by": "Recorded fixture owner",
+        "document_date": "2026-06-30",
+        "allow_provider_upload": true,
+        "extraction_limitations": "Recorded Markdown attachment; no independent audit and no private customer schedule."
+      }
+    ]
+  }
+}

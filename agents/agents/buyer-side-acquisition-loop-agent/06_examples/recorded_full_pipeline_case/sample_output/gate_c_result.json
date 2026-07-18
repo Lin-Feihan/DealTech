@@ -1,0 +1,515 @@
+{
+  "gate_id": "GATE_C",
+  "gate_name": "Decision Gate",
+  "block": "Block C: Risk, Diligence and Decision",
+  "status": "RENEGOTIATE",
+  "criteria": [
+    {
+      "criterion_id": "GC-01",
+      "criterion_name": "Diligence scope and coverage",
+      "outcome": "PASS",
+      "reason": "Every selected diligence workstream has a registered finding; unselected workstreams are not marked complete.",
+      "affected_module_ids": [
+        "C1"
+      ],
+      "supporting_evidence_ids": [
+        "EV-C1-MGMT-001",
+        "EV-C1-PUBLIC-001"
+      ],
+      "counterevidence_ids": [
+        "CE-C1-MGMT-001"
+      ],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GC-02",
+      "criterion_name": "Material unresolved findings",
+      "outcome": "CONDITION",
+      "reason": "Material diligence findings remain visible as conditions; none is silently treated as resolved.",
+      "affected_module_ids": [
+        "C1"
+      ],
+      "supporting_evidence_ids": [
+        "EV-C1-MGMT-001",
+        "EV-C1-PUBLIC-001"
+      ],
+      "counterevidence_ids": [
+        "CE-C1-MGMT-001"
+      ],
+      "conditions": [
+        "Financial diligence lead must complete quality-of-earnings and customer-level testing.",
+        "Technology diligence must test architecture and roadmap dependencies.",
+        "Cybersecurity specialist must perform authorized control testing."
+      ],
+      "human_review_required": true
+    },
+    {
+      "criterion_id": "GC-03",
+      "criterion_name": "Regulatory feasibility",
+      "outcome": "PASS",
+      "reason": "Regulatory feasibility is supported by dated evidence and remains conditional on qualified legal advice.",
+      "affected_module_ids": [
+        "C2"
+      ],
+      "supporting_evidence_ids": [
+        "EV-C2-PUBLIC-001",
+        "EV-C2-PUBLIC-002"
+      ],
+      "counterevidence_ids": [
+        "CE-C2-001",
+        "CE-C2-002"
+      ],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GC-04",
+      "criterion_name": "Approval and remedy risk",
+      "outcome": "CONDITION",
+      "reason": "Approval timing, closing dependencies and remedy risk remain conditional and are not legal advice.",
+      "affected_module_ids": [
+        "C2"
+      ],
+      "supporting_evidence_ids": [
+        "EV-C2-PUBLIC-001",
+        "EV-C2-PUBLIC-002"
+      ],
+      "counterevidence_ids": [
+        "CE-C2-001",
+        "CE-C2-002"
+      ],
+      "conditions": [
+        "Qualified counsel must determine filing and closing-condition requirements.",
+        "Remedy exposure cannot be assessed without transaction-specific market facts."
+      ],
+      "human_review_required": true
+    },
+    {
+      "criterion_id": "GC-05",
+      "criterion_name": "Integration feasibility",
+      "outcome": "CONDITION",
+      "reason": "Integration risks use their own evidence and are not inferred solely from Strategic Fit.",
+      "affected_module_ids": [
+        "C3"
+      ],
+      "supporting_evidence_ids": [
+        "EV-C3-PUBLIC-001"
+      ],
+      "counterevidence_ids": [
+        "CE-C3-001"
+      ],
+      "conditions": [
+        "Ring-fence product and security governance until the integration leader validates retention and system dependencies."
+      ],
+      "human_review_required": true
+    },
+    {
+      "criterion_id": "GC-06",
+      "criterion_name": "Synergy dependency risk",
+      "outcome": "CONDITION",
+      "reason": "Synergy dependencies and residual integration risk remain explicit.",
+      "affected_module_ids": [
+        "C3"
+      ],
+      "supporting_evidence_ids": [
+        "EV-C3-PUBLIC-001"
+      ],
+      "counterevidence_ids": [
+        "CE-C3-001"
+      ],
+      "conditions": [
+        "High until management dependency and retention mitigation are validated."
+      ],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GC-07",
+      "criterion_name": "Downside resilience",
+      "outcome": "CONDITION",
+      "reason": "Quantified scenarios use registered inputs; qualitative material risks retain explicit limitations rather than invented percentages.",
+      "affected_module_ids": [
+        "C4"
+      ],
+      "supporting_evidence_ids": [
+        "EV-C4-PUBLIC-001",
+        "EV-C4-PUBLIC-002"
+      ],
+      "counterevidence_ids": [
+        "CE-C4-001",
+        "CE-C4-002"
+      ],
+      "conditions": [
+        "Material and unquantified after evidence repair."
+      ],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GC-08",
+      "criterion_name": "Mitigation credibility",
+      "outcome": "PASS",
+      "reason": "Every registered material risk has a stated mitigation or follow-up owner boundary.",
+      "affected_module_ids": [
+        "C1",
+        "C3",
+        "C4"
+      ],
+      "supporting_evidence_ids": [
+        "EV-C1-MGMT-001",
+        "EV-C1-PUBLIC-001",
+        "EV-C3-PUBLIC-001",
+        "EV-C4-PUBLIC-001",
+        "EV-C4-PUBLIC-002"
+      ],
+      "counterevidence_ids": [],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GC-09",
+      "criterion_name": "Financing and liquidity consistency",
+      "outcome": "PASS",
+      "reason": "Frozen replayed leverage and liquidity remain within the Mandate.",
+      "affected_module_ids": [
+        "C4",
+        "C5"
+      ],
+      "supporting_evidence_ids": [],
+      "counterevidence_ids": [],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GC-10",
+      "criterion_name": "Return consistency",
+      "outcome": "CONDITION",
+      "reason": "Frozen replayed returns do not clear all Mandate thresholds; current terms cannot proceed.",
+      "affected_module_ids": [
+        "C4",
+        "C5"
+      ],
+      "supporting_evidence_ids": [],
+      "counterevidence_ids": [],
+      "conditions": [
+        "Reprice or improve verified cash flows to restore the return hurdles."
+      ],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GC-11",
+      "criterion_name": "Consistency with Gate A",
+      "outcome": "CONDITION",
+      "reason": "Frozen Gate A status is CONDITIONAL_PASS and its conditions remain immutable.",
+      "affected_module_ids": [
+        "C5"
+      ],
+      "supporting_evidence_ids": [],
+      "counterevidence_ids": [],
+      "conditions": [
+        "Acquisition may provide faster control of the capability than internal build or partnership.",
+        "Complete technical, customer and financial diligence.",
+        "Confirm final perimeter and binding terms before later transaction approval.",
+        "Control may offer execution advantages over partnership, subject to later cost and integration testing.",
+        "Human Review is required for information unavailable to public research.",
+        "Material cross-source conflict remains visible and requires resolution.",
+        "Obtain authorized transaction documents before final approval.",
+        "Resolve market definition before later competition or valuation work.",
+        "Resolve or formally accept each material conflict before transaction approval.",
+        "Technical, customer and financial diligence by authorized reviewers before transaction approval.",
+        "Test build and partnership economics and urgency before route approval.",
+        "Test route economics and execution in later authorized stages.",
+        "Validate capability transferability, operating-model compatibility and market definition.",
+        "Validate scarcity and readiness before exclusivity or transaction approval."
+      ],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GC-12",
+      "criterion_name": "Consistency with Gate B",
+      "outcome": "CONDITION",
+      "reason": "Frozen Gate B status is RENEGOTIATE_PRICE; Block C cannot override the price decision.",
+      "affected_module_ids": [
+        "C5"
+      ],
+      "supporting_evidence_ids": [],
+      "counterevidence_ids": [],
+      "conditions": [
+        "Validate management forecast drivers during financial diligence.",
+        "Reduce Equity Value to the Mandate maximum or obtain explicit buyer authority.",
+        "Refresh comparable evidence before price approval.",
+        "Treasury must confirm funding availability and terms.",
+        "Reprice or improve verified cash flows to restore hurdle compliance.",
+        "Close material assumptions and unknowns through diligence.",
+        "New-debt availability is a management representation and requires treasury confirmation; financial capacity is not willingness to pay.",
+        "Private customer concentration, retention, unit economics, margin quality, cash conversion and capability transferability are unavailable."
+      ],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GC-13",
+      "criterion_name": "Mandate compliance",
+      "outcome": "CONDITION",
+      "reason": "Frozen offered Equity Value exceeds the Mandate; no authorized price or Mandate change is registered.",
+      "affected_module_ids": [
+        "C5"
+      ],
+      "supporting_evidence_ids": [],
+      "counterevidence_ids": [],
+      "conditions": [
+        "Reduce Equity Value to the Mandate maximum or obtain explicit authorized Mandate change."
+      ],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GC-14",
+      "criterion_name": "Open Research Gaps",
+      "outcome": "PASS",
+      "reason": "No open Block C Research Gap remains.",
+      "affected_module_ids": [
+        "C1"
+      ],
+      "supporting_evidence_ids": [],
+      "counterevidence_ids": [],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GC-15",
+      "criterion_name": "Open Calculation Gaps",
+      "outcome": "PASS",
+      "reason": "No frozen Calculation Gap remains.",
+      "affected_module_ids": [
+        "C4",
+        "C5"
+      ],
+      "supporting_evidence_ids": [],
+      "counterevidence_ids": [],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GC-16",
+      "criterion_name": "Human Review requirements",
+      "outcome": "CONDITION",
+      "reason": "Reserved legal, management and committee judgements remain explicit and separate from the machine Decision State.",
+      "affected_module_ids": [
+        "A5",
+        "B4",
+        "C2",
+        "C3",
+        "C5"
+      ],
+      "supporting_evidence_ids": [],
+      "counterevidence_ids": [],
+      "conditions": [
+        "Authorized Human Review remains required; no transaction approval is granted.",
+        "Authorized Human Review remains required; no transaction approval is granted.",
+        "Regulatory feasibility remains conditional and the report is not legal advice.",
+        "The unresolved integration condition prevents unconditional proceeding.",
+        "Machine Decision State is decision support only and cannot approve the transaction."
+      ],
+      "human_review_required": true
+    },
+    {
+      "criterion_id": "GC-17",
+      "criterion_name": "PCE",
+      "outcome": "PASS",
+      "reason": "PCE completed for all admitted Block C Claims.",
+      "affected_module_ids": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5"
+      ],
+      "supporting_evidence_ids": [],
+      "counterevidence_ids": [],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GC-18",
+      "criterion_name": "ER/BRB",
+      "outcome": "PASS",
+      "reason": "ER/BRB evidence-row decisioning completed.",
+      "affected_module_ids": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5"
+      ],
+      "supporting_evidence_ids": [],
+      "counterevidence_ids": [],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GC-19",
+      "criterion_name": "Calculation replay",
+      "outcome": "PASS",
+      "reason": "Every frozen Calculation has a PASS replay reference.",
+      "affected_module_ids": [
+        "C4",
+        "C5"
+      ],
+      "supporting_evidence_ids": [],
+      "counterevidence_ids": [],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GC-20",
+      "criterion_name": "Conditions precedent",
+      "outcome": "CONDITION",
+      "reason": "Conditions precedent remain explicit and traceable.",
+      "affected_module_ids": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5"
+      ],
+      "supporting_evidence_ids": [],
+      "counterevidence_ids": [],
+      "conditions": [
+        "Acquisition may provide faster control of the capability than internal build or partnership.",
+        "Complete technical, customer and financial diligence.",
+        "Confirm final perimeter and binding terms before later transaction approval.",
+        "Control may offer execution advantages over partnership, subject to later cost and integration testing.",
+        "Human Review is required for information unavailable to public research.",
+        "Material cross-source conflict remains visible and requires resolution.",
+        "Obtain authorized transaction documents before final approval.",
+        "Resolve market definition before later competition or valuation work.",
+        "Resolve or formally accept each material conflict before transaction approval.",
+        "Technical, customer and financial diligence by authorized reviewers before transaction approval.",
+        "Test build and partnership economics and urgency before route approval.",
+        "Test route economics and execution in later authorized stages.",
+        "Validate capability transferability, operating-model compatibility and market definition.",
+        "Validate scarcity and readiness before exclusivity or transaction approval.",
+        "Validate management forecast drivers during financial diligence.",
+        "Reduce Equity Value to the Mandate maximum or obtain explicit buyer authority.",
+        "Refresh comparable evidence before price approval.",
+        "Treasury must confirm funding availability and terms.",
+        "Reprice or improve verified cash flows to restore hurdle compliance.",
+        "Close material assumptions and unknowns through diligence.",
+        "New-debt availability is a management representation and requires treasury confirmation; financial capacity is not willingness to pay.",
+        "Private customer concentration, retention, unit economics, margin quality, cash conversion and capability transferability are unavailable.",
+        "Financial diligence lead must complete quality-of-earnings and customer-level testing.",
+        "Technology diligence must test architecture and roadmap dependencies.",
+        "Cybersecurity specialist must perform authorized control testing."
+      ],
+      "human_review_required": false
+    }
+  ],
+  "failed_criterion_ids": [],
+  "conditions": [
+    "Financial diligence lead must complete quality-of-earnings and customer-level testing.",
+    "Technology diligence must test architecture and roadmap dependencies.",
+    "Cybersecurity specialist must perform authorized control testing.",
+    "Qualified counsel must determine filing and closing-condition requirements.",
+    "Remedy exposure cannot be assessed without transaction-specific market facts.",
+    "Ring-fence product and security governance until the integration leader validates retention and system dependencies.",
+    "High until management dependency and retention mitigation are validated.",
+    "Material and unquantified after evidence repair.",
+    "Reprice or improve verified cash flows to restore the return hurdles.",
+    "Acquisition may provide faster control of the capability than internal build or partnership.",
+    "Complete technical, customer and financial diligence.",
+    "Confirm final perimeter and binding terms before later transaction approval.",
+    "Control may offer execution advantages over partnership, subject to later cost and integration testing.",
+    "Human Review is required for information unavailable to public research.",
+    "Material cross-source conflict remains visible and requires resolution.",
+    "Obtain authorized transaction documents before final approval.",
+    "Resolve market definition before later competition or valuation work.",
+    "Resolve or formally accept each material conflict before transaction approval.",
+    "Technical, customer and financial diligence by authorized reviewers before transaction approval.",
+    "Test build and partnership economics and urgency before route approval.",
+    "Test route economics and execution in later authorized stages.",
+    "Validate capability transferability, operating-model compatibility and market definition.",
+    "Validate scarcity and readiness before exclusivity or transaction approval.",
+    "Validate management forecast drivers during financial diligence.",
+    "Reduce Equity Value to the Mandate maximum or obtain explicit buyer authority.",
+    "Refresh comparable evidence before price approval.",
+    "Treasury must confirm funding availability and terms.",
+    "Reprice or improve verified cash flows to restore hurdle compliance.",
+    "Close material assumptions and unknowns through diligence.",
+    "New-debt availability is a management representation and requires treasury confirmation; financial capacity is not willingness to pay.",
+    "Private customer concentration, retention, unit economics, margin quality, cash conversion and capability transferability are unavailable.",
+    "Reduce Equity Value to the Mandate maximum or obtain explicit authorized Mandate change.",
+    "Authorized Human Review remains required; no transaction approval is granted.",
+    "Regulatory feasibility remains conditional and the report is not legal advice.",
+    "The unresolved integration condition prevents unconditional proceeding.",
+    "Machine Decision State is decision support only and cannot approve the transaction."
+  ],
+  "gap_ids": [],
+  "pce_statuses": {
+    "CLAIM-C1-001": "Certified with Caveat",
+    "CLAIM-C2-001": "Certified with Caveat",
+    "CLAIM-C3-001": "Certified with Caveat",
+    "CLAIM-C4-001": "Certified with Caveat",
+    "CLAIM-C5-001": "Certified with Caveat",
+    "CLAIM-C2-002": "Certified with Caveat",
+    "CLAIM-C4-002": "Certified with Caveat",
+    "CLAIM-C5-002": "Certified with Caveat"
+  },
+  "er_brb_summary": {
+    "record_count": 8,
+    "scope": "read-only evidence-row control"
+  },
+  "calculation_replay_statuses": {
+    "CAL-B1-NET_DEBT-V1": "PASS",
+    "CAL-B2-ANNUAL_SYNERGY-V1": "PASS",
+    "CAL-B2-PROBABILITY_ADJUSTED_SYNERGY-V1": "PASS",
+    "CAL-B2-INTEGRATION_COSTS-V1": "PASS",
+    "CAL-B3-ENTERPRISE_VALUE-V1": "PASS",
+    "CAL-B3-EQUITY_VALUE-V1": "PASS",
+    "CAL-B3-TOTAL_CONSIDERATION-V1": "PASS",
+    "CAL-B3-EV_REVENUE-V1": "PASS",
+    "CAL-B3-EV_EBITDA-V1": "PASS",
+    "CAL-B3-PURCHASE_PREMIUM-V1": "PASS",
+    "CAL-B4-PRO_FORMA_DEBT-V1": "PASS",
+    "CAL-B4-PRO_FORMA_LEVERAGE-V1": "PASS",
+    "CAL-B4-CLOSING_LIQUIDITY-V1": "PASS",
+    "CAL-B4-LIQUIDITY_HEADROOM-V1": "PASS",
+    "CAL-B5-INVESTED_CAPITAL-V1": "PASS",
+    "CAL-B5-ROIC-V1": "PASS",
+    "CAL-B5-SIMPLE_PAYBACK-V1": "PASS",
+    "CAL-B5-IRR-V1": "PASS",
+    "CAL-B3-ENTERPRISE_VALUE-V2": "PASS",
+    "CAL-B3-EQUITY_VALUE-V2": "PASS",
+    "CAL-B3-TOTAL_CONSIDERATION-V2": "PASS",
+    "CAL-B3-EV_REVENUE-V2": "PASS",
+    "CAL-B3-EV_EBITDA-V2": "PASS",
+    "CAL-B3-PURCHASE_PREMIUM-V2": "PASS",
+    "CAL-B5-INVESTED_CAPITAL-V2": "PASS",
+    "CAL-B5-ROIC-V2": "PASS",
+    "CAL-B5-SIMPLE_PAYBACK-V2": "PASS",
+    "CAL-B5-IRR-V2": "PASS"
+  },
+  "human_review_items": [
+    "HR-B4-TREASURY-001",
+    "HR-UN-A5-BA-001",
+    "HR-C2-LEGAL-001",
+    "HR-C3-INTEGRATION-001",
+    "HR-C5-COMMITTEE-001"
+  ],
+  "prior_gate_history": [
+    {
+      "gate_id": "GATE_A",
+      "status": "FAIL_RESEARCH_GAP"
+    },
+    {
+      "gate_id": "GATE_A",
+      "status": "CONDITIONAL_PASS"
+    },
+    {
+      "gate_id": "GATE_B",
+      "status": "FAIL_CALCULATION_GAP"
+    },
+    {
+      "gate_id": "GATE_B",
+      "status": "RENEGOTIATE_PRICE"
+    }
+  ],
+  "business_reason": "9 criteria passed, 11 conditional, 0 failed; Gate C remains separate from the final machine Decision State and human transaction approval."
+}

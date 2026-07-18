@@ -1,0 +1,84 @@
+{
+  "schema_version": "milestone-5-a5",
+  "case_id": "",
+  "module_id": "A5",
+  "mandate_id": "",
+  "research_contract_id": "",
+  "field_requirements": {
+    "required": [
+      "case_id",
+      "mandate_id",
+      "research_contract_id",
+      "research.buyer.identity",
+      "research.buyer.description",
+      "research.target.identity",
+      "research.target.description",
+      "research.transaction_context",
+      "research.buyer_strategic_need",
+      "research.strategic_rationale",
+      "research.as_of_date",
+      "research.jurisdictions",
+      "research.confidentiality_constraints",
+      "research.search_budget"
+    ],
+    "optional": [
+      "research.attachments",
+      "attachment author",
+      "attachment extraction limitations",
+      "preferred Source refinements"
+    ]
+  },
+  "provider": {
+    "mode": "openai_live"
+  },
+  "research": {
+    "buyer": {"identity": "", "description": ""},
+    "target": {"identity": "", "description": ""},
+    "transaction_context": "",
+    "buyer_strategic_need": "",
+    "strategic_rationale": "",
+    "research_question": "Research Target Capability & Business Quality for the named target within the approved A5 scope.",
+    "decision_relevance": "Provide controlled A5 evidence for later Strategic Fit and Strategic Thesis Gate dependency evaluation; do not decide the Gate.",
+    "required_claim_types": [
+      "Target Capability",
+      "Business Quality",
+      "capability maturity",
+      "revenue quality",
+      "customer quality",
+      "scalability",
+      "defensibility"
+    ],
+    "preferred_source_types": [
+      "regulator or government material",
+      "company filings and official disclosures",
+      "audited reports",
+      "official target and buyer publications",
+      "reliable industry or market sources",
+      "reputable reporting"
+    ],
+    "excluded_source_types": [
+      "search-result snippets",
+      "model-generated prose",
+      "unrecoverable URLs",
+      "anonymous unsupported assertions"
+    ],
+    "evidence_threshold": {
+      "minimum_independent_sources_per_material_claim": 2,
+      "exact_locator_required": true,
+      "counterevidence_required": true
+    },
+    "counterevidence_requirement": "Search for and preserve material contradictions, capability limits, concentration, dependency and Business Quality weakness.",
+    "material_unknowns": [],
+    "confidentiality_constraints": [],
+    "as_of_date": "",
+    "jurisdictions": [],
+    "search_budget": {
+      "maximum_loop_iterations": 2,
+      "maximum_tool_calls": 6,
+      "maximum_provider_attempts": 2,
+      "maximum_estimated_tokens": 12000,
+      "timeout_seconds": 180
+    },
+    "attachments": []
+  }
+}

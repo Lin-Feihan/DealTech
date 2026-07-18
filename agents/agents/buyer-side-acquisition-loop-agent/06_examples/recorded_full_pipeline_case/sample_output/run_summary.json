@@ -1,0 +1,41 @@
+{
+  "schema_version": "release-candidate-1",
+  "case_id": "RECORDED-FULL-PIPELINE-001",
+  "run_id": "RUN-RECORDED-FULL-PIPELINE-001",
+  "status": "COMPLETED",
+  "provider_mode": "recorded",
+  "module_counts": {
+    "block_a": 7,
+    "block_b": 5,
+    "block_c": 5
+  },
+  "module_execution_counts": {
+    "block_a": 10,
+    "block_b": 7,
+    "block_c": 8
+  },
+  "targeted_repairs": {
+    "block_a": [
+      "A6",
+      "A3",
+      "A7"
+    ],
+    "block_b": [
+      "B3",
+      "B5"
+    ],
+    "block_c": [
+      "C2",
+      "C4",
+      "C5"
+    ]
+  },
+  "gate_a": "CONDITIONAL_PASS",
+  "gate_b": "RENEGOTIATE_PRICE",
+  "gate_c": "RENEGOTIATE",
+  "decision_state": "RENEGOTIATE",
+  "delivery_outcome": "DELIVERABLE_WITH_CAVEATS",
+  "final_report": "final_acquisition_strategy_report.md",
+  "decision_state_is_final_human_approval": false,
+  "paid_request_made": false
+}

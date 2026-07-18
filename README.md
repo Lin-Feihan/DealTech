@@ -1,215 +1,121 @@
 # Certified Deep Research Agents for AI-Native DealTech
 
-## Overview
+DealTech explores transaction research systems that preserve an auditable research trail instead of producing an unsupported one-step report. The repository includes several research prototypes and a new, independently packaged **Buyer-side Acquisition Loop Agent**.
 
-**Certified Deep Research Agents for AI-Native DealTech** explores how AI agents can support complex transaction research beyond one-step report generation.
+## Current implementation status
 
-The project focuses on M&A-related research tasks where outputs must be supported by evidence, intermediate artifacts, risk checks, and human-reviewable research traces.
+Buyer-side Acquisition Loop Agent `v0.1.0-rc1` is locally runnable. It supports case validation, the complete recorded A/B/C workflow, targeted gap loops, calculation replay, PCE and ER/BRB controls, Human Review, manifest-based resume, reporting and final delivery verification. `openai_live` provider code is implemented, but no paid live end-to-end validation has been performed and the Agent is not presented as production-ready.
 
-The core idea is simple:
+The older Acquisition Strategy Agent remains a protected V0 reference. It is not the runtime foundation of the new agent. The public RC1 demo is fictional and does not use any legacy demonstration or confidential teacher case.
 
-> AI agents should not only generate final reports. They should leave behind a certified research trail.
+## Buyer-side acquisition workflow
 
----
-
-## Scope
-
-This repository is organized around four deep research agents:
-
-```text
-Certified Deep Research Agents for AI-Native DealTech
-├── Shell Company Screening Agent
-├── SPAC Target Screening Agent
-├── Acquisition Strategy Agent
-└── Merger Strategy Agent
+```mermaid
+flowchart TD
+  I[Case Intake] --> M[Mandate]
+  M --> RC[Research Contract]
+  RC --> A[Block A: Strategic Thesis — A1–A7]
+  A --> GA[Gate A: Strategic Thesis Gate]
+  GA --> B[Block B: Value Creation & Pricing — B1–B5]
+  B --> GB[Gate B: Value Creation Gate]
+  GB --> C[Block C: Risk, Diligence & Decision — C1–C5]
+  C --> GC[Gate C: Decision Gate]
+  GC --> DS[Decision State]
+  DS --> FR[Final Acquisition Strategy Report]
+  FR --> DV[Final Delivery Verification]
+  GA & GB & GC --> GD[Gap Diagnosis]
+  GD --> MU[Memory Update]
+  MU --> LC[Loop Controller]
+  LC --> RP[Re-plan and targeted return]
+  RP --> A & B & C
 ```
 
-These agents cover three transaction research scenarios:
+Block A covers Transaction Context, Buyer Strategic Need, Strategic Rationale, Target Attractiveness, Target Capability & Business Quality, Industry / Competitive Position and Strategic Fit. Block B covers Standalone Financial Analysis, Synergy Mechanism & Value Creation, Valuation & Purchase Price Discipline, Deal Structure & Financing Impact and Returns Analysis. Block C covers Due Diligence, Regulatory Risk, Integration Risk, Downside Risk and Decision State.
 
-| Scenario                   | Research Focus                                                                  |
-| -------------------------- | ------------------------------------------------------------------------------- |
-| Shell-related transactions | Screening listed shell companies or SPAC acquisition targets                    |
-| Acquisition transactions   | Supporting buyer-side and seller-side acquisition analysis                      |
-| Merger transactions        | Assessing strategic rationale, synergy, governance, and integration feasibility |
+## Gate, loop and certification separation
 
----
+Provider research proposes Source, Evidence, Claim and domain records. Admission rejects malformed, unsupported or duplicate material. Required calculations preserve inputs, units, periods, perimeters, formulas and assumptions; an independent replay must pass before Gate B and Block C.
 
-## Why This Matters
+PCE applies claim-level delivery policy: a generated Claim may be Certified, Certified with Caveat, sent to Human Review, blocked or retained as internal trace. ER/BRB records evidence-row reliability and business/regulatory/reputational risk signals. PCE and ER/BRB do **not** decide Strategic Fit, valuation, purchase price, returns or transaction approval. The deterministic business Gates do that within their limited scope.
 
-Transaction research is evidence-intensive and judgment-heavy. It often requires:
+A Gate failure creates a typed Gap, updates append-only memory, selects only the affected module and dependencies, and re-evaluates the relevant Gate. Final delivery verification is separate again: it checks report sections, hashes, lineage, caveats, calculation replay and Human Review boundaries.
 
-* retrieving information from filings, annual reports, exchange disclosures, company websites, market data, and news;
-* comparing candidates across financial, strategic, regulatory, and ownership dimensions;
-* identifying risks, missing evidence, and judgment uncertainty;
-* producing outputs that can be reviewed, audited, and corrected.
+## Quick start
 
-Traditional AI outputs are often difficult to verify because the reasoning path is hidden. This project treats the research process itself as the key asset.
+Python 3.11 or newer is required.
 
----
-
-## Core Workflow
-
-The system follows a workflow-first structure:
-
-```text
-Mandate
-→ Research Execution
-→ Certified Research Trace
-→ Certification Gate
-→ Final Deliverable
+```bash
+python -m venv .venv
+python -m pip install -e ".[test]"
+buyer-side-acquisition-loop --case agents/agents/buyer-side-acquisition-loop-agent/06_examples/recorded_full_pipeline_case/case.yaml --check-case
+buyer-side-acquisition-loop --case agents/agents/buyer-side-acquisition-loop-agent/06_examples/recorded_full_pipeline_case/case.yaml --module FULL_PIPELINE
 ```
 
-### 1.Mandate
+The equivalent module command is `python -m buyer_side_acquisition_loop_agent`. Resume an interrupted run with:
 
-Defines the transaction background, user requirements, research scope, screening criteria, and risk preferences.
-
-### 2.Research Execution
-
-The agent performs structured research, such as candidate pool construction, source retrieval, hard filtering, due diligence, risk analysis, financial calculation, and report drafting.
-
-### 3.Certified Research Trace
-
-The agent preserves the intermediate artifacts behind the final output, including:
-
-```text
-- candidate pool
-- screening table
-- hard filter results
-- due diligence evidence
-- risk matrix
-- claim-to-evidence map
-- calculation records
-- human review notes
-- run logs
+```bash
+buyer-side-acquisition-loop --resume-run agents/agents/buyer-side-acquisition-loop-agent/06_examples/recorded_full_pipeline_case/run_output
 ```
 
-### 4.Certification Gate
+Initialize a supported Human Review case, then apply its structured response once to the paused workspace:
 
-Before final delivery, the research trace is checked for evidence quality, completeness, reproducibility, risk coverage, and human-review readiness.
-
-### 5.Final Deliverable
-
-Only certified research traces should be converted into final reports, investment memos, presentation materials, or due diligence packages.
-
----
-
-## Crtification Logic: PCE
-
-The project uses a **Proposal → Certification → Execution** logic.
-
-```text
-Proposal      = the agent generates research results and supporting traces
-Certification = an independent PCE layer checks the trace against Policy π
-Execution     = only certified or caveated claims can enter the final deliverable
+```bash
+buyer-side-acquisition-loop --case agents/agents/buyer-side-acquisition-loop-agent/06_examples/synthetic_human_only_information_case/case.yaml
+buyer-side-acquisition-loop --case agents/agents/buyer-side-acquisition-loop-agent/06_examples/synthetic_human_only_information_case/case.yaml --human-review-response agents/agents/buyer-side-acquisition-loop-agent/06_examples/synthetic_human_only_information_case/valid_human_review_response.json
 ```
 
-The principle is:
+Human Review history is append-only, so a previously accepted `response_id` cannot be applied again.
 
-> Generation does not equal permission.
+Run deterministic release checks with:
 
-A generated report is not automatically ready for use. It must first pass a certification process.
-
-In this repository, **Policy π** refers to the claim-level certification policy used by the PCE layer. It is not the same as the generator prompt. The generator proposes research outputs, while Policy π decides whether each claim is deliverable.
-
-Conceptually:
-
-```text
-π(claim, source, evidence, ER/BRB result, calculation record, human-review flag)
-→ certification status
+```bash
+python scripts/verify_buyer_side_agent_release.py
 ```
 
-The certification status can be:
+See [Quick start](agents/agents/buyer-side-acquisition-loop-agent/QUICKSTART.md) and the [case input guide](agents/agents/buyer-side-acquisition-loop-agent/CASE_INPUT_GUIDE.md).
 
-```text
-Certified
-Certified with Caveat
-Needs Human Review
-Not Certified
-Internal Trace Only
-```
+## Recorded demo result
 
-The PCE layer checks whether a claim has a registered source, specific evidence, sufficient source quality, replayable calculations when needed, preserved ER/BRB risk flags, and visible human-review boundaries.
+The continuous public fixture genuinely executes A1–A7, Gate A, B1–B5, all required calculations and replay, Gate B, C1–C5, Gate C, Decision State, the report and delivery verification under one case/run ID. Its criteria-derived result is:
 
-Therefore, the system separates two roles:
-
-```text
-Generator Agent  = produces claims, evidence tables, calculations, and research traces
-Certifying Layer = applies Policy π and certifies, caveats, blocks, or escalates claims
-```
-
-At the current prototype stage, the certifier is implemented mainly as an independent PCE certification module / workflow rather than a fully separate LLM agent. However, it is separated from the generator in responsibility and logic. Future versions can package this PCE layer as a standalone certifying agent.
-
----
-
-## Decision Logic: ER/BRB
-
-The project also explores an internal decision layer based on **Evidential Reasoning / Belief Rule Base**.
-
-Instead of forcing every candidate into a single score, ER/BRB represents judgment as explainable decision states:
-
-```text
-- Pass
-- Need Further Due Diligence
-- Exclude
-- Insufficient Evidence
-```
-
-This is useful for M&A research because many decisions involve incomplete information, conflicting evidence, regulatory uncertainty, and qualitative business judgment.
-
-ER/BRB helps the agent decide:
-
-```text
-- whether a candidate can enter the next stage
-- which risks require further review
-- which evidence is strong, weak, missing, or conflicting
-- which conclusions require human escalation
-- whether the final recommendation is sufficiently supported
-```
----
-
-## Demo Links
-
-| Demo | Link |
+| Control | Result |
 |---|---|
-| Shell Company Screening Agent | [Open Demo](https://462852416-glitch.github.io/shell-screening-agent-user-test-page/) |
-| SPAC Target Acquisition Agent | [Open Demo](https://462852416-glitch.github.io/soren-spac-target-screening-demo/)|
-| Acquisition Strategy Agent — Buyer Side | [Open Demo](https://462852416-glitch.github.io/acquisition-strategy-agent-portable-demo/buyer.html) |
-| Acquisition Strategy Agent — Target Side | [Open Demo](https://462852416-glitch.github.io/acquisition-strategy-agent-portable-demo/target.html)|
----
+| Gate A | `CONDITIONAL_PASS` |
+| Gate B | `RENEGOTIATE_PRICE` |
+| Gate C | `RENEGOTIATE` |
+| Decision State | `RENEGOTIATE` |
+| Delivery | `DELIVERABLE_WITH_CAVEATS` |
 
-## Technical Stack
+The demo includes targeted A6 source-diversity repair, B3/B5 calculation repair and C2/C4/C5 regulatory/downside/decision repair. These results are evaluated by the implemented criteria, not hard-coded by the full-pipeline orchestrator. A sanitized subset is in `recorded_full_pipeline_case/sample_output/`.
 
-The prototype is designed around the following stack:
+## Provider modes and attachments
 
-```text
-- GPT-5.5
-- OpenClaw
-- Context Engineering
-- FastAPI
-- Postgres
-- Static / Portable Web Frontend
-```
+`recorded` mode is deterministic and makes no network request. `openai_live` is never selected implicitly: it requires the optional dependency, configured model and credential, explicit provider and attachment permissions, valid budgets and `--enable-live`. CI never enables live research.
 
-OpenClaw handles agent orchestration. Context engineering organizes prompts, inputs, sources, and intermediate files. FastAPI supports backend interfaces. Postgres stores structured states and intermediate results. Static or portable web frontends support demonstration and interaction.
+Supported attachment extensions are `.pdf`, `.txt`, `.md`, `.html`, `.csv` and `.xlsx`. Non-macro, unencrypted `.xlsx` extraction is restricted to the explicit local Block B boundary. Each attachment records provenance, confidentiality, permitted modules, upload permission and extraction limits. Confidential files may be usable locally while remaining forbidden from provider upload.
 
----
+## Outputs
 
-## Research Contribution
-
-This project argues that the future moat of AI-native DealTech is not only the model, but the certified research trace behind the model output.
-
-Key contributions include:
+A full local run creates stage-specific A/B/C research traces, Gate histories, loop records, PCE and ER/BRB controls, calculations/replays, Human Review items, the final report and delivery certificate. Top-level release artifacts are:
 
 ```text
-1. A workflow-first framework for AI-native transaction research.
-2. A certified research trace for evidence preservation and auditability.
-3. A PCE certification logic that separates generation from delivery.
-4. An ER/BRB decision layer for uncertain business judgment.
-5. A multi-agent portfolio covering shell screening, SPAC target screening, acquisition strategy, and merger strategy.
+run_summary.json
+run_manifest.json
+gate_a_result.json
+gate_b_result.json
+gate_c_result.json
+decision_state.json
+cross_block_consistency_result.json
+final_acquisition_strategy_report.md
+final_delivery_verification.json
 ```
 
----
+Unrestricted `run_output/` folders are ignored. Only the sanitized `sample_output/` subset is intended for GitHub.
 
-## Disclaimer
+## Limitations, Human Review and disclaimer
 
-This repository is for academic research, prototype development, and educational demonstration only. It does not constitute investment advice, legal advice, financial advice, or transaction recommendation. Any real-world transaction decision should be reviewed by qualified professionals.
+The recorded evidence is fictional and not current research. Public sources cannot replace private financial, commercial, technology, cybersecurity, tax, regulatory or integration diligence. Live full-pipeline research has not yet received a non-confidential smoke test. The software license is also pending user selection.
+
+The agent may register `PROCEED`, `PROCEED_WITH_CONDITIONS`, `RENEGOTIATE`, `PAUSE`, `NO_GO` or `HUMAN_REVIEW` as a machine Decision State. That state is not authorized human approval. Qualified advisers and the buyer's authorized committee retain legal judgement, financing commitment, purchase-price authority, risk acceptance and the final Go/No-Go decision.
+
+This repository is for academic research, prototype development and educational demonstration. It does not constitute investment, legal, financial or transaction advice.

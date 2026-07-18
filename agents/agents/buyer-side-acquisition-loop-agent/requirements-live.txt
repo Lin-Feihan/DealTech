@@ -1,0 +1,2 @@
+# Optional Milestone 5 dependency. Deterministic and recorded modes use only the standard library.
+openai>=1.66.0,<3

@@ -1,0 +1,42 @@
+{
+  "verification_id": "DELIVERY-VERIFY-RECORDED-FULL-PIPELINE-001",
+  "case_id": "RECORDED-FULL-PIPELINE-001",
+  "delivery_outcome": "DELIVERABLE_WITH_CAVEATS",
+  "checks": {
+    "claim_evidence_source_lineage_complete": true,
+    "source_eligibility_and_admissibility_checked": true,
+    "evidence_admissibility_checked": true,
+    "blocked_claims_not_presented_as_verified": true,
+    "calculation_replay_complete": true,
+    "material_counterevidence_visible": true,
+    "caveats_visible": true,
+    "human_review_requirements_visible": true,
+    "open_gaps_visible": true,
+    "decision_state_consistent": true,
+    "gate_results_consistent": true,
+    "human_approval_boundary_visible": true,
+    "manifest_has_all_28_sections": true,
+    "manifest_hashes_match": true
+  },
+  "blocking_issues": [],
+  "caveats": [
+    "Final PCE status is Needs Human Review.",
+    "Open Human Review items remain: HR-B4-TREASURY-001, HR-UN-A5-BA-001, HR-C2-LEGAL-001, HR-C3-INTEGRATION-001, HR-C5-COMMITTEE-001."
+  ],
+  "blocked_claim_ids": [],
+  "calculation_replay_failures": [],
+  "open_gap_ids": [],
+  "open_human_review_ids": [
+    "HR-B4-TREASURY-001",
+    "HR-UN-A5-BA-001",
+    "HR-C2-LEGAL-001",
+    "HR-C3-INTEGRATION-001",
+    "HR-C5-COMMITTEE-001"
+  ],
+  "business_decision_state": "RENEGOTIATE",
+  "business_gate_pass_does_not_grant_delivery": true,
+  "economic_no_go_may_still_be_deliverable": true,
+  "certificate_permitted": true,
+  "policy_boundary": "Final delivery verification is separate from Gate C, PCE claim status, economic merit, and final human approval.",
+  "legacy_policy_adapter": "Claim/source/evidence and calculation delivery controls use the existing read-only dealtech_certification PCE result supplied by business_certification."
+}

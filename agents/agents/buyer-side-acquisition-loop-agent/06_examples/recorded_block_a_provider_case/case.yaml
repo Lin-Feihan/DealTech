@@ -1,0 +1,68 @@
+{
+  "schema_version": "milestone-6-block-a",
+  "case_id": "RECORDED-BLOCK-A-001",
+  "as_of_date": "2026-06-30",
+  "mandate_id": "MANDATE-RECORDED-BLOCK-A-001",
+  "research_contract_id": "RC-RECORDED-BLOCK-A-001",
+  "provider": {
+    "mode": "recorded",
+    "recording_path": "recordings/block_a_recording.json"
+  },
+  "mandate": {
+    "buyer_name": "Northstar Industrial Group",
+    "buyer_description": "A party-neutral recorded buyer seeking a controlled workflow capability for regulated operations.",
+    "target_name": "Orion Workflow Systems",
+    "target_description": "A party-neutral recorded target providing workflow software and implementation services.",
+    "transaction_type": "Potential acquisition of control",
+    "transaction_stage": "Preliminary buyer-side screening",
+    "decision_question": "Is the Strategic Thesis sufficiently supported to permit conditional progression to later value and risk analysis?",
+    "buyer_strategic_need": "The buyer needs a configurable regulated-workflow capability and a faster deployment path while retaining build and partnership alternatives.",
+    "initial_strategic_rationale": "Acquisition may accelerate capability access, but superiority to build, partnership, minority investment or no action remains to be tested.",
+    "jurisdictions": ["United States", "United Kingdom"],
+    "known_terms": ["No binding price has been agreed", "The review is buyer-side and preliminary"],
+    "unknown_terms": ["Final transaction perimeter", "Purchase price", "Financing structure", "Customer concentration schedule"],
+    "confidentiality_permissions": ["Public attachment may be used", "No confidential document may be uploaded without explicit approval"],
+    "human_review_roles": ["Buyer strategy lead", "Technical diligence lead", "Authorized transaction counsel"],
+    "material_constraints": ["No price, financing, returns or legal conclusion in Block A"]
+  },
+  "research": {
+    "attachments": [
+      {
+        "attachment_id": "BA-ATT-001",
+        "source_id": "SRC-BA-ATT-001",
+        "path": "attachments/target_capability_brief.md",
+        "original_filename": "target_capability_brief.md",
+        "file_type": "md",
+        "confidentiality": "public",
+        "supplied_by": "Recorded fixture owner",
+        "document_date": "2026-06-15",
+        "allow_provider_upload": true,
+        "extraction_limitations": "User-supplied recorded brief; not independently audited and contains no private customer schedule.",
+        "modules": ["A5"]
+      }
+    ],
+    "module_budgets": {
+      "A1": {"maximum_queries": 2, "maximum_tool_calls": 3, "maximum_estimated_tokens": 4000},
+      "A2": {"maximum_queries": 3, "maximum_tool_calls": 4, "maximum_estimated_tokens": 5000},
+      "A3": {"maximum_queries": 1, "maximum_tool_calls": 2, "maximum_estimated_tokens": 4500},
+      "A4": {"maximum_queries": 3, "maximum_tool_calls": 4, "maximum_estimated_tokens": 5000},
+      "A5": {"maximum_queries": 4, "maximum_tool_calls": 5, "maximum_estimated_tokens": 6000},
+      "A6": {"maximum_queries": 4, "maximum_tool_calls": 5, "maximum_estimated_tokens": 6000},
+      "A7": {"maximum_queries": 1, "maximum_tool_calls": 2, "maximum_estimated_tokens": 4500}
+    },
+    "total_block_a_budget": {"maximum_provider_requests": 12, "maximum_tool_calls": 40, "maximum_estimated_tokens": 60000},
+    "maximum_repair_iterations": 1,
+    "preferred_source_types": ["Mandate", "official filings and disclosures", "regulator material", "audited records", "reliable independent sources", "approved attachments"],
+    "excluded_source_types": ["search-result snippets", "model prose", "unrecoverable URLs", "anonymous unsupported assertions"],
+    "confidentiality_restrictions": ["Never serialize credentials", "Never invent private information", "Require explicit permission before confidential upload"],
+    "evidence_thresholds": {
+      "A1": {"minimum_independent_sources_per_material_claim": 1},
+      "A2": {"minimum_independent_sources_per_material_claim": 1},
+      "A3": {"minimum_independent_sources_per_material_claim": 1},
+      "A4": {"minimum_independent_sources_per_material_claim": 1},
+      "A5": {"minimum_independent_sources_per_material_claim": 1},
+      "A6": {"minimum_independent_sources_per_material_claim": 2},
+      "A7": {"minimum_independent_sources_per_material_claim": 1}
+    }
+  }
+}
