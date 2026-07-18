@@ -1,0 +1,407 @@
+{
+  "recording_id": "REC-BLOCK-C-001",
+  "model_identifier": "recorded-structured-research-provider",
+  "modules": {
+    "C1": {
+      "attempts": [
+        {
+          "response_id": "RESP-C1-001",
+          "request_timestamp": "2026-06-30T00:01:00Z",
+          "response_timestamp": "2026-06-30T00:01:01Z",
+          "elapsed_seconds": 1,
+          "tool_calls": [{"type": "recorded_public_document_review", "count": 1}],
+          "compact_response": {
+            "as_of_date": "2026-06-30",
+            "sources": [
+              {
+                "source_id": "SRC-C1-PUBLIC-001",
+                "url": "https://www.nist.gov/cyberframework",
+                "page_title": "Cybersecurity Framework",
+                "publisher_or_owner": "National Institute of Standards and Technology",
+                "source_type": "authoritative public cybersecurity framework",
+                "publication_date": "2024-02-26",
+                "exact_relevant_locator": "Cybersecurity Framework 2.0 overview and Govern function",
+                "limitations": "The framework defines assessment areas; it is not evidence that target controls are effective and is not complete private diligence."
+              }
+            ],
+            "evidence": [
+              {
+                "evidence_id": "EV-C1-PUBLIC-001",
+                "claim_id": "CLAIM-C1-001",
+                "source_id": "SRC-C1-PUBLIC-001",
+                "extracted_fact": "A cybersecurity assessment should address governance, identification, protection, detection, response and recovery boundaries.",
+                "exact_locator": "CSF 2.0 core functions overview",
+                "evidence_type": "authoritative public framework",
+                "strength": "high",
+                "limitations": "Framework coverage is not target-specific control testing."
+              },
+              {
+                "evidence_id": "EV-C1-MGMT-001",
+                "claim_id": "CLAIM-C1-001",
+                "source_id": "SRC-C1-MGMT-001",
+                "extracted_fact": "Management represents that identity-access controls cover the principal production environment but the statement is not independently tested.",
+                "exact_locator": "management_representation.md lines 3-5",
+                "direction": "contradict",
+                "evidence_type": "confidential management representation",
+                "strength": "low",
+                "limitations": "Confidential management representation; not independent evidence and not a complete cybersecurity diligence result."
+              }
+            ],
+            "claims": [
+              {
+                "claim_id": "CLAIM-C1-001",
+                "claim_text": "Selected financial, technology and cybersecurity diligence remains scoped and explicitly incomplete where private verification is unavailable.",
+                "supporting_evidence_ids": ["EV-C1-PUBLIC-001"],
+                "counterevidence_ids": ["CE-C1-MGMT-001"],
+                "confidence": "medium",
+                "limitations": "Public research and one management representation do not constitute full legal, financial, operational or cybersecurity due diligence.",
+                "human_review_required": true
+              }
+            ],
+            "assumptions": [
+              {"assumption_id": "ASM-C1-001", "owning_module": "Due Diligence", "statement": "Specialist teams will receive authorized private data before approval.", "materiality": "material", "basis": "Process assumption only", "supported": false, "source_ids": [], "evidence_ids": [], "human_review_required": true}
+            ],
+            "unknowns": [
+              {"unknown_id": "UNK-C1-001", "owning_module": "Due Diligence", "description": "Private customer retention and detailed control-test results are unavailable.", "materiality": "material", "impact": "Could change financial quality and integration risk.", "closure_requirement": "Authorized private financial and technology diligence.", "human_review_required": true}
+            ],
+            "counterevidence": [
+              {"counterevidence_id": "CE-C1-MGMT-001", "owning_module": "Due Diligence", "description": "The management statement is not independently tested and cannot establish control effectiveness.", "source_ids": ["SRC-C1-MGMT-001"], "evidence_ids": ["EV-C1-MGMT-001"], "affected_claim_ids": ["CLAIM-C1-001"], "disposition": "Retained as confidential management information requiring specialist validation."}
+            ],
+            "searched_queries": ["public cybersecurity diligence assessment framework"],
+            "pages_or_files_inspected": ["NIST CSF 2.0 overview", "management_representation.md"],
+            "module_assessment": {
+              "business_conclusion": "Selected diligence workstreams are registered, but public research and management representation do not constitute completed private diligence.",
+              "criterion_outcome": "CONDITION",
+              "conditions": ["Complete authorized private financial, technology and cybersecurity diligence before approval."],
+              "limitations": ["Unselected diligence workstreams are not marked complete."],
+              "structured_output": {
+                "workstreams": ["financial", "technology", "cybersecurity"],
+                "findings": ["Three selected workstreams have structured findings."],
+                "red_flags": ["Management representation remains untested."],
+                "unknowns": ["Private retention and control-test results are unavailable."],
+                "conditions": ["Specialist validation required."]
+              }
+            },
+            "module_records": {
+              "diligence_findings": [
+                {"finding_id": "DF-C1-FIN-001", "workstream": "financial", "issue": "Quality of earnings and private customer-level evidence are not available in public research.", "finding_type": "scope limitation", "severity": "high", "materiality": "material", "source_ids": ["SRC-C1-PUBLIC-001"], "evidence_ids": ["EV-C1-PUBLIC-001"], "affected_claim_ids": ["CLAIM-UP-B5-001"], "counterevidence_ids": [], "classification": "unknown", "supported_impact": "Returns may change if private financial quality differs from frozen inputs.", "required_follow_up": "Financial diligence lead must complete quality-of-earnings and customer-level testing.", "mitigation": "Condition approval on specialist financial diligence.", "human_review_required": true, "confidentiality": "public limitation only", "status": "OPEN_CONDITION", "version": 1, "provider_attempt_id": "ATTEMPT-C1-01"},
+                {"finding_id": "DF-C1-TECH-001", "workstream": "technology", "issue": "Architecture scalability and product-roadmap dependencies require private validation.", "finding_type": "scope limitation", "severity": "medium", "materiality": "material", "source_ids": ["SRC-C1-PUBLIC-001"], "evidence_ids": ["EV-C1-PUBLIC-001"], "affected_claim_ids": ["CLAIM-UP-A5-001"], "counterevidence_ids": [], "classification": "unknown", "supported_impact": "Capability durability and integration sequencing remain uncertain.", "required_follow_up": "Technology diligence must test architecture and roadmap dependencies.", "mitigation": "Use a ring-fenced validation workstream before Day 1 design.", "human_review_required": true, "confidentiality": "public limitation only", "status": "OPEN_CONDITION", "version": 1, "provider_attempt_id": "ATTEMPT-C1-01"},
+                {"finding_id": "DF-C1-CYBER-001", "workstream": "cybersecurity", "issue": "Identity-access control coverage is a management representation without independent testing.", "finding_type": "management representation", "severity": "high", "materiality": "material", "source_ids": ["SRC-C1-MGMT-001"], "evidence_ids": ["EV-C1-MGMT-001"], "affected_claim_ids": ["CLAIM-UP-A5-001"], "counterevidence_ids": ["CE-C1-MGMT-001"], "classification": "suspected", "supported_impact": "A control gap could increase remediation cost and integration risk, but no amount is supported.", "required_follow_up": "Cybersecurity specialist must perform authorized control testing.", "mitigation": "Condition approval on independent testing and a remediation plan.", "human_review_required": true, "confidentiality": "confidential management information", "status": "OPEN_CONDITION", "version": 1, "provider_attempt_id": "ATTEMPT-C1-01"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "C2": {
+      "attempts": [
+        {
+          "response_id": "RESP-C2-001",
+          "request_timestamp": "2026-06-30T00:02:00Z",
+          "response_timestamp": "2026-06-30T00:02:01Z",
+          "elapsed_seconds": 1,
+          "tool_calls": [{"type": "recorded_public_document_review", "count": 1}],
+          "compact_response": {
+            "as_of_date": "2026-06-30",
+            "sources": [
+              {"source_id": "SRC-C2-PUBLIC-001", "url": "https://competition-policy.ec.europa.eu/mergers/procedures_en", "page_title": "Merger procedures", "publisher_or_owner": "European Commission", "source_type": "official regulator procedure guidance", "publication_date": "2026-01-01", "exact_relevant_locator": "Merger procedures overview", "limitations": "General official guidance does not determine whether this party-neutral transaction is reportable or predict timing."}
+            ],
+            "evidence": [
+              {"evidence_id": "EV-C2-PUBLIC-001", "claim_id": "CLAIM-C2-001", "source_id": "SRC-C2-PUBLIC-001", "extracted_fact": "Merger review can involve filing, substantive assessment, timing and remedy questions.", "exact_locator": "Merger procedures overview", "evidence_type": "official regulator guidance", "strength": "high", "limitations": "The transaction's jurisdiction, filing requirement and timing require qualified counsel."}
+            ],
+            "claims": [
+              {"claim_id": "CLAIM-C2-001", "claim_text": "Regulatory review may affect closing, but the initial risk record lacks transaction-specific evidence and cannot state a legal conclusion.", "supporting_evidence_ids": ["EV-C2-PUBLIC-001"], "counterevidence_ids": ["CE-C2-001"], "confidence": "low", "limitations": "No filing threshold, approval requirement or timing is established.", "human_review_required": true}
+            ],
+            "assumptions": [
+              {"assumption_id": "ASM-C2-001", "owning_module": "Regulatory Risk", "statement": "At least one competition review may be relevant, subject to qualified counsel.", "materiality": "material", "basis": "Transaction structure and general regulator procedure only", "supported": false, "source_ids": ["SRC-C2-PUBLIC-001"], "evidence_ids": ["EV-C2-PUBLIC-001"], "human_review_required": true}
+            ],
+            "unknowns": [
+              {"unknown_id": "UNK-C2-001", "owning_module": "Regulatory Risk", "description": "Filing thresholds, jurisdiction, approval requirements, timing and remedies are not confirmed.", "materiality": "critical", "impact": "Could delay or condition closing.", "closure_requirement": "Qualified regulatory counsel advice using transaction-specific facts.", "human_review_required": true}
+            ],
+            "counterevidence": [
+              {"counterevidence_id": "CE-C2-001", "owning_module": "Regulatory Risk", "description": "General procedure guidance cannot establish that a filing is required for this transaction.", "source_ids": ["SRC-C2-PUBLIC-001"], "evidence_ids": ["EV-C2-PUBLIC-001"], "affected_claim_ids": ["CLAIM-C2-001"], "disposition": "Retained as a legal-adviser boundary and initial evidence gap."}
+            ],
+            "searched_queries": ["official merger review procedure guidance"],
+            "pages_or_files_inspected": ["European Commission merger procedures overview"],
+            "module_assessment": {
+              "business_conclusion": "Regulatory review may be relevant, but transaction-specific support is initially incomplete and qualified counsel is required.",
+              "criterion_outcome": "FAIL",
+              "conditions": ["Obtain authoritative transaction-relevant evidence and qualified counsel review."],
+              "limitations": ["No definitive legal advice or invented filing threshold."],
+              "structured_output": {"jurisdictions": ["Jurisdiction Alpha", "Jurisdiction Beta"], "approvals": ["Unconfirmed"], "theories_of_harm": ["Not assessed without transaction-specific facts"], "timing": ["Unknown"], "remedies": ["Unknown"]}
+            },
+            "module_records": {
+              "regulatory_risks": [
+                {"regulatory_risk_id": "RR-C2-001", "jurisdiction": "Jurisdiction Alpha and Jurisdiction Beta", "regulatory_area": "antitrust and competition", "trigger": "Potential review of a 100% acquisition", "current_status": "uncertain pending evidence and counsel", "probability_classification": "not assessed", "severity": "high", "timing_range": "not established", "approval_dependency": "Qualified counsel must determine whether a filing or approval is required.", "remedy_risk": "Not assessed without transaction-specific overlap evidence.", "source_ids": [], "evidence_ids": [], "assumption_ids": ["ASM-C2-001"], "unknown_ids": ["UNK-C2-001"], "limitations": ["Initial record lacks transaction-specific Source and Evidence lineage."], "legal_adviser_review_required": true, "status": "OPEN_EVIDENCE_GAP", "version": 1, "provider_attempt_id": "ATTEMPT-C2-01"}
+              ]
+            }
+          }
+        },
+        {
+          "response_id": "RESP-C2-002",
+          "request_timestamp": "2026-06-30T00:06:00Z",
+          "response_timestamp": "2026-06-30T00:06:01Z",
+          "elapsed_seconds": 1,
+          "tool_calls": [{"type": "recorded_targeted_document_review", "count": 1}],
+          "compact_response": {
+            "as_of_date": "2026-06-30",
+            "sources": [
+              {"source_id": "SRC-C2-PUBLIC-002", "url": "https://www.ftc.gov/advice-guidance/competition-guidance/guide-antitrust-laws/mergers", "page_title": "The Antitrust Laws and Mergers", "publisher_or_owner": "Federal Trade Commission", "source_type": "official regulator competition guidance", "publication_date": "2025-01-01", "exact_relevant_locator": "Mergers guidance overview", "limitations": "General official guidance does not determine jurisdiction, reportability, probability, timing or remedy for this party-neutral case."}
+            ],
+            "evidence": [
+              {"evidence_id": "EV-C2-PUBLIC-002", "claim_id": "CLAIM-C2-002", "source_id": "SRC-C2-PUBLIC-002", "extracted_fact": "Competition review evaluates whether an acquisition may substantially lessen competition and can affect transaction feasibility.", "exact_locator": "Mergers guidance overview", "evidence_type": "official regulator guidance", "strength": "high", "limitations": "Case-specific legal interpretation remains reserved for qualified counsel."}
+            ],
+            "claims": [
+              {"claim_id": "CLAIM-C2-002", "claim_text": "Competition feasibility requires transaction-specific jurisdiction and overlap analysis; official guidance supports the review framework but not a definitive legal conclusion.", "supporting_evidence_ids": ["EV-C2-PUBLIC-002"], "counterevidence_ids": ["CE-C2-002"], "confidence": "medium", "limitations": "Filing requirements, timing and remedy exposure remain unconfirmed by counsel.", "human_review_required": true, "claim_family_id": "CLAIM-C2-001", "claim_version": 2, "supersedes_claim_id": "CLAIM-C2-001"}
+            ],
+            "assumptions": [
+              {"assumption_id": "ASM-C2-002", "owning_module": "Regulatory Risk", "statement": "Competition analysis requires transaction-specific market and jurisdiction facts.", "materiality": "material", "basis": "Official regulator guidance", "supported": true, "source_ids": ["SRC-C2-PUBLIC-002"], "evidence_ids": ["EV-C2-PUBLIC-002"], "human_review_required": true}
+            ],
+            "unknowns": [
+              {"unknown_id": "UNK-C2-002", "owning_module": "Regulatory Risk", "description": "Case-specific filing, timing and remedy conclusions remain unavailable without counsel.", "materiality": "critical", "impact": "Closing feasibility remains conditional.", "closure_requirement": "Qualified regulatory counsel review.", "human_review_required": true}
+            ],
+            "counterevidence": [
+              {"counterevidence_id": "CE-C2-002", "owning_module": "Regulatory Risk", "description": "Official guidance does not establish a transaction-specific filing obligation or outcome.", "source_ids": ["SRC-C2-PUBLIC-002"], "evidence_ids": ["EV-C2-PUBLIC-002"], "affected_claim_ids": ["CLAIM-C2-002"], "disposition": "Retained as a limitation and legal Human Review boundary."}
+            ],
+            "searched_queries": ["official antitrust merger competition guidance"],
+            "pages_or_files_inspected": ["FTC mergers guidance overview"],
+            "module_assessment": {
+              "business_conclusion": "The regulatory assessment now has authoritative framework evidence, while transaction-specific legal conclusions remain reserved for counsel.",
+              "criterion_outcome": "CONDITION",
+              "conditions": ["Qualified counsel must confirm jurisdiction, filing, timing and remedy exposure."],
+              "limitations": ["No definitive legal advice is provided."],
+              "structured_output": {"jurisdictions": ["Jurisdiction Alpha", "Jurisdiction Beta"], "approvals": ["Counsel determination required"], "theories_of_harm": ["Transaction-specific overlap analysis required"], "timing": ["Not established"], "remedies": ["Not established"]}
+            },
+            "module_records": {
+              "regulatory_risks": [
+                {"regulatory_risk_id": "RR-C2-001", "jurisdiction": "Jurisdiction Alpha and Jurisdiction Beta", "regulatory_area": "antitrust and competition", "trigger": "Potential competition review of a 100% acquisition", "current_status": "framework evidenced; legal conclusion pending counsel", "probability_classification": "not assessed", "severity": "high", "timing_range": "not established", "approval_dependency": "Qualified counsel must determine filing and closing-condition requirements.", "remedy_risk": "Remedy exposure cannot be assessed without transaction-specific market facts.", "source_ids": ["SRC-C2-PUBLIC-002"], "evidence_ids": ["EV-C2-PUBLIC-002"], "assumption_ids": ["ASM-C2-002"], "unknown_ids": ["UNK-C2-002"], "limitations": ["Official guidance is not transaction-specific legal advice."], "legal_adviser_review_required": true, "status": "OPEN_HUMAN_REVIEW", "version": 2, "provider_attempt_id": "ATTEMPT-C2-02"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "C3": {
+      "attempts": [
+        {
+          "response_id": "RESP-C3-001",
+          "request_timestamp": "2026-06-30T00:03:00Z",
+          "response_timestamp": "2026-06-30T00:03:01Z",
+          "elapsed_seconds": 1,
+          "tool_calls": [{"type": "recorded_public_document_review", "count": 1}],
+          "compact_response": {
+            "as_of_date": "2026-06-30",
+            "sources": [
+              {"source_id": "SRC-C3-PUBLIC-001", "url": "https://www.cisa.gov/topics/cyber-threats-and-advisories/secure-by-design", "page_title": "Secure by Design", "publisher_or_owner": "Cybersecurity and Infrastructure Security Agency", "source_type": "authoritative public technology risk guidance", "publication_date": "2025-01-01", "exact_relevant_locator": "Secure by Design principles overview", "limitations": "General guidance does not predict this target's integration outcome, budget, timing or employee retention."}
+            ],
+            "evidence": [
+              {"evidence_id": "EV-C3-PUBLIC-001", "claim_id": "CLAIM-C3-001", "source_id": "SRC-C3-PUBLIC-001", "extracted_fact": "Technology governance and secure design responsibilities must remain explicit through product and system changes.", "exact_locator": "Secure by Design principles overview", "evidence_type": "authoritative public technology guidance", "strength": "medium", "limitations": "The guidance is not evidence that integration will succeed."}
+            ],
+            "claims": [
+              {"claim_id": "CLAIM-C3-001", "claim_text": "Technology and management-dependency integration risks require separate evidence and owner validation; Strategic Fit alone is insufficient.", "supporting_evidence_ids": ["EV-C3-PUBLIC-001"], "counterevidence_ids": ["CE-C3-001"], "confidence": "medium", "limitations": "No integration budget, timeline or retention outcome is supported.", "human_review_required": true}
+            ],
+            "assumptions": [
+              {"assumption_id": "ASM-C3-001", "owning_module": "Integration Risk", "statement": "A ring-fenced product and security governance period may reduce execution risk.", "materiality": "material", "basis": "Mitigation hypothesis, not an approved integration plan", "supported": false, "source_ids": ["SRC-C3-PUBLIC-001"], "evidence_ids": ["EV-C3-PUBLIC-001"], "human_review_required": true}
+            ],
+            "unknowns": [
+              {"unknown_id": "UNK-C3-001", "owning_module": "Integration Risk", "description": "Management retention, systems migration effort and integration cost are not established.", "materiality": "material", "impact": "Could delay capability transfer and synergy delivery.", "closure_requirement": "Integration leader validation using private plans and retention data.", "human_review_required": true}
+            ],
+            "counterevidence": [
+              {"counterevidence_id": "CE-C3-001", "owning_module": "Integration Risk", "description": "Strategic Fit does not evidence management retention, systems compatibility or execution timing.", "source_ids": ["SRC-C3-PUBLIC-001"], "evidence_ids": ["EV-C3-PUBLIC-001"], "affected_claim_ids": ["CLAIM-C3-001"], "disposition": "Retained as an unresolved integration condition."}
+            ],
+            "searched_queries": ["official secure technology governance integration risk guidance"],
+            "pages_or_files_inspected": ["CISA Secure by Design overview"],
+            "module_assessment": {
+              "business_conclusion": "Integration feasibility remains conditional on management dependency, technology governance and retention validation.",
+              "criterion_outcome": "CONDITION",
+              "conditions": ["Integration leader must validate management dependency and retention mitigation."],
+              "limitations": ["No integration budget, timeline or retention outcome is invented."],
+              "structured_output": {"integration_model": ["Ring-fence initially; validate before broader integration"], "risks": ["Management dependency and technology governance"], "value_at_risk": ["Capability and synergy delivery"], "mitigations": ["Retention and governance plan subject to owner approval"], "owners": ["Integration leader"]}
+            },
+            "module_records": {
+              "integration_risks": [
+                {"risk_id": "IR-C3-001", "integration_domain": "management dependency and technology governance", "dependency": "Capability transfer depends on key management and a controlled product/security operating model.", "severity": "high", "likelihood": "not quantified", "timing": "Day 1 through the initial integration period; exact timeline not established", "affected_synergy_or_claim_ids": ["CLAIM-UP-A5-001", "CLAIM-UP-A7-001"], "expected_impact": "Capability and synergy delivery could be delayed or reduced; no amount is supported.", "mitigation": "Ring-fence product and security governance until the integration leader validates retention and system dependencies.", "responsible_owner": "integration leader, subject to appointment", "leading_indicator": "Key-management retention status and unresolved system-dependency count", "human_review_required": true, "source_ids": ["SRC-C3-PUBLIC-001"], "evidence_ids": ["EV-C3-PUBLIC-001"], "assumption_ids": ["ASM-C3-001"], "limitations": ["No integration budget, timeline or employee-retention outcome is supported."], "residual_risk": "High until management dependency and retention mitigation are validated.", "status": "OPEN_CONDITION", "version": 1, "provider_attempt_id": "ATTEMPT-C3-01"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "C4": {
+      "attempts": [
+        {
+          "response_id": "RESP-C4-001",
+          "request_timestamp": "2026-06-30T00:04:00Z",
+          "response_timestamp": "2026-06-30T00:04:01Z",
+          "elapsed_seconds": 1,
+          "tool_calls": [{"type": "recorded_risk_synthesis", "count": 1}],
+          "compact_response": {
+            "as_of_date": "2026-06-30",
+            "sources": [
+              {"source_id": "SRC-C4-PUBLIC-001", "url": "https://www.federalreserve.gov/supervisionreg/srletters/sr1107.htm", "page_title": "Guidance on Model Risk Management", "publisher_or_owner": "Board of Governors of the Federal Reserve System", "source_type": "authoritative public risk-control guidance", "publication_date": "2011-04-04", "exact_relevant_locator": "Model validation and uncertainty principles", "limitations": "General risk-control guidance does not supply transaction downside percentages or probabilities."}
+            ],
+            "evidence": [
+              {"evidence_id": "EV-C4-PUBLIC-001", "claim_id": "CLAIM-C4-001", "source_id": "SRC-C4-PUBLIC-001", "extracted_fact": "Material model limitations and uncertainty should remain explicit and subject to independent challenge.", "exact_locator": "Model validation and uncertainty principles", "evidence_type": "authoritative public risk guidance", "strength": "medium", "limitations": "No transaction-specific downside value or probability is supplied."}
+            ],
+            "claims": [
+              {"claim_id": "CLAIM-C4-001", "claim_text": "Integration delay and regulatory uncertainty are material qualitative downside scenarios because no supported quantitative stress inputs are available.", "supporting_evidence_ids": ["EV-C4-PUBLIC-001"], "counterevidence_ids": ["CE-C4-001"], "confidence": "medium", "limitations": "No downside percentage or probability is invented.", "human_review_required": true, "dependency_claim_ids": ["CLAIM-C1-001", "CLAIM-C2-001", "CLAIM-C3-001"]}
+            ],
+            "assumptions": [
+              {"assumption_id": "ASM-C4-001", "owning_module": "Downside Risk", "statement": "Integration delay and regulatory uncertainty could affect frozen returns, but no quantitative change is supported.", "materiality": "material", "basis": "C1-C3 registered risks", "supported": false, "source_ids": ["SRC-C4-PUBLIC-001"], "evidence_ids": ["EV-C4-PUBLIC-001"], "human_review_required": true}
+            ],
+            "unknowns": [
+              {"unknown_id": "UNK-C4-001", "owning_module": "Downside Risk", "description": "Scenario percentages, probabilities and financial impacts are unavailable.", "materiality": "material", "impact": "Quantitative downside returns cannot be calculated.", "closure_requirement": "Authorized scenario inputs and replayable calculation data.", "human_review_required": true}
+            ],
+            "counterevidence": [
+              {"counterevidence_id": "CE-C4-001", "owning_module": "Downside Risk", "description": "Frozen base-case calculations do not prove resilience to integration delay or regulatory conditions.", "source_ids": ["SRC-C4-PUBLIC-001"], "evidence_ids": ["EV-C4-PUBLIC-001"], "affected_claim_ids": ["CLAIM-C4-001"], "disposition": "Retained; upside is not used to offset unquantified risk."}
+            ],
+            "searched_queries": ["official model risk uncertainty validation guidance"],
+            "pages_or_files_inspected": ["Federal Reserve SR 11-7 model risk guidance"],
+            "module_assessment": {
+              "business_conclusion": "Material downside remains qualitative because no supported scenario percentages or probabilities are available.",
+              "criterion_outcome": "CONDITION",
+              "conditions": ["Obtain authorized scenario inputs before quantitative downside approval."],
+              "limitations": ["No new calculation is created."],
+              "structured_output": {"scenarios": ["Integration delay and regulatory uncertainty"], "value_at_risk": ["Qualitative only"], "threshold_breaches": ["Current price and IRR conditions already remain"], "mitigations": ["Reprice and complete specialist reviews"], "walk_away_triggers": ["Confirmed fatal risk or unresolved Mandate breach"]}
+            },
+            "module_records": {
+              "downside_scenarios": [
+                {"scenario_id": "DS-C4-001", "scenario_name": "Integration delay and regulatory uncertainty", "trigger": "Management dependency remains unresolved or regulatory review delays closing.", "probability_classification": "not quantified", "affected_claim_ids": ["CLAIM-UP-A5-001", "CLAIM-UP-B5-001"], "affected_calculation_ids": ["CAL-UP-IRR", "CAL-UP-ROIC", "CAL-UP-LIQUIDITY"], "changed_assumption_ids": ["ASM-C4-001"], "financial_inputs": {}, "resulting_metrics": {}, "source_ids": ["SRC-C4-PUBLIC-001"], "evidence_ids": ["EV-C4-PUBLIC-001"], "assumption_ids": ["ASM-C4-001"], "mitigation": "Reprice current terms and complete regulatory and integration validation before quantitative stress testing.", "residual_risk": "Material and unquantified.", "monitoring_indicators": ["Regulatory review status", "Management retention status", "Authorized scenario inputs received"], "human_review_required": true, "limitations": ["No supported downside percentage, probability or financial input is available; the scenario remains qualitative."], "status": "OPEN_CONDITION", "version": 1, "provider_attempt_id": "ATTEMPT-C4-01"}
+              ]
+            }
+          }
+        },
+        {
+          "response_id": "RESP-C4-002",
+          "request_timestamp": "2026-06-30T00:07:00Z",
+          "response_timestamp": "2026-06-30T00:07:01Z",
+          "elapsed_seconds": 1,
+          "tool_calls": [{"type": "recorded_dependent_risk_resynthesis", "count": 1}],
+          "compact_response": {
+            "as_of_date": "2026-06-30",
+            "sources": [
+              {"source_id": "SRC-C4-PUBLIC-002", "url": "https://www.federalreserve.gov/supervisionreg/srletters/sr1107.htm", "page_title": "Guidance on Model Risk Management", "publisher_or_owner": "Board of Governors of the Federal Reserve System", "source_type": "authoritative public risk-control guidance", "publication_date": "2011-04-04", "exact_relevant_locator": "Model validation and uncertainty principles", "limitations": "General risk-control guidance does not supply transaction downside percentages or probabilities."}
+            ],
+            "evidence": [
+              {"evidence_id": "EV-C4-PUBLIC-002", "claim_id": "CLAIM-C4-002", "source_id": "SRC-C4-PUBLIC-002", "extracted_fact": "Material uncertainty remains explicit after evidence repair and requires independent challenge.", "exact_locator": "Model validation and uncertainty principles", "evidence_type": "authoritative public risk guidance", "strength": "medium", "limitations": "No transaction-specific downside value or probability is supplied."}
+            ],
+            "claims": [
+              {"claim_id": "CLAIM-C4-002", "claim_text": "After the regulatory evidence repair, downside remains qualitative and conditional because counsel, integration and scenario inputs remain open.", "supporting_evidence_ids": ["EV-C4-PUBLIC-002"], "counterevidence_ids": ["CE-C4-002"], "confidence": "medium", "limitations": "No downside value or probability is invented.", "human_review_required": true, "claim_family_id": "CLAIM-C4-001", "claim_version": 2, "supersedes_claim_id": "CLAIM-C4-001", "dependency_claim_ids": ["CLAIM-C2-002", "CLAIM-C3-001"]}
+            ],
+            "assumptions": [
+              {"assumption_id": "ASM-C4-002", "owning_module": "Downside Risk", "statement": "The repaired regulatory framework evidence does not close counsel or scenario-input requirements.", "materiality": "material", "basis": "C2 version 2 and C3 registered condition", "supported": true, "source_ids": ["SRC-C4-PUBLIC-001"], "evidence_ids": ["EV-C4-PUBLIC-002"], "human_review_required": true}
+            ],
+            "unknowns": [
+              {"unknown_id": "UNK-C4-002", "owning_module": "Downside Risk", "description": "Quantitative scenario inputs remain unavailable after regulatory evidence repair.", "materiality": "material", "impact": "Downside returns remain qualitative.", "closure_requirement": "Authorized scenario inputs and calculation replay.", "human_review_required": true}
+            ],
+            "counterevidence": [
+              {"counterevidence_id": "CE-C4-002", "owning_module": "Downside Risk", "description": "Improved regulatory framework evidence does not establish a favorable transaction outcome.", "source_ids": ["SRC-C4-PUBLIC-001"], "evidence_ids": ["EV-C4-PUBLIC-002"], "affected_claim_ids": ["CLAIM-C4-002"], "disposition": "Retained without unverified upside offset."}
+            ],
+            "searched_queries": ["dependent resynthesis after regulatory evidence repair"],
+            "pages_or_files_inspected": ["Registered C2 version 2", "Registered C3 risk", "Federal Reserve model risk guidance"],
+            "module_assessment": {
+              "business_conclusion": "Regulatory evidence repair closes the initial gap but does not remove qualitative downside, price or return conditions.",
+              "criterion_outcome": "CONDITION",
+              "conditions": ["Retain qualitative downside and obtain authorized scenario inputs."],
+              "limitations": ["No new calculation is created."],
+              "structured_output": {"scenarios": ["Integration delay and regulatory uncertainty"], "value_at_risk": ["Qualitative only"], "threshold_breaches": ["Current price and IRR conditions remain"], "mitigations": ["Reprice and complete specialist reviews"], "walk_away_triggers": ["Confirmed fatal risk or unresolved Mandate breach"]}
+            },
+            "module_records": {
+              "downside_scenarios": [
+                {"scenario_id": "DS-C4-001", "scenario_name": "Integration delay and regulatory uncertainty", "trigger": "Management dependency remains unresolved or regulatory review delays closing.", "probability_classification": "not quantified", "affected_claim_ids": ["CLAIM-UP-A5-001", "CLAIM-UP-B5-001"], "affected_calculation_ids": ["CAL-UP-IRR", "CAL-UP-ROIC", "CAL-UP-LIQUIDITY"], "changed_assumption_ids": ["ASM-C4-002"], "financial_inputs": {}, "resulting_metrics": {}, "source_ids": ["SRC-C4-PUBLIC-001"], "evidence_ids": ["EV-C4-PUBLIC-002"], "assumption_ids": ["ASM-C4-002"], "mitigation": "Reprice current terms and complete regulatory and integration validation before quantitative stress testing.", "residual_risk": "Material and unquantified after evidence repair.", "monitoring_indicators": ["Regulatory counsel status", "Management retention status", "Authorized scenario inputs received"], "human_review_required": true, "limitations": ["No supported downside percentage, probability or financial input is available; the scenario remains qualitative."], "status": "OPEN_CONDITION", "version": 2, "provider_attempt_id": "ATTEMPT-C4-02"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "C5": {
+      "attempts": [
+        {
+          "response_id": "RESP-C5-001",
+          "request_timestamp": "2026-06-30T00:05:00Z",
+          "response_timestamp": "2026-06-30T00:05:01Z",
+          "elapsed_seconds": 1,
+          "tool_calls": [{"type": "recorded_decision_input_synthesis", "count": 1}],
+          "compact_response": {
+            "as_of_date": "2026-06-30",
+            "sources": [
+              {"source_id": "SRC-C5-PUBLIC-001", "url": "https://www.oecd.org/corporate/principles-corporate-governance/", "page_title": "G20/OECD Principles of Corporate Governance", "publisher_or_owner": "OECD", "source_type": "authoritative public governance principles", "publication_date": "2023-09-11", "exact_relevant_locator": "Board responsibilities and accountability principles", "limitations": "General governance principles do not choose a transaction Decision State or grant approval."}
+            ],
+            "evidence": [
+              {"evidence_id": "EV-C5-PUBLIC-001", "claim_id": "CLAIM-C5-001", "source_id": "SRC-C5-PUBLIC-001", "extracted_fact": "Material decisions remain subject to defined governance responsibility and accountability.", "exact_locator": "Board responsibilities and accountability principles", "evidence_type": "authoritative public governance principles", "strength": "medium", "limitations": "The source does not approve this transaction."}
+            ],
+            "claims": [
+              {"claim_id": "CLAIM-C5-001", "claim_text": "The synthesis must preserve Gate B price and return conditions, open specialist reviews and the final human approval boundary.", "supporting_evidence_ids": ["EV-C5-PUBLIC-001"], "counterevidence_ids": ["CE-C5-001"], "confidence": "medium", "limitations": "The provider does not select Gate C or the final Decision State.", "human_review_required": true, "dependency_claim_ids": ["CLAIM-C1-001", "CLAIM-C2-001", "CLAIM-C3-001", "CLAIM-C4-001"]}
+            ],
+            "assumptions": [
+              {"assumption_id": "ASM-C5-001", "owning_module": "Decision State", "statement": "No authorized price or Mandate change has been registered.", "materiality": "critical", "basis": "Frozen Gate B and Mandate", "supported": true, "source_ids": ["SRC-C5-PUBLIC-001"], "evidence_ids": ["EV-C5-PUBLIC-001"], "human_review_required": true}
+            ],
+            "unknowns": [
+              {"unknown_id": "UNK-C5-001", "owning_module": "Decision State", "description": "Final committee risk acceptance and price authority are not supplied.", "materiality": "critical", "impact": "No final transaction approval can be stated.", "closure_requirement": "Authorized committee decision.", "human_review_required": true}
+            ],
+            "counterevidence": [
+              {"counterevidence_id": "CE-C5-001", "owning_module": "Decision State", "description": "A completed report or favorable strategic thesis cannot override the frozen price and return conditions.", "source_ids": ["SRC-C5-PUBLIC-001"], "evidence_ids": ["EV-C5-PUBLIC-001"], "affected_claim_ids": ["CLAIM-C5-001"], "disposition": "Retained in controlled synthesis."}
+            ],
+            "searched_queries": [],
+            "pages_or_files_inspected": ["Registered Gate A/B and C1-C4 objects", "OECD governance principles"],
+            "module_assessment": {
+              "business_conclusion": "Provider supplies only synthesis inputs; it does not choose Gate C, Decision State, delivery permission or human approval.",
+              "criterion_outcome": "CONDITION",
+              "conditions": ["Preserve price, return, regulatory, integration and Human Review conditions."],
+              "limitations": ["Controlled runtime selects the Decision State after Gate C."],
+              "structured_output": {"decision_state": [], "rationale": ["Frozen Gate B is RENEGOTIATE_PRICE"], "conditions": ["Current terms cannot proceed"], "walk_away_triggers": ["Unresolved fatal risk or Mandate breach"], "authority_boundary": ["Final approval remains human"]}
+            },
+            "module_records": {
+              "decision_inputs": [
+                {"synthesis_input_id": "DI-C5-001", "description": "Preserve frozen Gate A/B results, registered C1-C4 conditions, PCE, ER/BRB, replay and Human Review boundaries.", "source_object_ids": ["GATE_A", "GATE_B", "DF-C1-FIN-001", "RR-C2-001", "IR-C3-001", "DS-C4-001"]}
+              ]
+            }
+          }
+        },
+        {
+          "response_id": "RESP-C5-002",
+          "request_timestamp": "2026-06-30T00:08:00Z",
+          "response_timestamp": "2026-06-30T00:08:01Z",
+          "elapsed_seconds": 1,
+          "tool_calls": [{"type": "recorded_dependent_decision_resynthesis", "count": 1}],
+          "compact_response": {
+            "as_of_date": "2026-06-30",
+            "sources": [
+              {"source_id": "SRC-C5-PUBLIC-002", "url": "https://www.oecd.org/corporate/principles-corporate-governance/", "page_title": "G20/OECD Principles of Corporate Governance", "publisher_or_owner": "OECD", "source_type": "authoritative public governance principles", "publication_date": "2023-09-11", "exact_relevant_locator": "Board responsibilities and accountability principles", "limitations": "General governance principles do not choose a transaction Decision State or grant approval."}
+            ],
+            "evidence": [
+              {"evidence_id": "EV-C5-PUBLIC-002", "claim_id": "CLAIM-C5-002", "source_id": "SRC-C5-PUBLIC-002", "extracted_fact": "Material decisions remain subject to defined governance responsibility after analytical inputs change.", "exact_locator": "Board responsibilities and accountability principles", "evidence_type": "authoritative public governance principles", "strength": "medium", "limitations": "The source does not approve this transaction."}
+            ],
+            "claims": [
+              {"claim_id": "CLAIM-C5-002", "claim_text": "After regulatory evidence repair, price, return, integration and Human Review conditions still prevent proceeding at current terms.", "supporting_evidence_ids": ["EV-C5-PUBLIC-002"], "counterevidence_ids": ["CE-C5-002"], "confidence": "medium", "limitations": "The provider still does not select Gate C or the final Decision State.", "human_review_required": true, "claim_family_id": "CLAIM-C5-001", "claim_version": 2, "supersedes_claim_id": "CLAIM-C5-001", "dependency_claim_ids": ["CLAIM-C2-002", "CLAIM-C3-001", "CLAIM-C4-002"]}
+            ],
+            "assumptions": [
+              {"assumption_id": "ASM-C5-002", "owning_module": "Decision State", "statement": "Regulatory evidence repair did not authorize price or Mandate change.", "materiality": "critical", "basis": "Frozen Gate B and registered C2 version 2", "supported": true, "source_ids": ["SRC-C5-PUBLIC-001"], "evidence_ids": ["EV-C5-PUBLIC-002"], "human_review_required": true}
+            ],
+            "unknowns": [
+              {"unknown_id": "UNK-C5-002", "owning_module": "Decision State", "description": "Final committee risk acceptance and price authority remain unavailable.", "materiality": "critical", "impact": "No final transaction approval can be stated.", "closure_requirement": "Authorized committee decision after current terms are addressed.", "human_review_required": true}
+            ],
+            "counterevidence": [
+              {"counterevidence_id": "CE-C5-002", "owning_module": "Decision State", "description": "Closing one evidence gap does not override the frozen price and return conditions.", "source_ids": ["SRC-C5-PUBLIC-001"], "evidence_ids": ["EV-C5-PUBLIC-002"], "affected_claim_ids": ["CLAIM-C5-002"], "disposition": "Retained in controlled synthesis."}
+            ],
+            "searched_queries": [],
+            "pages_or_files_inspected": ["Registered Gate A/B and repaired C2/C4 objects", "OECD governance principles"],
+            "module_assessment": {
+              "business_conclusion": "Provider supplies updated synthesis inputs only; the controlled runtime must preserve the current-terms problem.",
+              "criterion_outcome": "CONDITION",
+              "conditions": ["Preserve price, return, regulatory, integration and Human Review conditions."],
+              "limitations": ["Controlled runtime selects the Decision State after Gate C."],
+              "structured_output": {"decision_state": [], "rationale": ["Frozen Gate B remains RENEGOTIATE_PRICE"], "conditions": ["Current terms cannot proceed"], "walk_away_triggers": ["Unresolved fatal risk or Mandate breach"], "authority_boundary": ["Final approval remains human"]}
+            },
+            "module_records": {
+              "decision_inputs": [
+                {"synthesis_input_id": "DI-C5-002", "description": "Use repaired C2 and dependent C4 inputs while preserving frozen Gate B and Human Review authority.", "source_object_ids": ["GATE_A", "GATE_B", "RR-C2-001", "IR-C3-001", "DS-C4-001"]}
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

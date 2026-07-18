@@ -1,0 +1,519 @@
+{
+  "gate_id": "GATE_B",
+  "gate_name": "Value Creation Gate",
+  "block": "Block B: Value Creation and Pricing",
+  "status": "RENEGOTIATE_PRICE",
+  "criteria": [
+    {
+      "criterion_id": "GB-01",
+      "criterion_name": "Standalone financial sufficiency",
+      "outcome": "PASS",
+      "reason": "Historical earnings, cash conversion and net-debt inputs are separately traceable.",
+      "affected_module_ids": [
+        "B1"
+      ],
+      "supporting_evidence_ids": [
+        "EV-B1-AUDIT",
+        "EV-B1-COUNTER",
+        "EV-B1-XLSX"
+      ],
+      "counterevidence_ids": [
+        "CE-B1-01"
+      ],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GB-02",
+      "criterion_name": "Period and data quality",
+      "outcome": "PASS",
+      "reason": "Financial periods, currencies, units, scales, classifications and perimeters are controlled with explicit normalization.",
+      "affected_module_ids": [
+        "B1"
+      ],
+      "supporting_evidence_ids": [
+        "EV-B1-AUDIT",
+        "EV-B1-COUNTER",
+        "EV-B1-XLSX"
+      ],
+      "counterevidence_ids": [
+        "CE-B1-01"
+      ],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GB-03",
+      "criterion_name": "Forecast quality",
+      "outcome": "CONDITION",
+      "reason": "Management forecast remains separately classified and subject to stated limitations.",
+      "affected_module_ids": [
+        "B1"
+      ],
+      "supporting_evidence_ids": [
+        "EV-B1-AUDIT",
+        "EV-B1-COUNTER",
+        "EV-B1-XLSX"
+      ],
+      "counterevidence_ids": [
+        "CE-B1-01"
+      ],
+      "conditions": [
+        "Validate management forecast drivers during financial diligence."
+      ],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GB-04",
+      "criterion_name": "Synergy credibility",
+      "outcome": "PASS",
+      "reason": "Synergies are mechanism-based rather than inferred from Strategic Fit.",
+      "affected_module_ids": [
+        "B2"
+      ],
+      "supporting_evidence_ids": [
+        "EV-B2-COUNTER",
+        "EV-B2-SUPPORT"
+      ],
+      "counterevidence_ids": [
+        "CE-B2-01"
+      ],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GB-05",
+      "criterion_name": "Quantified synergy support",
+      "outcome": "PASS",
+      "reason": "Every quantified synergy retains baseline, driver, timing, probability and lineage.",
+      "affected_module_ids": [
+        "B2"
+      ],
+      "supporting_evidence_ids": [
+        "EV-B2-COUNTER",
+        "EV-B2-SUPPORT"
+      ],
+      "counterevidence_ids": [
+        "CE-B2-01"
+      ],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GB-06",
+      "criterion_name": "Implementation costs and dis-synergies",
+      "outcome": "PASS",
+      "reason": "Implementation costs, recurring costs and dis-synergies are explicit.",
+      "affected_module_ids": [
+        "B2"
+      ],
+      "supporting_evidence_ids": [
+        "EV-B2-COUNTER",
+        "EV-B2-SUPPORT"
+      ],
+      "counterevidence_ids": [
+        "CE-B2-01"
+      ],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GB-07",
+      "criterion_name": "Valuation range",
+      "outcome": "PASS",
+      "reason": "Base and downside valuation ranges are recorded without invented market inputs.",
+      "affected_module_ids": [
+        "B3"
+      ],
+      "supporting_evidence_ids": [
+        "EV-B3-COMPS",
+        "EV-B3-COUNTER",
+        "EV-B3-PRICE-IND",
+        "EV-B3-TERM-02",
+        "EV-B3-TERM-COUNTER-02"
+      ],
+      "counterevidence_ids": [
+        "CE-B3-01",
+        "CE-B3-02"
+      ],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GB-08",
+      "criterion_name": "Purchase-price discipline",
+      "outcome": "CONDITION",
+      "reason": "Verified offered Equity Value exceeds the buyer Mandate boundary.",
+      "affected_module_ids": [
+        "B3"
+      ],
+      "supporting_evidence_ids": [
+        "EV-B3-COMPS",
+        "EV-B3-COUNTER",
+        "EV-B3-PRICE-IND",
+        "EV-B3-TERM-02",
+        "EV-B3-TERM-COUNTER-02"
+      ],
+      "counterevidence_ids": [
+        "CE-B3-01",
+        "CE-B3-02"
+      ],
+      "conditions": [
+        "Reduce Equity Value to the Mandate maximum or obtain explicit buyer authority."
+      ],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GB-09",
+      "criterion_name": "Comparable evidence",
+      "outcome": "CONDITION",
+      "reason": "Comparable evidence is admitted with stated limitations.",
+      "affected_module_ids": [
+        "B3"
+      ],
+      "supporting_evidence_ids": [
+        "EV-B3-COMPS",
+        "EV-B3-COUNTER",
+        "EV-B3-PRICE-IND",
+        "EV-B3-TERM-02",
+        "EV-B3-TERM-COUNTER-02"
+      ],
+      "counterevidence_ids": [
+        "CE-B3-01",
+        "CE-B3-02"
+      ],
+      "conditions": [
+        "Refresh comparable evidence before price approval."
+      ],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GB-10",
+      "criterion_name": "Structure feasibility",
+      "outcome": "PASS",
+      "reason": "Cash, debt, assumed debt, fees and contingent terms are separately identified.",
+      "affected_module_ids": [
+        "B4"
+      ],
+      "supporting_evidence_ids": [
+        "EV-B4-COUNTER",
+        "EV-B4-FIN"
+      ],
+      "counterevidence_ids": [
+        "CE-B4-01"
+      ],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GB-11",
+      "criterion_name": "Financing constraints",
+      "outcome": "CONDITION",
+      "reason": "Financing capacity is assessed separately from willingness to pay; funding remains subject to approval.",
+      "affected_module_ids": [
+        "B4"
+      ],
+      "supporting_evidence_ids": [
+        "EV-B4-COUNTER",
+        "EV-B4-FIN"
+      ],
+      "counterevidence_ids": [
+        "CE-B4-01"
+      ],
+      "conditions": [
+        "Treasury must confirm funding availability and terms."
+      ],
+      "human_review_required": true
+    },
+    {
+      "criterion_id": "GB-12",
+      "criterion_name": "Leverage and liquidity",
+      "outcome": "PASS",
+      "reason": "Pro forma leverage and closing liquidity remain inside Mandate constraints.",
+      "affected_module_ids": [
+        "B4"
+      ],
+      "supporting_evidence_ids": [
+        "EV-B4-COUNTER",
+        "EV-B4-FIN"
+      ],
+      "counterevidence_ids": [
+        "CE-B4-01"
+      ],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GB-13",
+      "criterion_name": "Calculation replay",
+      "outcome": "PASS",
+      "reason": "All required Block B formulas were independently reconstructed within tolerance.",
+      "affected_module_ids": [
+        "B1",
+        "B2",
+        "B3",
+        "B4",
+        "B5"
+      ],
+      "supporting_evidence_ids": [
+        "EV-B1-AUDIT",
+        "EV-B1-COUNTER",
+        "EV-B1-XLSX",
+        "EV-B2-COUNTER",
+        "EV-B2-SUPPORT",
+        "EV-B3-COMPS",
+        "EV-B3-COUNTER",
+        "EV-B3-PRICE-IND",
+        "EV-B3-TERM-02",
+        "EV-B3-TERM-COUNTER-02",
+        "EV-B4-COUNTER",
+        "EV-B4-FIN",
+        "EV-B5-CF",
+        "EV-B5-COUNTER",
+        "EV-B5-V2",
+        "EV-B5-V2-COUNTER"
+      ],
+      "counterevidence_ids": [],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GB-14",
+      "criterion_name": "Return threshold",
+      "outcome": "CONDITION",
+      "reason": "Returns do not clear all Mandate hurdles; positive IRR alone is insufficient.",
+      "affected_module_ids": [
+        "B5"
+      ],
+      "supporting_evidence_ids": [
+        "EV-B5-CF",
+        "EV-B5-COUNTER",
+        "EV-B5-V2",
+        "EV-B5-V2-COUNTER"
+      ],
+      "counterevidence_ids": [
+        "CE-B5-01",
+        "CE-B5-02"
+      ],
+      "conditions": [
+        "Reprice or improve verified cash flows to restore hurdle compliance."
+      ],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GB-15",
+      "criterion_name": "Downside case",
+      "outcome": "PASS",
+      "reason": "A separate downside cash-flow case is retained.",
+      "affected_module_ids": [
+        "B5"
+      ],
+      "supporting_evidence_ids": [
+        "EV-B5-CF",
+        "EV-B5-COUNTER",
+        "EV-B5-V2",
+        "EV-B5-V2-COUNTER"
+      ],
+      "counterevidence_ids": [
+        "CE-B5-01",
+        "CE-B5-02"
+      ],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GB-16",
+      "criterion_name": "Counterevidence",
+      "outcome": "PASS",
+      "reason": "Every Block B module retains material counterevidence.",
+      "affected_module_ids": [
+        "B1",
+        "B2",
+        "B3",
+        "B4",
+        "B5"
+      ],
+      "supporting_evidence_ids": [
+        "EV-B1-AUDIT",
+        "EV-B1-COUNTER",
+        "EV-B1-XLSX",
+        "EV-B2-COUNTER",
+        "EV-B2-SUPPORT",
+        "EV-B3-COMPS",
+        "EV-B3-COUNTER",
+        "EV-B3-PRICE-IND",
+        "EV-B3-TERM-02",
+        "EV-B3-TERM-COUNTER-02",
+        "EV-B4-COUNTER",
+        "EV-B4-FIN",
+        "EV-B5-CF",
+        "EV-B5-COUNTER",
+        "EV-B5-V2",
+        "EV-B5-V2-COUNTER"
+      ],
+      "counterevidence_ids": [
+        "CE-B1-01",
+        "CE-B2-01",
+        "CE-B3-01",
+        "CE-B3-02",
+        "CE-B4-01",
+        "CE-B5-01",
+        "CE-B5-02"
+      ],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GB-17",
+      "criterion_name": "Assumptions and unknowns",
+      "outcome": "CONDITION",
+      "reason": "Material assumptions and explicit unknowns remain visible and are not converted to facts or zero.",
+      "affected_module_ids": [
+        "B1",
+        "B2",
+        "B3",
+        "B4",
+        "B5"
+      ],
+      "supporting_evidence_ids": [],
+      "counterevidence_ids": [],
+      "conditions": [
+        "Close material assumptions and unknowns through diligence."
+      ],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GB-18",
+      "criterion_name": "Research Gaps",
+      "outcome": "PASS",
+      "reason": "No open Block B Research or financial-integrity Gap remains.",
+      "affected_module_ids": [
+        "B1"
+      ],
+      "supporting_evidence_ids": [],
+      "counterevidence_ids": [],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GB-19",
+      "criterion_name": "Calculation Gaps",
+      "outcome": "PASS",
+      "reason": "No open Block B Calculation Gap remains.",
+      "affected_module_ids": [
+        "B5"
+      ],
+      "supporting_evidence_ids": [],
+      "counterevidence_ids": [],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GB-20",
+      "criterion_name": "Human Review",
+      "outcome": "CONDITION",
+      "reason": "Required Human Review boundaries are explicit and non-blocking for research completion.",
+      "affected_module_ids": [
+        "A5",
+        "B4"
+      ],
+      "supporting_evidence_ids": [],
+      "counterevidence_ids": [],
+      "conditions": [
+        "New-debt availability is a management representation and requires treasury confirmation; financial capacity is not willingness to pay.",
+        "Private customer concentration, retention, unit economics, margin quality, cash conversion and capability transferability are unavailable."
+      ],
+      "human_review_required": true
+    },
+    {
+      "criterion_id": "GB-21",
+      "criterion_name": "PCE",
+      "outcome": "PASS",
+      "reason": "PCE delivery control completed after deterministic calculations.",
+      "affected_module_ids": [
+        "B1",
+        "B2",
+        "B3",
+        "B4",
+        "B5"
+      ],
+      "supporting_evidence_ids": [],
+      "counterevidence_ids": [],
+      "conditions": [],
+      "human_review_required": false
+    },
+    {
+      "criterion_id": "GB-22",
+      "criterion_name": "ER/BRB",
+      "outcome": "PASS",
+      "reason": "ER/BRB evidence-row assessment completed after deterministic calculations.",
+      "affected_module_ids": [
+        "B1",
+        "B2",
+        "B3",
+        "B4",
+        "B5"
+      ],
+      "supporting_evidence_ids": [],
+      "counterevidence_ids": [],
+      "conditions": [],
+      "human_review_required": false
+    }
+  ],
+  "failed_criterion_ids": [],
+  "conditions": [
+    "Validate management forecast drivers during financial diligence.",
+    "Reduce Equity Value to the Mandate maximum or obtain explicit buyer authority.",
+    "Refresh comparable evidence before price approval.",
+    "Treasury must confirm funding availability and terms.",
+    "Reprice or improve verified cash flows to restore hurdle compliance.",
+    "Close material assumptions and unknowns through diligence.",
+    "New-debt availability is a management representation and requires treasury confirmation; financial capacity is not willingness to pay.",
+    "Private customer concentration, retention, unit economics, margin quality, cash conversion and capability transferability are unavailable."
+  ],
+  "gap_ids": [],
+  "pce_statuses": {
+    "CL-B1-01": "Certified",
+    "CL-B2-01": "Certified",
+    "CL-B3-01": "Certified with Caveat",
+    "CL-B4-01": "Certified with Caveat",
+    "CL-B5-01": "Certified",
+    "CL-B3-02": "Certified with Caveat",
+    "CL-B5-02": "Certified"
+  },
+  "er_brb_summary": {
+    "record_count": 9,
+    "scope": "read-only evidence-row control"
+  },
+  "calculation_replay_statuses": {
+    "CAL-B1-NET_DEBT-V1": "PASS",
+    "CAL-B2-ANNUAL_SYNERGY-V1": "PASS",
+    "CAL-B2-PROBABILITY_ADJUSTED_SYNERGY-V1": "PASS",
+    "CAL-B2-INTEGRATION_COSTS-V1": "PASS",
+    "CAL-B3-ENTERPRISE_VALUE-V2": "PASS",
+    "CAL-B3-EQUITY_VALUE-V2": "PASS",
+    "CAL-B3-TOTAL_CONSIDERATION-V2": "PASS",
+    "CAL-B3-EV_REVENUE-V2": "PASS",
+    "CAL-B3-EV_EBITDA-V2": "PASS",
+    "CAL-B3-PURCHASE_PREMIUM-V2": "PASS",
+    "CAL-B4-PRO_FORMA_DEBT-V1": "PASS",
+    "CAL-B4-PRO_FORMA_LEVERAGE-V1": "PASS",
+    "CAL-B4-CLOSING_LIQUIDITY-V1": "PASS",
+    "CAL-B4-LIQUIDITY_HEADROOM-V1": "PASS",
+    "CAL-B5-INVESTED_CAPITAL-V2": "PASS",
+    "CAL-B5-ROIC-V2": "PASS",
+    "CAL-B5-SIMPLE_PAYBACK-V2": "PASS",
+    "CAL-B5-IRR-V2": "PASS"
+  },
+  "human_review_items": [
+    "HR-B4-TREASURY-001",
+    "HR-UN-A5-BA-001"
+  ],
+  "prior_gate_history": [
+    {
+      "gate_id": "GATE_A",
+      "status": "CONDITIONAL_PASS"
+    }
+  ],
+  "business_reason": "15 criteria passed, 7 conditional, 0 failed; result derives from Gate B criteria and Mandate thresholds."
+}

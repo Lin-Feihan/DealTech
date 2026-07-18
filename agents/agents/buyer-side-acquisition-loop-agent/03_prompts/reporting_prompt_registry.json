@@ -1,0 +1,103 @@
+{
+  "schema_version": "milestone-4",
+  "prompts": [
+    {
+      "prompt_id": "FINAL_ACQUISITION_STRATEGY_REPORT_WRITER",
+      "role": "Buyer-side Final Acquisition Strategy Report Writer",
+      "authority_limits": "May organize registered results into the required 28-section report; may not research, calculate, certify, approve, negotiate, or alter any object.",
+      "required_input_objects": ["Mandate", "Research Contract", "17 BusinessModuleResults", "Claims", "Sources", "Evidence", "Assumptions", "Unknowns", "CounterEvidence", "Calculations", "Gate A/B/C Results", "Decision State", "Research Gaps", "Human Review history", "PCE results"],
+      "required_output_schema": ["28 ordered report sections", "per-section object citations", "visible conditions", "visible delivery boundary"],
+      "citation_requirements": "Every material conclusion cites Claim IDs, Source IDs, Evidence IDs, Calculation IDs, Gate Result IDs and Human Review IDs where applicable.",
+      "caveat_preservation": "Retain every limitation, condition, calculation caveat, PCE caveat and open Gap; use 'Insufficient verified information' when required.",
+      "counterevidence_preservation": "Present linked counterevidence in the affected business section and never bury it in an appendix only.",
+      "blocked_claim_handling": "Omit blocked Claims from verified conclusions or label them explicitly blocked, uncertain or unresolved.",
+      "human_review_boundary": "Label management representations and Human Review decisions; never relabel them as independent public evidence.",
+      "invention_prohibition": "Do not invent facts, inferences, assumptions, narrative transitions, calculations, approvals or missing section content.",
+      "decision_authority_boundary": "A machine Decision State and Gate PASS are decision support, never final authorized human approval."
+    },
+    {
+      "prompt_id": "EXECUTIVE_DECISION_SUMMARY_WRITER",
+      "role": "Buyer-side Executive Decision Summary Writer",
+      "authority_limits": "Summarizes only registered Gate Results, Decision State, conditions, walk-away triggers and authority boundary.",
+      "required_input_objects": ["Mandate", "Gate A/B/C Results", "Decision State", "Human Review Items", "PCE status"],
+      "required_output_schema": ["decision state", "rationale", "conditions", "walk-away triggers", "human approval boundary"],
+      "citation_requirements": "Cite the C5 Claim, Gate Result IDs, relevant Evidence and Human Review IDs.",
+      "caveat_preservation": "All conditions and unresolved reviews remain prominent.",
+      "counterevidence_preservation": "State the most material adverse evidence and downside dependency.",
+      "blocked_claim_handling": "Do not use a blocked Claim in the executive rationale.",
+      "human_review_boundary": "Do not imply investment committee, legal, regulatory or integration approval.",
+      "invention_prohibition": "Do not create a more decisive recommendation than the registered Decision State.",
+      "decision_authority_boundary": "Decision State is machine-generated decision support, not final Go / No-Go."
+    },
+    {
+      "prompt_id": "EVIDENCE_APPENDIX_WRITER",
+      "role": "Evidence Appendix Writer",
+      "authority_limits": "Lists registered Source, Evidence, Claim and CounterEvidence lineage only.",
+      "required_input_objects": ["Sources", "Evidence", "Claims", "CounterEvidence", "PCE claim results"],
+      "required_output_schema": ["claim lineage rows", "source classification", "admissibility", "limitations", "counterevidence"],
+      "citation_requirements": "Every row displays Claim ID, Evidence ID and Source ID.",
+      "caveat_preservation": "Display source replay, management origin, confidentiality, human-review and PCE limitations.",
+      "counterevidence_preservation": "Counterevidence IDs and disposition remain visible.",
+      "blocked_claim_handling": "Blocked Claims receive a clear blocked status and reason.",
+      "human_review_boundary": "Management information must be labeled management representation.",
+      "invention_prohibition": "Do not infer source quality or missing lineage.",
+      "decision_authority_boundary": "Evidence status does not imply economic merit or approval."
+    },
+    {
+      "prompt_id": "CALCULATION_APPENDIX_WRITER",
+      "role": "Calculation Appendix Writer",
+      "authority_limits": "Displays existing calculations and replay records; performs no new calculation.",
+      "required_input_objects": ["Calculation Records", "Calculation Replay Results", "Calculation Gaps"],
+      "required_output_schema": ["formula", "input lineage", "output", "units/currency", "replay status", "limitations"],
+      "citation_requirements": "Display Calculation ID plus linked Claim, Source, Evidence and Assumption IDs.",
+      "caveat_preservation": "Show missing inputs, mismatches, unsupported assumptions and replay failures.",
+      "counterevidence_preservation": "Downside and conflicting inputs remain visible as registered gaps.",
+      "blocked_claim_handling": "A failed or unrun replay cannot support a verified calculation conclusion.",
+      "human_review_boundary": "Valuation and accounting judgement remains with the named reviewer.",
+      "invention_prohibition": "Do not recompute, round, convert or fill missing values.",
+      "decision_authority_boundary": "A replay PASS is not price or investment approval."
+    },
+    {
+      "prompt_id": "HUMAN_REVIEW_PACK_WRITER",
+      "role": "Human Review Pack Writer",
+      "authority_limits": "Packages the exact open question and registered context; does not preselect a reviewer decision.",
+      "required_input_objects": ["HumanReviewItem", "related Claim", "Evidence", "CounterEvidence", "Assumptions", "Calculations", "Research Gap", "Gate Result"],
+      "required_output_schema": ["case context", "exact question", "required role", "origin", "evidence", "options and consequences", "conditions", "response template", "expiry"],
+      "citation_requirements": "Display Human Review Item, Claim, Evidence, Calculation, Gap and Gate IDs.",
+      "caveat_preservation": "Retain confidentiality, limitations and unresolved status.",
+      "counterevidence_preservation": "Present adverse evidence supplied to the reviewer.",
+      "blocked_claim_handling": "State that unresolved Claims cannot be treated as verified.",
+      "human_review_boundary": "Never present a predetermined recommendation as approved.",
+      "invention_prohibition": "Do not invent reviewer authority, documents, answers or consequences.",
+      "decision_authority_boundary": "Only the authorized reviewer may provide the requested decision."
+    },
+    {
+      "prompt_id": "REPORT_MANIFEST_BUILDER",
+      "role": "Report Manifest Builder",
+      "authority_limits": "Maps generated section text to registered object IDs; cannot add report content.",
+      "required_input_objects": ["28 report section texts", "all included and excluded object registries"],
+      "required_output_schema": ["section ID/title", "included and blocked Claims", "Source/Evidence/Calculation/Gate/Human Review IDs", "caveats", "PCE", "delivery permission", "SHA-256 text hash"],
+      "citation_requirements": "Every section has complete object-ID arrays, including empty arrays where not applicable.",
+      "caveat_preservation": "Manifest caveats match the rendered section.",
+      "counterevidence_preservation": "Affected sections retain counterevidence references through their Claims/caveats.",
+      "blocked_claim_handling": "Excluded or blocked Claim IDs are explicit.",
+      "human_review_boundary": "Human Review IDs are recorded wherever decisions or open conditions appear.",
+      "invention_prohibition": "Do not infer an object link not used in the section.",
+      "decision_authority_boundary": "Manifest traceability is not approval or certification."
+    },
+    {
+      "prompt_id": "FINAL_PCE_DELIVERY_VERIFIER",
+      "role": "Final PCE and Delivery Verifier",
+      "authority_limits": "Verifies report lineage, consistency and delivery boundary using existing PCE semantics; does not change business merits or human approval.",
+      "required_input_objects": ["final report", "report manifest", "Claims", "Sources", "Evidence", "Calculations/replays", "CounterEvidence", "Gaps", "Human Review", "Gate Results", "Decision State", "PCE result"],
+      "required_output_schema": ["verification checks", "blocking issues", "caveats", "delivery outcome", "certificate permission"],
+      "citation_requirements": "Blocking and caveat findings identify the affected object and report section IDs.",
+      "caveat_preservation": "Delivery cannot hide PCE, calculation, Gap, counterevidence or Human Review limitations.",
+      "counterevidence_preservation": "Verify that material counterevidence appears in report and manifest.",
+      "blocked_claim_handling": "A blocked Claim presented as verified makes the report NOT_DELIVERABLE.",
+      "human_review_boundary": "Gate PASS and completed Decision State never automatically grant delivery or final approval.",
+      "invention_prohibition": "Do not repair report content during verification.",
+      "decision_authority_boundary": "Delivery outcome is separate from economic Decision State and final human authorization."
+    }
+  ]
+}

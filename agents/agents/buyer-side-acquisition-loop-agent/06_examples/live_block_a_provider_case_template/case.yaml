@@ -1,0 +1,51 @@
+{
+  "schema_version": "milestone-6-block-a",
+  "case_id": "",
+  "as_of_date": "",
+  "mandate_id": "",
+  "research_contract_id": "",
+  "provider": {"mode": "openai_live"},
+  "mandate": {
+    "buyer_name": "",
+    "buyer_description": "",
+    "target_name": "",
+    "target_description": "",
+    "transaction_type": "",
+    "transaction_stage": "",
+    "decision_question": "",
+    "buyer_strategic_need": "",
+    "initial_strategic_rationale": "",
+    "jurisdictions": [],
+    "known_terms": [],
+    "unknown_terms": ["Material unknowns must be entered explicitly before execution"],
+    "confidentiality_permissions": [],
+    "human_review_roles": [],
+    "material_constraints": []
+  },
+  "research": {
+    "attachments": [],
+    "module_budgets": {
+      "A1": {"maximum_queries": 2, "maximum_tool_calls": 3, "maximum_estimated_tokens": 4000},
+      "A2": {"maximum_queries": 3, "maximum_tool_calls": 4, "maximum_estimated_tokens": 5000},
+      "A3": {"maximum_queries": 1, "maximum_tool_calls": 2, "maximum_estimated_tokens": 4500},
+      "A4": {"maximum_queries": 3, "maximum_tool_calls": 4, "maximum_estimated_tokens": 5000},
+      "A5": {"maximum_queries": 4, "maximum_tool_calls": 5, "maximum_estimated_tokens": 6000},
+      "A6": {"maximum_queries": 4, "maximum_tool_calls": 5, "maximum_estimated_tokens": 6000},
+      "A7": {"maximum_queries": 1, "maximum_tool_calls": 2, "maximum_estimated_tokens": 4500}
+    },
+    "total_block_a_budget": {"maximum_provider_requests": 12, "maximum_tool_calls": 40, "maximum_estimated_tokens": 60000},
+    "maximum_repair_iterations": 1,
+    "preferred_source_types": ["official and authoritative sources", "reliable independent sources"],
+    "excluded_source_types": ["search-result snippets", "model prose", "unrecoverable URLs"],
+    "confidentiality_restrictions": ["No confidential upload without explicit permission", "Never serialize credentials"],
+    "evidence_thresholds": {
+      "A1": {"minimum_independent_sources_per_material_claim": 1},
+      "A2": {"minimum_independent_sources_per_material_claim": 1},
+      "A3": {"minimum_independent_sources_per_material_claim": 1},
+      "A4": {"minimum_independent_sources_per_material_claim": 1},
+      "A5": {"minimum_independent_sources_per_material_claim": 2},
+      "A6": {"minimum_independent_sources_per_material_claim": 2},
+      "A7": {"minimum_independent_sources_per_material_claim": 1}
+    }
+  }
+}

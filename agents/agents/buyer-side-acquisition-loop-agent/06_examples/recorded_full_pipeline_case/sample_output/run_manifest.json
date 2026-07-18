@@ -1,0 +1,55 @@
+{
+  "schema_version": "release-candidate-1",
+  "case_id": "RECORDED-FULL-PIPELINE-001",
+  "run_id": "RUN-RECORDED-FULL-PIPELINE-001",
+  "sample_scope": "Sanitized GitHub subset; full provider, evidence, calculation, loop and Human Review traces are intentionally excluded and are reproducible with the documented recorded demo command.",
+  "unpublished_internal_references": [
+    "stages/block_a/",
+    "stages/block_b/",
+    "stages/block_c/"
+  ],
+  "artifacts": [
+    {
+      "path": "final_acquisition_strategy_report.md",
+      "sha256": "e9f1b08be28e7443b5abbf0a194d6586e121a546f57be125ec15b5d63756c22c",
+      "bytes": 64147
+    },
+    {
+      "path": "run_summary.json",
+      "sha256": "6c704780f0eaa48ee05ee20e06eca553323a10cfc07c6f810954b3a354df641e",
+      "bytes": 910
+    },
+    {
+      "path": "gate_a_result.json",
+      "sha256": "7008cb6317d8aa12f2e8f0374298f3262fd1efe5b316cb34420c75103dd39fc5",
+      "bytes": 39366
+    },
+    {
+      "path": "gate_b_result.json",
+      "sha256": "6dcf2bbe1354fafe0c291bbff6c1bff079fb6fe5c3a49b78433f9d01b0169db1",
+      "bytes": 15254
+    },
+    {
+      "path": "gate_c_result.json",
+      "sha256": "3af3e7e191d3b58532f6e65a24c7d095939c72d3ffb8ba5e1b4abd4f72a727e0",
+      "bytes": 20843
+    },
+    {
+      "path": "decision_state.json",
+      "sha256": "88c3891dc724a75c37056c32975c1887c6147d8bf8a57373aeb7915718d66d77",
+      "bytes": 4503
+    },
+    {
+      "path": "final_delivery_verification.json",
+      "sha256": "dff7fe1facdb9b73740e24c019ab9052599895b615dca99d1468e48fd128eb5c",
+      "bytes": 1800
+    },
+    {
+      "path": "cross_block_consistency_result.json",
+      "sha256": "0c4bbea6930ad9cb4ba967141beb967ba80eb7542e8a403f9769fa34acc2e5da",
+      "bytes": 434
+    }
+  ],
+  "contains_local_absolute_paths": false,
+  "contains_credentials": false
+}

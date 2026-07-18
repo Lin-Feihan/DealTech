@@ -1,0 +1,90 @@
+{
+  "schema_version": "milestone-2",
+  "scenario": {
+    "name": "iteration_budget_exhaustion"
+  },
+  "mandate": {
+    "mandate_id": "MANDATE-SYN-BUDGET-001",
+    "case_id": "synthetic-iteration-budget-001",
+    "perspective": "buyer-side",
+    "buyer_name": "Synthetic Buyer",
+    "target_name": "Synthetic Target",
+    "decision_question": "What happens when Gate A remains failed at the iteration limit?",
+    "transaction_context": "A synthetic mandate permits only two Gate A iterations.",
+    "buyer_strategic_need": "Buyer Strategic Need: close a verified capability gap within a defined timeframe.",
+    "strategic_rationale": "Strategic Rationale: acquisition may accelerate access if the target capability is verified.",
+    "target_attractiveness": "Target Attractiveness: the target is hypothesized to own a relevant capability.",
+    "target_capability_business_quality": "Target Capability & Business Quality: current evidence quality is insufficient.",
+    "industry_competitive_position": "Industry / Competitive Position: the target occupies a relevant synthetic segment.",
+    "strategic_fit_hypothesis": "Strategic Fit: the target may meet the buyer need, subject to admissible evidence.",
+    "max_iterations": 2
+  },
+  "research_contract": {
+    "contract_id": "RC-SYN-BUDGET-001",
+    "case_id": "synthetic-iteration-budget-001",
+    "block_name": "Block A: Strategic Thesis",
+    "gate_name": "Strategic Thesis Gate",
+    "business_modules": ["Buyer Strategic Need", "Strategic Rationale", "Target Attractiveness", "Target Capability & Business Quality", "Industry / Competitive Position", "Strategic Fit"],
+    "gate_criteria": ["Buyer Strategic Need is explicit", "Strategic Rationale is explicit", "Target Attractiveness is explicit", "Industry / Competitive Position is explicit", "Target Capability & Business Quality evidence supports Strategic Fit"],
+    "evidence_rule": "Strategic Fit requires replayed, PCE-eligible evidence.",
+    "iteration_budget": 2,
+    "maximum_no_progress_iterations": 5
+  },
+  "initial_research_question": {
+    "question_id": "RQ-BUDGET-01",
+    "owner_module": "Target Capability & Business Quality",
+    "question_text": "What admissible evidence supports the target capability?",
+    "purpose": "Test the evidence boundary within a two-iteration budget.",
+    "iteration": 1,
+    "status": "PLANNED"
+  },
+  "claim": {
+    "claim_id": "CLM-BUDGET-001",
+    "claim_text": "The synthetic target capability addresses the buyer's stated strategic need.",
+    "business_module": "Strategic Fit",
+    "evidence_ids": [],
+    "source_ids": [],
+    "human_review_required": false
+  },
+  "initial_evidence": {
+    "evidence_id": "EV-BUDGET-MISSING-001",
+    "claim_id": "CLM-BUDGET-001",
+    "source_id": "",
+    "extracted_fact": "",
+    "evidence_type": "missing evidence marker",
+    "confidence": "none",
+    "status": "MISSING",
+    "supports_claim": false,
+    "limitations": "No admissible evidence was registered at intake."
+  },
+  "research_actions": [
+    {
+      "action_id": "ATTEMPT-BUDGET-02",
+      "action_key": "BUDGETED_LOW_QUALITY_SEARCH",
+      "method": "controlled low-quality synthetic review",
+      "outcome": "The final permitted iteration found only a PCE-ineligible record.",
+      "source": {
+        "source_id": "SRC-BUDGET-LOW-001",
+        "source_name": "Budget case unverified synthetic record",
+        "source_type": "controlled low-quality synthetic fixture",
+        "url_or_file": "agents/buyer-side-acquisition-loop-agent/06_examples/synthetic_iteration_budget_case/case.yaml#attempt",
+        "used_for": "Target Capability & Business Quality",
+        "reliability_tier": "Tier 3 synthetic record",
+        "pce_eligible": false,
+        "source_replay_status": "completed",
+        "limitations": "Not PCE-eligible."
+      },
+      "evidence": {
+        "evidence_id": "EV-BUDGET-LOW-001",
+        "claim_id": "CLM-BUDGET-001",
+        "source_id": "SRC-BUDGET-LOW-001",
+        "extracted_fact": "The record repeats the capability assertion without verification.",
+        "evidence_type": "unverified synthetic record",
+        "confidence": "low",
+        "status": "AVAILABLE",
+        "supports_claim": true,
+        "limitations": "Insufficient for PCE certification."
+      }
+    }
+  ]
+}

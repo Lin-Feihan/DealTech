@@ -1,0 +1,388 @@
+{
+  "recording_id": "REC-A5-001",
+  "model_identifier": "recorded-responses-contract-v1",
+  "attempts": [
+    {
+      "response_id": "RESP-REC-A5-001",
+      "request_timestamp": "2026-06-30T09:00:00Z",
+      "response_timestamp": "2026-06-30T09:00:04Z",
+      "elapsed_seconds": 4.0,
+      "usage": {"input_tokens": 2400, "output_tokens": 1800, "total_tokens": 4200},
+      "file_references": ["SRC-A5-ATT-001"],
+      "tool_calls": [
+        {"id": "WS-REC-001", "type": "web_search_call", "status": "completed", "action": {"type": "search", "queries": ["Orion Systems capability architecture official disclosure", "workflow platform recurring revenue quality benchmark"]}}
+      ],
+      "structured_response": {
+        "sources": [
+          {
+            "source_id": "SRC-A5-OFFICIAL-001",
+            "url": "https://example.org/recorded-orion/product-architecture",
+            "page_title": "Recorded Orion product architecture disclosure",
+            "publisher_or_owner": "Recorded Orion Systems",
+            "source_type": "official target publication recorded fixture",
+            "source_tier": "Tier 2 official company disclosure",
+            "publication_date": "2026-05-31",
+            "retrieval_timestamp": "2026-06-30T09:00:02Z",
+            "author": "Recorded Orion product organization",
+            "exact_relevant_locator": "Architecture and deployment sections",
+            "discovery_query": "Orion Systems capability architecture official disclosure",
+            "provider_response_reference": "RESP-REC-A5-001",
+            "pce_eligible": true,
+            "limitations": "Recorded deterministic fixture; official company material is not independent verification.",
+            "confidentiality_classification": "public",
+            "source_kind": "web",
+            "original_filename": "",
+            "file_hash_sha256": "",
+            "file_type": "",
+            "supplied_by": "",
+            "document_date": "",
+            "extraction_method": "web page inspection"
+          },
+          {
+            "source_id": "SRC-A5-INDUSTRY-001",
+            "url": "https://example.org/recorded-industry/workflow-quality-benchmark",
+            "page_title": "Recorded workflow platform quality benchmark",
+            "publisher_or_owner": "Recorded Independent Industry Institute",
+            "source_type": "independent industry benchmark recorded fixture",
+            "source_tier": "Tier 2 independent industry source",
+            "publication_date": "2026-04-30",
+            "retrieval_timestamp": "2026-06-30T09:00:03Z",
+            "author": "Recorded Industry Research Team",
+            "exact_relevant_locator": "Sections 3.2 and 4.1",
+            "discovery_query": "workflow platform recurring revenue quality benchmark",
+            "provider_response_reference": "RESP-REC-A5-001",
+            "pce_eligible": true,
+            "limitations": "Recorded deterministic fixture; benchmark scope is broader than the target.",
+            "confidentiality_classification": "public",
+            "source_kind": "web",
+            "original_filename": "",
+            "file_hash_sha256": "",
+            "file_type": "",
+            "supplied_by": "",
+            "document_date": "",
+            "extraction_method": "web page inspection"
+          }
+        ],
+        "evidence": [
+          {
+            "evidence_id": "EV-A5-CAP-OFFICIAL-001",
+            "claim_id": "CL-A5-CAP-001",
+            "source_id": "SRC-A5-OFFICIAL-001",
+            "extracted_fact": "The recorded disclosure describes modular API interfaces and a standardized deployment process.",
+            "exact_locator": "Architecture section, paragraphs 2-4",
+            "direction": "support",
+            "evidence_type": "official product disclosure",
+            "strength": "medium",
+            "limitations": "Company-authored evidence; capability performance is not independently benchmarked.",
+            "extraction_timestamp": "2026-06-30T09:00:03Z"
+          },
+          {
+            "evidence_id": "EV-A5-CAP-ATT-001",
+            "claim_id": "CL-A5-CAP-001",
+            "source_id": "SRC-A5-ATT-001",
+            "extracted_fact": "The registered brief records twelve production deployments using the standardized process during the observation period.",
+            "exact_locator": "Product and operating capability section, paragraph 1",
+            "direction": "support",
+            "evidence_type": "registered case attachment",
+            "strength": "medium",
+            "limitations": "Case-supplied record; no independent audit.",
+            "extraction_timestamp": "2026-06-30T09:00:03Z"
+          },
+          {
+            "evidence_id": "EV-A5-QUALITY-001",
+            "claim_id": "CL-A5-QUALITY-001",
+            "source_id": "SRC-A5-INDUSTRY-001",
+            "extracted_fact": "The recorded benchmark identifies standardized deployments and recurring support relationships as positive, but incomplete, Business Quality indicators.",
+            "exact_locator": "Section 3.2, indicators table",
+            "direction": "support",
+            "evidence_type": "independent industry benchmark",
+            "strength": "medium",
+            "limitations": "The benchmark does not independently verify target-specific customer or financial quality.",
+            "extraction_timestamp": "2026-06-30T09:00:03Z"
+          },
+          {
+            "evidence_id": "EV-A5-COUNTER-001",
+            "claim_id": "CL-A5-QUALITY-001",
+            "source_id": "SRC-A5-INDUSTRY-001",
+            "extracted_fact": "The benchmark warns that standardized deployment evidence does not establish retention, margin quality, concentration or cash generation.",
+            "exact_locator": "Section 4.1, limitations",
+            "direction": "contradict",
+            "evidence_type": "independent limitation evidence",
+            "strength": "high",
+            "limitations": "General benchmark limitation rather than target-specific adverse evidence.",
+            "extraction_timestamp": "2026-06-30T09:00:03Z"
+          }
+        ],
+        "claims": [
+          {
+            "claim_id": "CL-A5-CAP-001",
+            "claim_text": "The recorded target demonstrates a documented modular workflow capability and standardized deployment process.",
+            "claim_class": "evidence-supported inference",
+            "materiality": "material",
+            "supporting_evidence_ids": ["EV-A5-CAP-OFFICIAL-001", "EV-A5-CAP-ATT-001"],
+            "counterevidence_ids": [],
+            "confidence": "medium",
+            "limitations": "Transferability to the buyer and technical debt remain unverified.",
+            "owning_module": "Target Capability & Business Quality",
+            "decision_relevance": "Tests whether a real Target Capability exists before Strategic Fit synthesis.",
+            "delivery_request": "PCE review requested; provider does not certify",
+            "human_review_required": false,
+            "claim_family_id": "A5-CAPABILITY",
+            "claim_version": 1,
+            "supersedes_claim_id": ""
+          },
+          {
+            "claim_id": "CL-A5-QUALITY-001",
+            "claim_text": "Available public evidence is not yet sufficient to establish durable target-specific Business Quality.",
+            "claim_class": "bounded insufficiency conclusion",
+            "materiality": "material",
+            "supporting_evidence_ids": ["EV-A5-QUALITY-001"],
+            "counterevidence_ids": ["CE-A5-001"],
+            "confidence": "high",
+            "limitations": "Only one independent Source supports the initial Business Quality assessment.",
+            "owning_module": "Target Capability & Business Quality",
+            "decision_relevance": "Prevents capability evidence from substituting for Business Quality analysis.",
+            "delivery_request": "Research gap diagnosis requested; provider does not certify",
+            "human_review_required": false,
+            "claim_family_id": "A5-BUSINESS-QUALITY",
+            "claim_version": 1,
+            "supersedes_claim_id": ""
+          }
+        ],
+        "assumptions": [
+          {
+            "assumption_id": "ASSUMP-A5-001",
+            "owning_module": "A5",
+            "statement": "The documented deployment process may be transferable subject to technical and operating diligence.",
+            "materiality": "material",
+            "basis": "Documented process evidence, with transferability not independently tested.",
+            "supported": false,
+            "source_ids": ["SRC-A5-OFFICIAL-001", "SRC-A5-ATT-001"],
+            "evidence_ids": ["EV-A5-CAP-OFFICIAL-001", "EV-A5-CAP-ATT-001"],
+            "human_review_required": false
+          }
+        ],
+        "unknowns": [
+          {
+            "unknown_id": "UNKNOWN-A5-001",
+            "owning_module": "A5",
+            "description": "Target-specific audited retention, customer concentration, margin and cash-conversion schedules are unavailable in the recorded public set.",
+            "materiality": "non-material-for-pilot",
+            "impact": "Real transaction use would require financial and customer diligence before delivery.",
+            "closure_requirement": "Obtain registered target-specific schedules with reviewer authority and provenance.",
+            "human_review_required": false
+          }
+        ],
+        "counterevidence": [
+          {
+            "counterevidence_id": "CE-A5-001",
+            "owning_module": "A5",
+            "description": "Standardized deployment evidence does not establish retention, margin, concentration or cash-generation quality.",
+            "source_ids": ["SRC-A5-INDUSTRY-001"],
+            "evidence_ids": ["EV-A5-COUNTER-001"],
+            "affected_claim_ids": ["CL-A5-QUALITY-001"],
+            "disposition": "Preserve as a material limitation and target the missing quality evidence."
+          }
+        ],
+        "suggested_follow_up_questions": [
+          "Which two additional independent records specifically test Orion Systems revenue durability and operating quality without repeating the initial architecture and benchmark queries?"
+        ],
+        "retrieval_summary": "Initial A5 research established capability evidence but did not meet the two-Source threshold for the material Business Quality Claim.",
+        "searched_queries": [
+          "Orion Systems capability architecture official disclosure",
+          "workflow platform recurring revenue quality benchmark"
+        ],
+        "pages_or_files_inspected": [
+          "SRC-A5-OFFICIAL-001 architecture and deployment sections",
+          "SRC-A5-INDUSTRY-001 sections 3.2 and 4.1",
+          "SRC-A5-ATT-001 product and operating capability section"
+        ],
+        "unresolved_conflicts": [
+          "Capability evidence is positive while target-specific Business Quality evidence remains incomplete."
+        ],
+        "returned_citations": [
+          {"url": "https://example.org/recorded-orion/product-architecture", "title": "Recorded Orion product architecture disclosure", "start_index": 0, "end_index": 100},
+          {"url": "https://example.org/recorded-industry/workflow-quality-benchmark", "title": "Recorded workflow platform quality benchmark", "start_index": 101, "end_index": 200}
+        ],
+        "provider_metadata": {
+          "provider_response_reference": "RESP-REC-A5-001",
+          "research_scope": "A5 Target Capability & Business Quality only",
+          "as_of_date": "2026-06-30",
+          "limitations": ["Recorded fixture; no live request was made."]
+        },
+        "module_assessment": {
+          "business_conclusion": "Target Capability is evidenced, but Business Quality remains insufficient under the registered two-Source threshold.",
+          "criterion_outcome": "FAIL",
+          "conditions": [],
+          "limitations": ["Target-specific customer and financial quality remain incomplete."],
+          "structured_output": {
+            "capabilities": ["Modular workflow platform", "standardized deployment process"],
+            "business_quality": ["Initial public quality evidence is insufficient"],
+            "customer_quality": ["Target-specific customer quality remains unknown"],
+            "scalability": ["Standardized deployments support a scalability hypothesis, not a certified conclusion"],
+            "durability": ["Durability requires targeted repair"],
+            "material_limitations": ["One independent Source for the initial Business Quality Claim"],
+            "missing_private_information": ["Audited retention and customer concentration schedules"],
+            "distinction_boundaries": ["Target Capability is not Business Quality", "A5 is not Target Attractiveness or Strategic Fit"]
+          }
+        }
+      }
+    },
+    {
+      "response_id": "RESP-REC-A5-002",
+      "request_timestamp": "2026-06-30T09:01:00Z",
+      "response_timestamp": "2026-06-30T09:01:03Z",
+      "elapsed_seconds": 3.0,
+      "usage": {"input_tokens": 2100, "output_tokens": 1300, "total_tokens": 3400},
+      "file_references": [],
+      "tool_calls": [
+        {"id": "WS-REC-002", "type": "web_search_call", "status": "completed", "action": {"type": "search", "queries": ["recorded Orion service continuity independent register", "recorded Orion recurring contract quality audit"]}}
+      ],
+      "structured_response": {
+        "sources": [
+          {
+            "source_id": "SRC-A5-REG-002",
+            "url": "https://example.org/recorded-regulator/orion-service-continuity",
+            "page_title": "Recorded service-continuity register",
+            "publisher_or_owner": "Recorded Public Service Regulator",
+            "source_type": "regulator record recorded fixture",
+            "source_tier": "Tier 1 regulator record",
+            "publication_date": "2026-06-15",
+            "retrieval_timestamp": "2026-06-30T09:01:02Z",
+            "author": "Recorded Public Service Regulator",
+            "exact_relevant_locator": "Continuity table, rows 4-8",
+            "discovery_query": "recorded Orion service continuity independent register",
+            "provider_response_reference": "RESP-REC-A5-002",
+            "pce_eligible": true,
+            "limitations": "Recorded deterministic regulator-style fixture; service continuity is not a full financial-quality audit.",
+            "confidentiality_classification": "public",
+            "source_kind": "web",
+            "original_filename": "",
+            "file_hash_sha256": "",
+            "file_type": "",
+            "supplied_by": "",
+            "document_date": "",
+            "extraction_method": "web table inspection"
+          },
+          {
+            "source_id": "SRC-A5-AUDIT-002",
+            "url": "https://example.org/recorded-audit/orion-contract-quality",
+            "page_title": "Recorded recurring contract quality review",
+            "publisher_or_owner": "Recorded Independent Assurance Group",
+            "source_type": "independent assurance review recorded fixture",
+            "source_tier": "Tier 1 independent assurance",
+            "publication_date": "2026-06-20",
+            "retrieval_timestamp": "2026-06-30T09:01:02Z",
+            "author": "Recorded Assurance Team",
+            "exact_relevant_locator": "Scope, observations 2-5, and limitations",
+            "discovery_query": "recorded Orion recurring contract quality audit",
+            "provider_response_reference": "RESP-REC-A5-002",
+            "pce_eligible": true,
+            "limitations": "Recorded deterministic assurance-style fixture; private cohort schedules remain unavailable.",
+            "confidentiality_classification": "public",
+            "source_kind": "web",
+            "original_filename": "",
+            "file_hash_sha256": "",
+            "file_type": "",
+            "supplied_by": "",
+            "document_date": "",
+            "extraction_method": "web report inspection"
+          }
+        ],
+        "evidence": [
+          {
+            "evidence_id": "EV-A5-QUALITY-REG-002",
+            "claim_id": "CL-A5-QUALITY-002",
+            "source_id": "SRC-A5-REG-002",
+            "extracted_fact": "The recorded register reports uninterrupted delivery across the stated observation period for the covered service set.",
+            "exact_locator": "Continuity table, rows 4-8",
+            "direction": "support",
+            "evidence_type": "regulator continuity record",
+            "strength": "high",
+            "limitations": "Covers service continuity, not customer concentration or cash conversion.",
+            "extraction_timestamp": "2026-06-30T09:01:02Z"
+          },
+          {
+            "evidence_id": "EV-A5-QUALITY-AUDIT-002",
+            "claim_id": "CL-A5-QUALITY-002",
+            "source_id": "SRC-A5-AUDIT-002",
+            "extracted_fact": "The recorded review identifies recurring support contracts and standardized delivery controls within its stated sample.",
+            "exact_locator": "Observations 2-5",
+            "direction": "support",
+            "evidence_type": "independent assurance review",
+            "strength": "high",
+            "limitations": "Sample-based review; does not establish complete retention, margin or concentration metrics.",
+            "extraction_timestamp": "2026-06-30T09:01:02Z"
+          }
+        ],
+        "claims": [
+          {
+            "claim_id": "CL-A5-QUALITY-002",
+            "claim_text": "Two additional independent records support service continuity and recurring delivery controls, providing conditional evidence of Business Quality while private cohort and financial quality remain unverified.",
+            "claim_class": "evidence-supported inference",
+            "materiality": "material",
+            "supporting_evidence_ids": ["EV-A5-QUALITY-REG-002", "EV-A5-QUALITY-AUDIT-002"],
+            "counterevidence_ids": ["CE-A5-001"],
+            "confidence": "medium",
+            "limitations": "Customer concentration, audited retention, margin quality and cash conversion remain unavailable.",
+            "owning_module": "Target Capability & Business Quality",
+            "decision_relevance": "Provides a bounded Business Quality input without converting it into Strategic Fit or value creation.",
+            "delivery_request": "PCE review requested with caveats; provider does not certify",
+            "human_review_required": false,
+            "claim_family_id": "A5-BUSINESS-QUALITY",
+            "claim_version": 2,
+            "supersedes_claim_id": "CL-A5-QUALITY-001"
+          }
+        ],
+        "assumptions": [],
+        "unknowns": [],
+        "counterevidence": [],
+        "suggested_follow_up_questions": [],
+        "retrieval_summary": "Targeted repair added two non-duplicative independent Sources for the latest Business Quality Claim version.",
+        "searched_queries": [
+          "recorded Orion service continuity independent register",
+          "recorded Orion recurring contract quality audit"
+        ],
+        "pages_or_files_inspected": [
+          "SRC-A5-REG-002 continuity table",
+          "SRC-A5-AUDIT-002 observations and limitations"
+        ],
+        "unresolved_conflicts": [
+          "Positive continuity and control evidence does not eliminate the initial limitation concerning retention, margin, cash conversion or concentration."
+        ],
+        "returned_citations": [
+          {"url": "https://example.org/recorded-regulator/orion-service-continuity", "title": "Recorded service-continuity register", "start_index": 0, "end_index": 100},
+          {"url": "https://example.org/recorded-audit/orion-contract-quality", "title": "Recorded recurring contract quality review", "start_index": 101, "end_index": 200}
+        ],
+        "provider_metadata": {
+          "provider_response_reference": "RESP-REC-A5-002",
+          "research_scope": "Targeted A5 Business Quality repair only",
+          "as_of_date": "2026-06-30",
+          "limitations": ["Recorded fixture; no live request was made."]
+        },
+        "module_assessment": {
+          "business_conclusion": "A5 is conditionally sufficient for a Gate A dependency input after targeted repair; important private customer and financial quality remain explicit unknowns.",
+          "criterion_outcome": "CONDITION",
+          "conditions": [
+            "Obtain private customer concentration, retention, margin and cash-conversion schedules before transaction approval.",
+            "Validate capability transferability through technical and operating diligence."
+          ],
+          "limitations": [
+            "The repair does not convert unavailable private information into public-source facts.",
+            "A5 does not establish Target Attractiveness, Strategic Fit, valuation or final recommendation."
+          ],
+          "structured_output": {
+            "capabilities": ["Documented modular workflow capability", "standardized deployment process"],
+            "business_quality": ["Conditionally supported service continuity and recurring delivery controls"],
+            "customer_quality": ["Private customer cohort and concentration evidence remains unavailable"],
+            "scalability": ["Standardized process supports a bounded scalability inference"],
+            "durability": ["Continuity evidence is positive but incomplete"],
+            "material_limitations": ["No audited retention, margin, cash conversion or customer concentration schedule"],
+            "missing_private_information": ["Customer concentration", "retention cohorts", "margin and cash-conversion schedules"],
+            "distinction_boundaries": ["Target Capability remains distinct from Business Quality", "A5 remains distinct from Target Attractiveness and Strategic Fit"]
+          }
+        }
+      }
+    }
+  ]
+}

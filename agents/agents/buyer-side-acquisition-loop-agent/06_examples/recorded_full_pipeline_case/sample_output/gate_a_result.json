@@ -1,0 +1,1089 @@
+{
+  "history": [
+    {
+      "gate_result_id": "GATE-A-01",
+      "gate_id": "GATE_A",
+      "gate_name": "Strategic Thesis Gate",
+      "iteration": 1,
+      "status": "FAIL_RESEARCH_GAP",
+      "criterion_results": [
+        {
+          "criterion_id": "GA-MANDATE",
+          "criterion_name": "Mandate clarity",
+          "outcome": "PASS",
+          "reason": "Mandate fields required for Block A are explicit.",
+          "affected_module_ids": [
+            "A1"
+          ],
+          "supporting_claim_ids": [],
+          "counterevidence_ids": [],
+          "conditions": [],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-A1",
+          "criterion_name": "Transaction Context",
+          "outcome": "CONDITION",
+          "reason": "Transaction context is defined for preliminary Strategic Thesis work, with material terms explicitly unknown.",
+          "affected_module_ids": [
+            "A1"
+          ],
+          "supporting_claim_ids": [
+            "CL-A1-001"
+          ],
+          "counterevidence_ids": [
+            "CE-A1-001"
+          ],
+          "conditions": [
+            "Confirm final perimeter and binding terms before later transaction approval."
+          ],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-A2",
+          "criterion_name": "Buyer Strategic Need",
+          "outcome": "CONDITION",
+          "reason": "A buyer need exists independently of the target, but route selection remains open.",
+          "affected_module_ids": [
+            "A2"
+          ],
+          "supporting_claim_ids": [
+            "CL-A2-001"
+          ],
+          "counterevidence_ids": [
+            "CE-A2-001"
+          ],
+          "conditions": [
+            "Test build and partnership economics and urgency before route approval."
+          ],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-A3",
+          "criterion_name": "Strategic Rationale",
+          "outcome": "CONDITION",
+          "reason": "The acquisition route is plausible but not sufficiently supported while A6 remains unresolved.",
+          "affected_module_ids": [
+            "A3"
+          ],
+          "supporting_claim_ids": [
+            "CL-A3-001"
+          ],
+          "counterevidence_ids": [
+            "CE-A3-001"
+          ],
+          "conditions": [
+            "Repair A6 and retain build and partnership counterfactuals."
+          ],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-A4",
+          "criterion_name": "Target Attractiveness",
+          "outcome": "CONDITION",
+          "reason": "The target is relevant relative to partnership, subject to scarcity and readiness limitations.",
+          "affected_module_ids": [
+            "A4"
+          ],
+          "supporting_claim_ids": [
+            "CL-A4-001"
+          ],
+          "counterevidence_ids": [
+            "CE-A4-001"
+          ],
+          "conditions": [
+            "Validate scarcity and readiness before exclusivity or transaction approval."
+          ],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-A5",
+          "criterion_name": "Target Capability & Business Quality",
+          "outcome": "CONDITION",
+          "reason": "Capability is evidenced for Gate A input, while Business Quality and transferability require explicit diligence conditions.",
+          "affected_module_ids": [
+            "A5"
+          ],
+          "supporting_claim_ids": [
+            "CL-A5-BA-001"
+          ],
+          "counterevidence_ids": [
+            "CE-A5-BA-001"
+          ],
+          "conditions": [
+            "Complete technical, customer and financial diligence.",
+            "Human Review is required for information unavailable to public research."
+          ],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-A6",
+          "criterion_name": "Industry / Competitive Position",
+          "outcome": "FAIL",
+          "reason": "Industry evidence identifies competitors and substitutes but is insufficient under the two-source A6 threshold.",
+          "affected_module_ids": [
+            "A6"
+          ],
+          "supporting_claim_ids": [
+            "CL-A6-001"
+          ],
+          "counterevidence_ids": [
+            "CE-A6-001"
+          ],
+          "conditions": [
+            "Material cross-source conflict remains visible and requires resolution.",
+            "Obtain independent evidence on market boundaries and competitor response."
+          ],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-A7",
+          "criterion_name": "Strategic Fit",
+          "outcome": "CONDITION",
+          "reason": "Need-capability complementarity is plausible but initial industry support and transferability are insufficient for unconditional fit.",
+          "affected_module_ids": [
+            "A7"
+          ],
+          "supporting_claim_ids": [
+            "CL-A7-001"
+          ],
+          "counterevidence_ids": [
+            "CE-A7-001"
+          ],
+          "conditions": [
+            "Repair A6 and complete technical and operating diligence."
+          ],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-EVIDENCE",
+          "criterion_name": "Evidence sufficiency",
+          "outcome": "FAIL",
+          "reason": "Module evidence or PCE requirements remain unsatisfied.",
+          "affected_module_ids": [
+            "A6"
+          ],
+          "supporting_claim_ids": [
+            "CL-A1-001",
+            "CL-A2-001",
+            "CL-A4-001",
+            "CL-A5-BA-001",
+            "CL-A6-001",
+            "CL-A3-001",
+            "CL-A7-001"
+          ],
+          "counterevidence_ids": [],
+          "conditions": [],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-SOURCE-DIVERSITY",
+          "criterion_name": "Source diversity",
+          "outcome": "FAIL",
+          "reason": "Duplicate or insufficient Sources cannot satisfy diversity.",
+          "affected_module_ids": [
+            "A6"
+          ],
+          "supporting_claim_ids": [],
+          "counterevidence_ids": [],
+          "conditions": [],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-COUNTEREVIDENCE",
+          "criterion_name": "Counterevidence",
+          "outcome": "PASS",
+          "reason": "Every Block A module preserved counterevidence.",
+          "affected_module_ids": [],
+          "supporting_claim_ids": [],
+          "counterevidence_ids": [
+            "CE-A1-001",
+            "CE-A2-001",
+            "CE-A4-001",
+            "CE-A5-BA-001",
+            "CE-A6-001",
+            "CE-A3-001",
+            "CE-A7-001"
+          ],
+          "conditions": [],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-CONFLICTS",
+          "criterion_name": "Conflicts",
+          "outcome": "CONDITION",
+          "reason": "Material conflicts remain visible and cannot be hidden to pass Gate A.",
+          "affected_module_ids": [],
+          "supporting_claim_ids": [
+            "CL-A6-001"
+          ],
+          "counterevidence_ids": [],
+          "conditions": [
+            "Resolve or formally accept each material conflict before transaction approval."
+          ],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-ASSUMPTIONS",
+          "criterion_name": "Material assumptions",
+          "outcome": "CONDITION",
+          "reason": "Material assumptions remain explicitly conditional.",
+          "affected_module_ids": [],
+          "supporting_claim_ids": [],
+          "counterevidence_ids": [],
+          "conditions": [
+            "Acquisition may provide faster control of the capability than internal build or partnership."
+          ],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-UNKNOWNS",
+          "criterion_name": "Material unknowns",
+          "outcome": "CONDITION",
+          "reason": "Material unknowns remain explicit.",
+          "affected_module_ids": [],
+          "supporting_claim_ids": [],
+          "counterevidence_ids": [],
+          "conditions": [
+            "Obtain authorized transaction documents before final approval.",
+            "Technical, customer and financial diligence by authorized reviewers before transaction approval."
+          ],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-HUMAN-REVIEW",
+          "criterion_name": "Human Review requirements",
+          "outcome": "CONDITION",
+          "reason": "Human Review boundaries remain visible.",
+          "affected_module_ids": [],
+          "supporting_claim_ids": [],
+          "counterevidence_ids": [],
+          "conditions": [],
+          "human_review_items": [
+            "HR-UN-A5-BA-001"
+          ]
+        },
+        {
+          "criterion_id": "GA-PCE",
+          "criterion_name": "PCE status",
+          "outcome": "PASS",
+          "reason": "All current Claims passed the independent PCE delivery control.",
+          "affected_module_ids": [],
+          "supporting_claim_ids": [
+            "CL-A1-001",
+            "CL-A2-001",
+            "CL-A4-001",
+            "CL-A5-BA-001",
+            "CL-A6-001",
+            "CL-A3-001",
+            "CL-A7-001"
+          ],
+          "counterevidence_ids": [],
+          "conditions": [],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-ER-BRB",
+          "criterion_name": "ER/BRB status",
+          "outcome": "PASS",
+          "reason": "Independent ER/BRB evidence-row assessment completed.",
+          "affected_module_ids": [],
+          "supporting_claim_ids": [],
+          "counterevidence_ids": [],
+          "conditions": [],
+          "human_review_items": []
+        }
+      ],
+      "failed_criteria": [
+        "GA-A6",
+        "GA-EVIDENCE",
+        "GA-SOURCE-DIVERSITY"
+      ],
+      "supporting_claims": [
+        "CL-A1-001",
+        "CL-A2-001",
+        "CL-A4-001",
+        "CL-A5-BA-001",
+        "CL-A6-001",
+        "CL-A3-001",
+        "CL-A7-001"
+      ],
+      "counterevidence": [
+        "CE-A1-001",
+        "CE-A2-001",
+        "CE-A4-001",
+        "CE-A5-BA-001",
+        "CE-A6-001",
+        "CE-A3-001",
+        "CE-A7-001"
+      ],
+      "conditions": [
+        "Acquisition may provide faster control of the capability than internal build or partnership.",
+        "Complete technical, customer and financial diligence.",
+        "Confirm final perimeter and binding terms before later transaction approval.",
+        "Human Review is required for information unavailable to public research.",
+        "Material cross-source conflict remains visible and requires resolution.",
+        "Obtain authorized transaction documents before final approval.",
+        "Obtain independent evidence on market boundaries and competitor response.",
+        "Repair A6 and complete technical and operating diligence.",
+        "Repair A6 and retain build and partnership counterfactuals.",
+        "Resolve or formally accept each material conflict before transaction approval.",
+        "Technical, customer and financial diligence by authorized reviewers before transaction approval.",
+        "Test build and partnership economics and urgency before route approval.",
+        "Validate scarcity and readiness before exclusivity or transaction approval."
+      ],
+      "open_gaps": [],
+      "human_review_items": [
+        {
+          "human_review_item_id": "HR-UN-A5-BA-001",
+          "originating_module": "A5",
+          "description": "Private customer concentration, retention, unit economics, margin quality, cash conversion and capability transferability are unavailable.",
+          "required_role": "Buyer strategy lead",
+          "blocking": false,
+          "status": "OPEN"
+        }
+      ],
+      "downstream_permission": "BLOCK_B_NOT_PERMITTED",
+      "business_outcome": "FAIL_RESEARCH_GAP",
+      "certification_summary": {
+        "pce_statuses": {
+          "CL-A1-001": "Certified",
+          "CL-A2-001": "Certified",
+          "CL-A4-001": "Certified",
+          "CL-A5-BA-001": "Certified",
+          "CL-A6-001": "Certified",
+          "CL-A3-001": "Certified",
+          "CL-A7-001": "Certified"
+        },
+        "er_brb_record_count": 7,
+        "provider_selected_gate_result": false,
+        "certification_does_not_replace_business_gate": true
+      },
+      "authority_boundary": "Gate A is evaluated by deterministic business criteria after admission, PCE and ER/BRB; no provider selects this result."
+    },
+    {
+      "gate_result_id": "GATE-A-02",
+      "gate_id": "GATE_A",
+      "gate_name": "Strategic Thesis Gate",
+      "iteration": 2,
+      "status": "CONDITIONAL_PASS",
+      "criterion_results": [
+        {
+          "criterion_id": "GA-MANDATE",
+          "criterion_name": "Mandate clarity",
+          "outcome": "PASS",
+          "reason": "Mandate fields required for Block A are explicit.",
+          "affected_module_ids": [
+            "A1"
+          ],
+          "supporting_claim_ids": [],
+          "counterevidence_ids": [],
+          "conditions": [],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-A1",
+          "criterion_name": "Transaction Context",
+          "outcome": "CONDITION",
+          "reason": "Transaction context is defined for preliminary Strategic Thesis work, with material terms explicitly unknown.",
+          "affected_module_ids": [
+            "A1"
+          ],
+          "supporting_claim_ids": [
+            "CL-A1-001"
+          ],
+          "counterevidence_ids": [
+            "CE-A1-001"
+          ],
+          "conditions": [
+            "Confirm final perimeter and binding terms before later transaction approval."
+          ],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-A2",
+          "criterion_name": "Buyer Strategic Need",
+          "outcome": "CONDITION",
+          "reason": "A buyer need exists independently of the target, but route selection remains open.",
+          "affected_module_ids": [
+            "A2"
+          ],
+          "supporting_claim_ids": [
+            "CL-A2-001"
+          ],
+          "counterevidence_ids": [
+            "CE-A2-001"
+          ],
+          "conditions": [
+            "Test build and partnership economics and urgency before route approval."
+          ],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-A3",
+          "criterion_name": "Strategic Rationale",
+          "outcome": "CONDITION",
+          "reason": "The rationale is evidence-based and conditionally defensible after A6 repair, with alternatives and assumptions preserved.",
+          "affected_module_ids": [
+            "A3"
+          ],
+          "supporting_claim_ids": [
+            "CL-A3-002"
+          ],
+          "counterevidence_ids": [
+            "CE-A3-002"
+          ],
+          "conditions": [
+            "Test route economics and execution in later authorized stages."
+          ],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-A4",
+          "criterion_name": "Target Attractiveness",
+          "outcome": "CONDITION",
+          "reason": "The target is relevant relative to partnership, subject to scarcity and readiness limitations.",
+          "affected_module_ids": [
+            "A4"
+          ],
+          "supporting_claim_ids": [
+            "CL-A4-001"
+          ],
+          "counterevidence_ids": [
+            "CE-A4-001"
+          ],
+          "conditions": [
+            "Validate scarcity and readiness before exclusivity or transaction approval."
+          ],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-A5",
+          "criterion_name": "Target Capability & Business Quality",
+          "outcome": "CONDITION",
+          "reason": "Capability is evidenced for Gate A input, while Business Quality and transferability require explicit diligence conditions.",
+          "affected_module_ids": [
+            "A5"
+          ],
+          "supporting_claim_ids": [
+            "CL-A5-BA-001"
+          ],
+          "counterevidence_ids": [
+            "CE-A5-BA-001"
+          ],
+          "conditions": [
+            "Complete technical, customer and financial diligence.",
+            "Human Review is required for information unavailable to public research."
+          ],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-A6",
+          "criterion_name": "Industry / Competitive Position",
+          "outcome": "CONDITION",
+          "reason": "A6 now meets the source-diversity threshold, with market-boundary conflict retained as a condition.",
+          "affected_module_ids": [
+            "A6"
+          ],
+          "supporting_claim_ids": [
+            "CL-A6-002"
+          ],
+          "counterevidence_ids": [
+            "CE-A6-002"
+          ],
+          "conditions": [
+            "Material cross-source conflict remains visible and requires resolution.",
+            "Resolve market definition before later competition or valuation work."
+          ],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-A7",
+          "criterion_name": "Strategic Fit",
+          "outcome": "CONDITION",
+          "reason": "Strategic Fit is conditionally supported after A6 repair, with substitutes, market conflict and private execution dependencies visible.",
+          "affected_module_ids": [
+            "A7"
+          ],
+          "supporting_claim_ids": [
+            "CL-A7-002"
+          ],
+          "counterevidence_ids": [
+            "CE-A7-002"
+          ],
+          "conditions": [
+            "Validate capability transferability, operating-model compatibility and market definition."
+          ],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-EVIDENCE",
+          "criterion_name": "Evidence sufficiency",
+          "outcome": "PASS",
+          "reason": "Every current module Claim has admitted evidence and independent PCE status.",
+          "affected_module_ids": [],
+          "supporting_claim_ids": [
+            "CL-A1-001",
+            "CL-A2-001",
+            "CL-A4-001",
+            "CL-A5-BA-001",
+            "CL-A6-002",
+            "CL-A3-002",
+            "CL-A7-002"
+          ],
+          "counterevidence_ids": [],
+          "conditions": [],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-SOURCE-DIVERSITY",
+          "criterion_name": "Source diversity",
+          "outcome": "PASS",
+          "reason": "Module-specific independent Source thresholds are satisfied.",
+          "affected_module_ids": [],
+          "supporting_claim_ids": [],
+          "counterevidence_ids": [],
+          "conditions": [],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-COUNTEREVIDENCE",
+          "criterion_name": "Counterevidence",
+          "outcome": "PASS",
+          "reason": "Every Block A module preserved counterevidence.",
+          "affected_module_ids": [],
+          "supporting_claim_ids": [],
+          "counterevidence_ids": [
+            "CE-A1-001",
+            "CE-A2-001",
+            "CE-A4-001",
+            "CE-A5-BA-001",
+            "CE-A6-001",
+            "CE-A3-001",
+            "CE-A7-001",
+            "CE-A6-002",
+            "CE-A3-002",
+            "CE-A7-002"
+          ],
+          "conditions": [],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-CONFLICTS",
+          "criterion_name": "Conflicts",
+          "outcome": "CONDITION",
+          "reason": "Material conflicts remain visible and cannot be hidden to pass Gate A.",
+          "affected_module_ids": [],
+          "supporting_claim_ids": [
+            "CL-A6-001",
+            "CL-A6-002"
+          ],
+          "counterevidence_ids": [],
+          "conditions": [
+            "Resolve or formally accept each material conflict before transaction approval."
+          ],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-ASSUMPTIONS",
+          "criterion_name": "Material assumptions",
+          "outcome": "CONDITION",
+          "reason": "Material assumptions remain explicitly conditional.",
+          "affected_module_ids": [],
+          "supporting_claim_ids": [],
+          "counterevidence_ids": [],
+          "conditions": [
+            "Acquisition may provide faster control of the capability than internal build or partnership.",
+            "Control may offer execution advantages over partnership, subject to later cost and integration testing."
+          ],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-UNKNOWNS",
+          "criterion_name": "Material unknowns",
+          "outcome": "CONDITION",
+          "reason": "Material unknowns remain explicit.",
+          "affected_module_ids": [],
+          "supporting_claim_ids": [],
+          "counterevidence_ids": [],
+          "conditions": [
+            "Obtain authorized transaction documents before final approval.",
+            "Technical, customer and financial diligence by authorized reviewers before transaction approval."
+          ],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-HUMAN-REVIEW",
+          "criterion_name": "Human Review requirements",
+          "outcome": "CONDITION",
+          "reason": "Human Review boundaries remain visible.",
+          "affected_module_ids": [],
+          "supporting_claim_ids": [],
+          "counterevidence_ids": [],
+          "conditions": [],
+          "human_review_items": [
+            "HR-UN-A5-BA-001"
+          ]
+        },
+        {
+          "criterion_id": "GA-PCE",
+          "criterion_name": "PCE status",
+          "outcome": "PASS",
+          "reason": "All current Claims passed the independent PCE delivery control.",
+          "affected_module_ids": [],
+          "supporting_claim_ids": [
+            "CL-A1-001",
+            "CL-A2-001",
+            "CL-A4-001",
+            "CL-A5-BA-001",
+            "CL-A6-002",
+            "CL-A3-002",
+            "CL-A7-002"
+          ],
+          "counterevidence_ids": [],
+          "conditions": [],
+          "human_review_items": []
+        },
+        {
+          "criterion_id": "GA-ER-BRB",
+          "criterion_name": "ER/BRB status",
+          "outcome": "PASS",
+          "reason": "Independent ER/BRB evidence-row assessment completed.",
+          "affected_module_ids": [],
+          "supporting_claim_ids": [],
+          "counterevidence_ids": [],
+          "conditions": [],
+          "human_review_items": []
+        }
+      ],
+      "failed_criteria": [],
+      "supporting_claims": [
+        "CL-A1-001",
+        "CL-A2-001",
+        "CL-A4-001",
+        "CL-A5-BA-001",
+        "CL-A6-002",
+        "CL-A3-002",
+        "CL-A7-002"
+      ],
+      "counterevidence": [
+        "CE-A1-001",
+        "CE-A2-001",
+        "CE-A4-001",
+        "CE-A5-BA-001",
+        "CE-A6-001",
+        "CE-A3-001",
+        "CE-A7-001",
+        "CE-A6-002",
+        "CE-A3-002",
+        "CE-A7-002"
+      ],
+      "conditions": [
+        "Acquisition may provide faster control of the capability than internal build or partnership.",
+        "Complete technical, customer and financial diligence.",
+        "Confirm final perimeter and binding terms before later transaction approval.",
+        "Control may offer execution advantages over partnership, subject to later cost and integration testing.",
+        "Human Review is required for information unavailable to public research.",
+        "Material cross-source conflict remains visible and requires resolution.",
+        "Obtain authorized transaction documents before final approval.",
+        "Resolve market definition before later competition or valuation work.",
+        "Resolve or formally accept each material conflict before transaction approval.",
+        "Technical, customer and financial diligence by authorized reviewers before transaction approval.",
+        "Test build and partnership economics and urgency before route approval.",
+        "Test route economics and execution in later authorized stages.",
+        "Validate capability transferability, operating-model compatibility and market definition.",
+        "Validate scarcity and readiness before exclusivity or transaction approval."
+      ],
+      "open_gaps": [],
+      "human_review_items": [
+        {
+          "human_review_item_id": "HR-UN-A5-BA-001",
+          "originating_module": "A5",
+          "description": "Private customer concentration, retention, unit economics, margin quality, cash conversion and capability transferability are unavailable.",
+          "required_role": "Buyer strategy lead",
+          "blocking": false,
+          "status": "OPEN"
+        }
+      ],
+      "downstream_permission": "BLOCK_B_MAY_START_WITH_CONDITIONS",
+      "business_outcome": "CONDITIONAL_PASS",
+      "certification_summary": {
+        "pce_statuses": {
+          "CL-A1-001": "Certified",
+          "CL-A2-001": "Certified",
+          "CL-A4-001": "Certified",
+          "CL-A5-BA-001": "Certified",
+          "CL-A6-002": "Certified",
+          "CL-A3-002": "Certified",
+          "CL-A7-002": "Certified"
+        },
+        "er_brb_record_count": 10,
+        "provider_selected_gate_result": false,
+        "certification_does_not_replace_business_gate": true
+      },
+      "authority_boundary": "Gate A is evaluated by deterministic business criteria after admission, PCE and ER/BRB; no provider selects this result."
+    }
+  ],
+  "final_result": {
+    "gate_result_id": "GATE-A-02",
+    "gate_id": "GATE_A",
+    "gate_name": "Strategic Thesis Gate",
+    "iteration": 2,
+    "status": "CONDITIONAL_PASS",
+    "criterion_results": [
+      {
+        "criterion_id": "GA-MANDATE",
+        "criterion_name": "Mandate clarity",
+        "outcome": "PASS",
+        "reason": "Mandate fields required for Block A are explicit.",
+        "affected_module_ids": [
+          "A1"
+        ],
+        "supporting_claim_ids": [],
+        "counterevidence_ids": [],
+        "conditions": [],
+        "human_review_items": []
+      },
+      {
+        "criterion_id": "GA-A1",
+        "criterion_name": "Transaction Context",
+        "outcome": "CONDITION",
+        "reason": "Transaction context is defined for preliminary Strategic Thesis work, with material terms explicitly unknown.",
+        "affected_module_ids": [
+          "A1"
+        ],
+        "supporting_claim_ids": [
+          "CL-A1-001"
+        ],
+        "counterevidence_ids": [
+          "CE-A1-001"
+        ],
+        "conditions": [
+          "Confirm final perimeter and binding terms before later transaction approval."
+        ],
+        "human_review_items": []
+      },
+      {
+        "criterion_id": "GA-A2",
+        "criterion_name": "Buyer Strategic Need",
+        "outcome": "CONDITION",
+        "reason": "A buyer need exists independently of the target, but route selection remains open.",
+        "affected_module_ids": [
+          "A2"
+        ],
+        "supporting_claim_ids": [
+          "CL-A2-001"
+        ],
+        "counterevidence_ids": [
+          "CE-A2-001"
+        ],
+        "conditions": [
+          "Test build and partnership economics and urgency before route approval."
+        ],
+        "human_review_items": []
+      },
+      {
+        "criterion_id": "GA-A3",
+        "criterion_name": "Strategic Rationale",
+        "outcome": "CONDITION",
+        "reason": "The rationale is evidence-based and conditionally defensible after A6 repair, with alternatives and assumptions preserved.",
+        "affected_module_ids": [
+          "A3"
+        ],
+        "supporting_claim_ids": [
+          "CL-A3-002"
+        ],
+        "counterevidence_ids": [
+          "CE-A3-002"
+        ],
+        "conditions": [
+          "Test route economics and execution in later authorized stages."
+        ],
+        "human_review_items": []
+      },
+      {
+        "criterion_id": "GA-A4",
+        "criterion_name": "Target Attractiveness",
+        "outcome": "CONDITION",
+        "reason": "The target is relevant relative to partnership, subject to scarcity and readiness limitations.",
+        "affected_module_ids": [
+          "A4"
+        ],
+        "supporting_claim_ids": [
+          "CL-A4-001"
+        ],
+        "counterevidence_ids": [
+          "CE-A4-001"
+        ],
+        "conditions": [
+          "Validate scarcity and readiness before exclusivity or transaction approval."
+        ],
+        "human_review_items": []
+      },
+      {
+        "criterion_id": "GA-A5",
+        "criterion_name": "Target Capability & Business Quality",
+        "outcome": "CONDITION",
+        "reason": "Capability is evidenced for Gate A input, while Business Quality and transferability require explicit diligence conditions.",
+        "affected_module_ids": [
+          "A5"
+        ],
+        "supporting_claim_ids": [
+          "CL-A5-BA-001"
+        ],
+        "counterevidence_ids": [
+          "CE-A5-BA-001"
+        ],
+        "conditions": [
+          "Complete technical, customer and financial diligence.",
+          "Human Review is required for information unavailable to public research."
+        ],
+        "human_review_items": []
+      },
+      {
+        "criterion_id": "GA-A6",
+        "criterion_name": "Industry / Competitive Position",
+        "outcome": "CONDITION",
+        "reason": "A6 now meets the source-diversity threshold, with market-boundary conflict retained as a condition.",
+        "affected_module_ids": [
+          "A6"
+        ],
+        "supporting_claim_ids": [
+          "CL-A6-002"
+        ],
+        "counterevidence_ids": [
+          "CE-A6-002"
+        ],
+        "conditions": [
+          "Material cross-source conflict remains visible and requires resolution.",
+          "Resolve market definition before later competition or valuation work."
+        ],
+        "human_review_items": []
+      },
+      {
+        "criterion_id": "GA-A7",
+        "criterion_name": "Strategic Fit",
+        "outcome": "CONDITION",
+        "reason": "Strategic Fit is conditionally supported after A6 repair, with substitutes, market conflict and private execution dependencies visible.",
+        "affected_module_ids": [
+          "A7"
+        ],
+        "supporting_claim_ids": [
+          "CL-A7-002"
+        ],
+        "counterevidence_ids": [
+          "CE-A7-002"
+        ],
+        "conditions": [
+          "Validate capability transferability, operating-model compatibility and market definition."
+        ],
+        "human_review_items": []
+      },
+      {
+        "criterion_id": "GA-EVIDENCE",
+        "criterion_name": "Evidence sufficiency",
+        "outcome": "PASS",
+        "reason": "Every current module Claim has admitted evidence and independent PCE status.",
+        "affected_module_ids": [],
+        "supporting_claim_ids": [
+          "CL-A1-001",
+          "CL-A2-001",
+          "CL-A4-001",
+          "CL-A5-BA-001",
+          "CL-A6-002",
+          "CL-A3-002",
+          "CL-A7-002"
+        ],
+        "counterevidence_ids": [],
+        "conditions": [],
+        "human_review_items": []
+      },
+      {
+        "criterion_id": "GA-SOURCE-DIVERSITY",
+        "criterion_name": "Source diversity",
+        "outcome": "PASS",
+        "reason": "Module-specific independent Source thresholds are satisfied.",
+        "affected_module_ids": [],
+        "supporting_claim_ids": [],
+        "counterevidence_ids": [],
+        "conditions": [],
+        "human_review_items": []
+      },
+      {
+        "criterion_id": "GA-COUNTEREVIDENCE",
+        "criterion_name": "Counterevidence",
+        "outcome": "PASS",
+        "reason": "Every Block A module preserved counterevidence.",
+        "affected_module_ids": [],
+        "supporting_claim_ids": [],
+        "counterevidence_ids": [
+          "CE-A1-001",
+          "CE-A2-001",
+          "CE-A4-001",
+          "CE-A5-BA-001",
+          "CE-A6-001",
+          "CE-A3-001",
+          "CE-A7-001",
+          "CE-A6-002",
+          "CE-A3-002",
+          "CE-A7-002"
+        ],
+        "conditions": [],
+        "human_review_items": []
+      },
+      {
+        "criterion_id": "GA-CONFLICTS",
+        "criterion_name": "Conflicts",
+        "outcome": "CONDITION",
+        "reason": "Material conflicts remain visible and cannot be hidden to pass Gate A.",
+        "affected_module_ids": [],
+        "supporting_claim_ids": [
+          "CL-A6-001",
+          "CL-A6-002"
+        ],
+        "counterevidence_ids": [],
+        "conditions": [
+          "Resolve or formally accept each material conflict before transaction approval."
+        ],
+        "human_review_items": []
+      },
+      {
+        "criterion_id": "GA-ASSUMPTIONS",
+        "criterion_name": "Material assumptions",
+        "outcome": "CONDITION",
+        "reason": "Material assumptions remain explicitly conditional.",
+        "affected_module_ids": [],
+        "supporting_claim_ids": [],
+        "counterevidence_ids": [],
+        "conditions": [
+          "Acquisition may provide faster control of the capability than internal build or partnership.",
+          "Control may offer execution advantages over partnership, subject to later cost and integration testing."
+        ],
+        "human_review_items": []
+      },
+      {
+        "criterion_id": "GA-UNKNOWNS",
+        "criterion_name": "Material unknowns",
+        "outcome": "CONDITION",
+        "reason": "Material unknowns remain explicit.",
+        "affected_module_ids": [],
+        "supporting_claim_ids": [],
+        "counterevidence_ids": [],
+        "conditions": [
+          "Obtain authorized transaction documents before final approval.",
+          "Technical, customer and financial diligence by authorized reviewers before transaction approval."
+        ],
+        "human_review_items": []
+      },
+      {
+        "criterion_id": "GA-HUMAN-REVIEW",
+        "criterion_name": "Human Review requirements",
+        "outcome": "CONDITION",
+        "reason": "Human Review boundaries remain visible.",
+        "affected_module_ids": [],
+        "supporting_claim_ids": [],
+        "counterevidence_ids": [],
+        "conditions": [],
+        "human_review_items": [
+          "HR-UN-A5-BA-001"
+        ]
+      },
+      {
+        "criterion_id": "GA-PCE",
+        "criterion_name": "PCE status",
+        "outcome": "PASS",
+        "reason": "All current Claims passed the independent PCE delivery control.",
+        "affected_module_ids": [],
+        "supporting_claim_ids": [
+          "CL-A1-001",
+          "CL-A2-001",
+          "CL-A4-001",
+          "CL-A5-BA-001",
+          "CL-A6-002",
+          "CL-A3-002",
+          "CL-A7-002"
+        ],
+        "counterevidence_ids": [],
+        "conditions": [],
+        "human_review_items": []
+      },
+      {
+        "criterion_id": "GA-ER-BRB",
+        "criterion_name": "ER/BRB status",
+        "outcome": "PASS",
+        "reason": "Independent ER/BRB evidence-row assessment completed.",
+        "affected_module_ids": [],
+        "supporting_claim_ids": [],
+        "counterevidence_ids": [],
+        "conditions": [],
+        "human_review_items": []
+      }
+    ],
+    "failed_criteria": [],
+    "supporting_claims": [
+      "CL-A1-001",
+      "CL-A2-001",
+      "CL-A4-001",
+      "CL-A5-BA-001",
+      "CL-A6-002",
+      "CL-A3-002",
+      "CL-A7-002"
+    ],
+    "counterevidence": [
+      "CE-A1-001",
+      "CE-A2-001",
+      "CE-A4-001",
+      "CE-A5-BA-001",
+      "CE-A6-001",
+      "CE-A3-001",
+      "CE-A7-001",
+      "CE-A6-002",
+      "CE-A3-002",
+      "CE-A7-002"
+    ],
+    "conditions": [
+      "Acquisition may provide faster control of the capability than internal build or partnership.",
+      "Complete technical, customer and financial diligence.",
+      "Confirm final perimeter and binding terms before later transaction approval.",
+      "Control may offer execution advantages over partnership, subject to later cost and integration testing.",
+      "Human Review is required for information unavailable to public research.",
+      "Material cross-source conflict remains visible and requires resolution.",
+      "Obtain authorized transaction documents before final approval.",
+      "Resolve market definition before later competition or valuation work.",
+      "Resolve or formally accept each material conflict before transaction approval.",
+      "Technical, customer and financial diligence by authorized reviewers before transaction approval.",
+      "Test build and partnership economics and urgency before route approval.",
+      "Test route economics and execution in later authorized stages.",
+      "Validate capability transferability, operating-model compatibility and market definition.",
+      "Validate scarcity and readiness before exclusivity or transaction approval."
+    ],
+    "open_gaps": [],
+    "human_review_items": [
+      {
+        "human_review_item_id": "HR-UN-A5-BA-001",
+        "originating_module": "A5",
+        "description": "Private customer concentration, retention, unit economics, margin quality, cash conversion and capability transferability are unavailable.",
+        "required_role": "Buyer strategy lead",
+        "blocking": false,
+        "status": "OPEN"
+      }
+    ],
+    "downstream_permission": "BLOCK_B_MAY_START_WITH_CONDITIONS",
+    "business_outcome": "CONDITIONAL_PASS",
+    "certification_summary": {
+      "pce_statuses": {
+        "CL-A1-001": "Certified",
+        "CL-A2-001": "Certified",
+        "CL-A4-001": "Certified",
+        "CL-A5-BA-001": "Certified",
+        "CL-A6-002": "Certified",
+        "CL-A3-002": "Certified",
+        "CL-A7-002": "Certified"
+      },
+      "er_brb_record_count": 10,
+      "provider_selected_gate_result": false,
+      "certification_does_not_replace_business_gate": true
+    },
+    "authority_boundary": "Gate A is evaluated by deterministic business criteria after admission, PCE and ER/BRB; no provider selects this result."
+  }
+}

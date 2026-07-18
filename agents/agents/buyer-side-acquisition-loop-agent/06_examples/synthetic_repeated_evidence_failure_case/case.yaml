@@ -1,0 +1,132 @@
+{
+  "schema_version": "milestone-2",
+  "scenario": {
+    "name": "repeated_evidence_failure"
+  },
+  "mandate": {
+    "mandate_id": "MANDATE-SYN-REPEATED-001",
+    "case_id": "synthetic-repeated-evidence-failure-001",
+    "perspective": "buyer-side",
+    "buyer_name": "Synthetic Buyer",
+    "target_name": "Synthetic Target",
+    "decision_question": "Can repeated low-quality research support the current strategic thesis?",
+    "transaction_context": "A synthetic buyer is evaluating a synthetic capability acquisition.",
+    "buyer_strategic_need": "Buyer Strategic Need: shorten the launch cycle for a defined analytics capability.",
+    "strategic_rationale": "Strategic Rationale: a supported target capability could close the buyer's product gap.",
+    "target_attractiveness": "Target Attractiveness: the target is hypothesized to have a focused capability and operating model.",
+    "target_capability_business_quality": "Target Capability & Business Quality: the capability assertion requires replayable evidence.",
+    "industry_competitive_position": "Industry / Competitive Position: the target operates in a strategically relevant synthetic segment.",
+    "strategic_fit_hypothesis": "Strategic Fit: the capability may address the buyer need if evidence quality is sufficient.",
+    "max_iterations": 3
+  },
+  "research_contract": {
+    "contract_id": "RC-SYN-REPEATED-001",
+    "case_id": "synthetic-repeated-evidence-failure-001",
+    "block_name": "Block A: Strategic Thesis",
+    "gate_name": "Strategic Thesis Gate",
+    "business_modules": [
+      "Transaction Context",
+      "Buyer Strategic Need",
+      "Strategic Rationale",
+      "Target Attractiveness",
+      "Target Capability & Business Quality",
+      "Industry / Competitive Position",
+      "Strategic Fit"
+    ],
+    "gate_criteria": [
+      "Buyer Strategic Need is explicit",
+      "Strategic Rationale is explicit",
+      "Target Attractiveness is explicit",
+      "Industry / Competitive Position is explicit",
+      "Target Capability & Business Quality evidence supports Strategic Fit"
+    ],
+    "evidence_rule": "Strategic Fit requires replayed, PCE-eligible evidence.",
+    "iteration_budget": 3,
+    "maximum_no_progress_iterations": 2
+  },
+  "initial_research_question": {
+    "question_id": "RQ-REPEATED-01",
+    "owner_module": "Target Capability & Business Quality",
+    "question_text": "What admissible evidence supports the target capability?",
+    "purpose": "Test the initial Strategic Fit evidence boundary.",
+    "iteration": 1,
+    "status": "PLANNED"
+  },
+  "claim": {
+    "claim_id": "CLM-REPEATED-001",
+    "claim_text": "The synthetic target capability addresses the synthetic buyer's stated strategic need.",
+    "business_module": "Strategic Fit",
+    "evidence_ids": [],
+    "source_ids": [],
+    "human_review_required": false
+  },
+  "initial_evidence": {
+    "evidence_id": "EV-REPEATED-MISSING-001",
+    "claim_id": "CLM-REPEATED-001",
+    "source_id": "",
+    "extracted_fact": "",
+    "evidence_type": "missing evidence marker",
+    "confidence": "none",
+    "status": "MISSING",
+    "supports_claim": false,
+    "limitations": "No admissible evidence was registered at intake."
+  },
+  "research_actions": [
+    {
+      "action_id": "ATTEMPT-REPEATED-02",
+      "action_key": "LOW_QUALITY_PRODUCT_SUMMARY_SEARCH",
+      "method": "controlled low-quality synthetic source review",
+      "outcome": "A new record was found, but its source is not PCE-eligible.",
+      "source": {
+        "source_id": "SRC-REPEATED-LOW-001",
+        "source_name": "Unverified synthetic product summary",
+        "source_type": "controlled low-quality synthetic fixture",
+        "url_or_file": "agents/buyer-side-acquisition-loop-agent/06_examples/synthetic_repeated_evidence_failure_case/case.yaml#attempt_1",
+        "used_for": "Target Capability & Business Quality",
+        "reliability_tier": "Tier 3 synthetic summary",
+        "pce_eligible": false,
+        "source_replay_status": "completed",
+        "limitations": "Not independently verified and not PCE-eligible."
+      },
+      "evidence": {
+        "evidence_id": "EV-REPEATED-LOW-001",
+        "claim_id": "CLM-REPEATED-001",
+        "source_id": "SRC-REPEATED-LOW-001",
+        "extracted_fact": "The low-quality fixture repeats the capability assertion without verification.",
+        "evidence_type": "unverified synthetic summary",
+        "confidence": "low",
+        "status": "AVAILABLE",
+        "supports_claim": true,
+        "limitations": "Insufficient for PCE certification."
+      }
+    },
+    {
+      "action_id": "ATTEMPT-REPEATED-03",
+      "action_key": "ALTERNATE_LOW_QUALITY_RECORD_REVIEW",
+      "method": "alternate controlled low-quality synthetic review",
+      "outcome": "A second distinct record was found, but it remains PCE-ineligible.",
+      "source": {
+        "source_id": "SRC-REPEATED-LOW-002",
+        "source_name": "Second unverified synthetic capability note",
+        "source_type": "controlled low-quality synthetic fixture",
+        "url_or_file": "agents/buyer-side-acquisition-loop-agent/06_examples/synthetic_repeated_evidence_failure_case/case.yaml#attempt_2",
+        "used_for": "Target Capability & Business Quality",
+        "reliability_tier": "Tier 3 synthetic note",
+        "pce_eligible": false,
+        "source_replay_status": "completed",
+        "limitations": "Not independently verified and not PCE-eligible."
+      },
+      "evidence": {
+        "evidence_id": "EV-REPEATED-LOW-002",
+        "claim_id": "CLM-REPEATED-001",
+        "source_id": "SRC-REPEATED-LOW-002",
+        "extracted_fact": "The second fixture also repeats the assertion without admissible support.",
+        "evidence_type": "unverified synthetic note",
+        "confidence": "low",
+        "status": "AVAILABLE",
+        "supports_claim": true,
+        "limitations": "Insufficient for PCE certification."
+      }
+    }
+  ]
+}
