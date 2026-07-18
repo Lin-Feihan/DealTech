@@ -20,10 +20,37 @@ FILES = (
     "final_delivery_verification.json",
     "cross_block_consistency_result.json",
 )
+TEXT_SUFFIXES = {".md", ".json", ".yaml", ".yml", ".toml", ".txt", ".py"}
 
 
-def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+def canonical_artifact_bytes(path: Path) -> bytes:
+    data = path.read_bytes()
+    if path.suffix.lower() not in TEXT_SUFFIXES:
+        return data
+    text = data.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
+    return text.encode("utf-8")
+
+
+def artifact_entry(name: str) -> dict[str, str | int]:
+    data = canonical_artifact_bytes(SAMPLE / name)
+    return {"path": name, "sha256": hashlib.sha256(data).hexdigest(), "bytes": len(data)}
+
+
+def write_manifest() -> None:
+    summary = json.loads((SAMPLE / "run_summary.json").read_text(encoding="utf-8"))
+    manifest = {
+        "schema_version": "release-candidate-1",
+        "case_id": summary["case_id"],
+        "run_id": summary["run_id"],
+        "sample_scope": "Sanitized GitHub subset; full provider, evidence, calculation, loop and Human Review traces are intentionally excluded and are reproducible with the documented recorded demo command.",
+        "unpublished_internal_references": ["stages/block_a/", "stages/block_b/", "stages/block_c/"],
+        "artifacts": [artifact_entry(name) for name in FILES],
+        "contains_local_absolute_paths": False,
+        "contains_credentials": False,
+    }
+    (SAMPLE / "run_manifest.json").write_text(
+        json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
 
 
 def main() -> int:
@@ -33,23 +60,7 @@ def main() -> int:
     SAMPLE.mkdir(parents=True, exist_ok=True)
     for name in FILES:
         shutil.copy2(RUN / name, SAMPLE / name)
-    summary = json.loads((SAMPLE / "run_summary.json").read_text(encoding="utf-8"))
-    manifest = {
-        "schema_version": "release-candidate-1",
-        "case_id": summary["case_id"],
-        "run_id": summary["run_id"],
-        "sample_scope": "Sanitized GitHub subset; full provider, evidence, calculation, loop and Human Review traces are intentionally excluded and are reproducible with the documented recorded demo command.",
-        "unpublished_internal_references": ["stages/block_a/", "stages/block_b/", "stages/block_c/"],
-        "artifacts": [
-            {"path": name, "sha256": sha256(SAMPLE / name), "bytes": (SAMPLE / name).stat().st_size}
-            for name in FILES
-        ],
-        "contains_local_absolute_paths": False,
-        "contains_credentials": False,
-    }
-    (SAMPLE / "run_manifest.json").write_text(
-        json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
-    )
+    write_manifest()
     print(SAMPLE.relative_to(ROOT).as_posix())
     return 0
 

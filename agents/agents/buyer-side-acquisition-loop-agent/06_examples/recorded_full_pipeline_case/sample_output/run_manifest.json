@@ -11,43 +11,43 @@
   "artifacts": [
     {
       "path": "final_acquisition_strategy_report.md",
-      "sha256": "e9f1b08be28e7443b5abbf0a194d6586e121a546f57be125ec15b5d63756c22c",
-      "bytes": 64147
+      "sha256": "51a639e3ed0d3552c442f5fdaef953c3863d8897bc8cacc5ea00103dbaf84e91",
+      "bytes": 63246
     },
     {
       "path": "run_summary.json",
-      "sha256": "6c704780f0eaa48ee05ee20e06eca553323a10cfc07c6f810954b3a354df641e",
-      "bytes": 910
+      "sha256": "3f671dc5b095bb4e4312444762d870c42d4c9cbf5138bde194369bbc695903d4",
+      "bytes": 869
     },
     {
       "path": "gate_a_result.json",
-      "sha256": "7008cb6317d8aa12f2e8f0374298f3262fd1efe5b316cb34420c75103dd39fc5",
-      "bytes": 39366
+      "sha256": "1657cf625a938a8780bb6e360501d70512d0cec893ec75bcd51c4bdfcec70736",
+      "bytes": 38277
     },
     {
       "path": "gate_b_result.json",
-      "sha256": "6dcf2bbe1354fafe0c291bbff6c1bff079fb6fe5c3a49b78433f9d01b0169db1",
-      "bytes": 15254
+      "sha256": "388721f31416e2b605cce1a9fff0548a18305f95e6a23c1a812053c71a4c8b82",
+      "bytes": 14735
     },
     {
       "path": "gate_c_result.json",
-      "sha256": "3af3e7e191d3b58532f6e65a24c7d095939c72d3ffb8ba5e1b4abd4f72a727e0",
-      "bytes": 20843
+      "sha256": "c76f2f68b7da32968ed2511e8d082cd559cafc438ed7e3d7d04dc49133269d96",
+      "bytes": 20328
     },
     {
       "path": "decision_state.json",
-      "sha256": "88c3891dc724a75c37056c32975c1887c6147d8bf8a57373aeb7915718d66d77",
-      "bytes": 4503
+      "sha256": "99d48174df7b7d206835a66c6d85baab6c6e015b408dc67377b4972a4c813a69",
+      "bytes": 4435
     },
     {
       "path": "final_delivery_verification.json",
-      "sha256": "dff7fe1facdb9b73740e24c019ab9052599895b615dca99d1468e48fd128eb5c",
-      "bytes": 1800
+      "sha256": "e2e1831b8d99246f965e0064971df4c4b9ad8558ddd13cd36011da9b94f1685d",
+      "bytes": 1758
     },
     {
       "path": "cross_block_consistency_result.json",
-      "sha256": "0c4bbea6930ad9cb4ba967141beb967ba80eb7542e8a403f9769fa34acc2e5da",
-      "bytes": 434
+      "sha256": "0e98ca1552e22f7d9d0f3650b8b63bd4c9a2814754d5718fa386260aef95573d",
+      "bytes": 420
     }
   ],
   "contains_local_absolute_paths": false,

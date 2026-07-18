@@ -40,6 +40,15 @@ REQUIRED = (
 WINDOWS_ABSOLUTE = re.compile(r"(?i)(?:[A-Z]:\\Users\\|[A-Z]:/Users/)")
 SECRET = re.compile(r"(?:sk-[A-Za-z0-9_-]{20,}|api[_-]?key\s*[:=]\s*['\"][^'\"]{12,})", re.I)
 FORBIDDEN_LEGACY = ("app" + "le", "darwin" + "ai")
+TEXT_SUFFIXES = {".md", ".json", ".yaml", ".yml", ".toml", ".txt", ".py"}
+
+
+def canonical_artifact_bytes(path: Path) -> bytes:
+    data = path.read_bytes()
+    if path.suffix.lower() not in TEXT_SUFFIXES:
+        return data
+    text = data.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
+    return text.encode("utf-8")
 
 
 def run(command: list[str], *, timeout: int = 240) -> bool:
@@ -79,7 +88,11 @@ def validate_sample() -> list[str]:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         for row in manifest.get("artifacts", []):
             path = SAMPLE / row["path"]
-            if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != row["sha256"]:
+            if not path.is_file():
+                errors.append(f"curated manifest mismatch: {row['path']}")
+                continue
+            data = canonical_artifact_bytes(path)
+            if hashlib.sha256(data).hexdigest() != row["sha256"] or len(data) != row["bytes"]:
                 errors.append(f"curated manifest mismatch: {row['path']}")
     return errors
 
