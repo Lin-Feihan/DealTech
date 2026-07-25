@@ -31,6 +31,23 @@ def test_acquisition_views_run_separately():
     assert {e['claim_id'] for e in buyer.evidence_records}.isdisjoint({e['claim_id'] for e in target.evidence_records})
 
 
+def test_acquisition_buyer_output_uses_professional_report_layer():
+    result = run_agent_case('acquisition-strategy', 'case_001_acquisition_strategy', 'buyer_side')
+    final_text = Path(result.output_written_to, 'final_output.md').read_text(encoding='utf-8')
+    assert final_text.startswith('# Buyer-side Acquisition Strategy Report')
+    assert '## 4. Deal Structure and Economics' in final_text
+    assert '## 6. Key Risks and Mitigants' in final_text
+    assert '## 8. Buyer-side Conclusion' in final_text
+    assert 'target_profile.md' in final_text
+    assert 'transaction_context.md' in final_text
+    assert 'CLM-' not in final_text
+    assert 'EVI-' not in final_text
+    assert 'SRC-' not in final_text
+    assert 'PCE' not in final_text
+    assert 'Apple factual background can be delivered only where source-backed' not in final_text
+    assert 'DarwinAI transaction occurrence/context can be delivered only with caveats' not in final_text
+
+
 def test_merger_framework_only_does_not_fake_case_run():
     result = run_agent_case('merger-strategy')
     assert result.status == 'Framework only'
