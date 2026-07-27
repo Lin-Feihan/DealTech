@@ -194,7 +194,7 @@ The broader prototype is designed around the following stack:
 
 OpenClaw handles agent orchestration. Context engineering organizes prompts, inputs, sources, and intermediate files. FastAPI supports backend interfaces. Postgres stores structured states and intermediate results. Static or portable web frontends support demonstration and interaction.
 
-The technical stack above describes the broader design direction and earlier prototypes in this repository. The current Buyer-side Acquisition Loop Agent is independently packaged as a Python application and command-line interface, with deterministic, recorded, and optional OpenAI live provider modes.
+The technical stack above describes the broader design direction and earlier prototypes in this repository. The current V2 direction is packaged under `v2_loop_engineered_deep_research_agent/`, while earlier runnable prototypes remain available as prior implementation assets.
 
 ---
 
@@ -214,61 +214,45 @@ Key contributions include:
 
 ---
 
-## Latest Runnable Implementation
+## Latest Development: Loop-Engineered DealTech V2
 
-### Buyer-side Acquisition Loop Agent `v0.1.0-rc1`
+The latest DealTech effort is the **V2 Loop-Engineered Certified Deep Research Agent** for buyer-side acquisition strategy research.
 
-The **Buyer-side Acquisition Loop Agent** is the latest runnable implementation of the Acquisition Strategy Agent in this repository.
+V2 builds on the earlier Acquisition Strategy Agent, but adds a more controlled research and delivery layer: case intake, source-quality control, evidence lineage, method selection, calculation replay, recommendation logic, human review boundaries, and final delivery certification.
 
-It extends the earlier Deep Research framework with a unified Loop Engineering mechanism for validation, gap diagnosis, targeted repair, re-planning, Human Review, and termination control.
-
-The implementation follows this workflow:
+High-level workflow:
 
 ```text
 Case Intake
-→ Mandate and Research Contract
-→ Block A: Strategic Thesis
-→ Gate A
-→ Block B: Value Creation, Financial Analysis, and Pricing
-→ Gate B
-→ Block C: Due Diligence, Risk, and Decision
-→ Gate C
-→ Decision State
-→ Final Report
-→ Delivery Verification
+→ Research Planning
+→ Source and Evidence Collection
+→ Claim and Evidence Mapping
+→ Method Selection
+→ Deal Analysis
+→ Calculation Replay
+→ Recommendation Decision
+→ Report Generation
+→ Certification Review
+→ Final Delivery
 ```
 
-The current release includes:
+The current V2 package includes:
 
-- 17 buyer-side M&A research modules across Blocks A, B, and C;
-- Gate A, Gate B, and Gate C;
-- typed gap diagnosis and targeted Loop repair;
-- Source–Evidence–Claim lineage;
-- financial calculations and independent calculation replay;
-- separate PCE, ER/BRB, business Gate, and Loop Controller responsibilities;
-- Human Review pause and resume;
-- cross-block consistency checks;
-- final acquisition strategy reporting and delivery verification;
-- deterministic and recorded provider modes;
-- an optional `openai_live` provider.
+- the preserved buyer-side acquisition research baseline;
+- loop-engineered policies for research, analysis, reporting, certification, and human review;
+- structured schemas for mandates, claims, evidence, analysis packages, recommendations, and report manifests;
+- a runnable buyer-side acquisition analysis runtime;
+- tests and baseline guards for method routing, evidence grounding, calculation replay, report-shape control, and prompt/output-contract preservation.
 
-The complete recorded A → B → C pipeline has been validated locally and through GitHub Actions.
-
-The public recorded example is fictional and is intended for reproducible demonstration rather than current transaction research.
-
-The `openai_live` provider has been implemented but has not yet received paid end-to-end live validation. This release is therefore presented as a research release candidate rather than a production-ready transaction system.
-
-Documentation and runnable examples:
+This release should be viewed as the current **Loop-Engineered Certified Deep Research baseline** for DealTech, not yet a fully productionized autonomous transaction system.
 
 | Resource | Link |
 |---|---|
-| Agent Overview | [Open README](agents/agents/buyer-side-acquisition-loop-agent/README.md) |
-| Quick Start | [Open Quick Start](agents/agents/buyer-side-acquisition-loop-agent/QUICKSTART.md) |
-| Architecture | [Open Architecture](agents/agents/buyer-side-acquisition-loop-agent/ARCHITECTURE.md) |
-| Case Input Guide | [Open Case Input Guide](agents/agents/buyer-side-acquisition-loop-agent/CASE_INPUT_GUIDE.md) |
-| Recorded Sample Output | [Open Sample Output](agents/agents/buyer-side-acquisition-loop-agent/06_examples/recorded_full_pipeline_case/sample_output/) |
-
-The original Acquisition Strategy Agent and the other research agents remain preserved as earlier research and prototype assets. The Buyer-side Acquisition Loop Agent is maintained alongside them as the latest executable implementation.
+| V2 Overview | [Open V2 README](v2_loop_engineered_deep_research_agent/README.md) |
+| Agent Baseline Map | [Open Baseline Map](v2_loop_engineered_deep_research_agent/AGENT_BASELINE_MAP.md) |
+| Runtime | [Open Runtime](v2_loop_engineered_deep_research_agent/runtime/) |
+| Tests | [Open Tests](v2_loop_engineered_deep_research_agent/runtime/tests/) |
+| Baseline Guard | [Open Guard](v2_loop_engineered_deep_research_agent/tools/verify_v2_agent_baseline.py) |
 
 ---
 
