@@ -1,0 +1,40 @@
+{
+  "manifest_version": "2026-07-24",
+  "agent_family": "acquisition_strategy_agent",
+  "v2_system": "loop_engineered_certified_deep_research_agent",
+  "available_perspectives": ["buyer_side"],
+  "bundles": {
+    "buyer_side": {
+      "config": "buyer_side/agent.config.json",
+      "prompt": "buyer_side/prompt.md",
+      "workflow": "buyer_side/workflow.json",
+      "loop_policy": "buyer_side/loop_policy.json",
+      "certification_policy": "buyer_side/certification_policy.json",
+      "report_writer_policy": "buyer_side/report_writer_policy.json",
+      "output_contract": "buyer_side/output_contract.json",
+      "runbook": "buyer_side/runbook.md"
+    }
+  },
+  "runtime": {
+    "entrypoint": "../../runtime/run_agent.py",
+    "scope": "certified inputs to analysis objects, recommendation gate, report, and manifest"
+  },
+  "shared_schemas": [
+    "../../schemas/mandate.schema.json",
+    "../../schemas/research_plan.schema.json",
+    "../../schemas/claim.schema.json",
+    "../../schemas/evidence.schema.json",
+    "../../schemas/certification.schema.json",
+    "../../schemas/report_manifest.schema.json",
+    "../../schemas/section_analysis.schema.json",
+    "../../schemas/analysis_package.schema.json",
+    "../../schemas/recommendation_decision.schema.json"
+  ],
+  "shared_policies": [
+    "../../policies/policy_pi.md",
+    "../../policies/source_quality_policy.md",
+    "../../policies/calculation_replay_policy.md",
+    "../../policies/human_review_policy.md"
+  ],
+  "status": "executable_analysis_and_report_runtime_no_case_study"
+}

@@ -1,0 +1,3 @@
+﻿Touchpoint,Stage,What it does,Input evidence,Output,Important boundary
+HF-level ER/BRB,Hard Filter,Combines preliminary structured evidence into pass/exclude/watchlist/DD escalation + confidence,"market snapshot, source reliability, listing status, market cap, P/B, turnover, basic red flags","hard-filter decision, confidence, DD escalation flag",Cannot soften true hard exclusion gates into pass
+DD-level ER/BRB,Deep Due Diligence,"Aggregates document-level and DD evidence to calibrate risk, reranking and recommendation","annual reports, announcements, control trace, litigation/debt/compliance/carrying-cost evidence, risk matrix","DD-adjusted score, risk escalation, recommendation support","Can refine or overturn HF provisional judgments, but must map to evidence"

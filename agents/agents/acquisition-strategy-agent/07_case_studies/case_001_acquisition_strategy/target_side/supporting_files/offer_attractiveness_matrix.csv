@@ -1,5 +1,0 @@
-criterion_id,criterion,assessment,source_id,evidence_id,human_review_required
-OFFER-T01,strategic buyer fit,Certified with Caveat as public-reporting context,SRC-ACQ-T03,EVI-ACQ-T03,Yes
-OFFER-T02,deal value / price,Unknown / Not Certified,SRC-ACQ-T05,EVI-ACQ-T05,Yes
-OFFER-T03,fairness opinion,Not Public / Not Certified,SRC-ACQ-T05,EVI-ACQ-T05,Yes
-OFFER-T04,board response,Not Public / Human Review Required,SRC-ACQ-T05,EVI-ACQ-T07,Yes

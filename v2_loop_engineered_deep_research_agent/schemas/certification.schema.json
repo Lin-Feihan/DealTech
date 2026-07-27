@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/v2/schemas/certification.schema.json",
+  "title": "Certification Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["certification_id", "claim_id", "status", "checks", "decision_rationale"],
+  "properties": {
+    "certification_id": {"type": "string"},
+    "claim_id": {"type": "string"},
+    "status": {"type": "string", "enum": ["Certified", "Certified with Caveat", "Needs Human Review", "Not Certified", "Internal Trace Only"]},
+    "checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["coverage", "evidence_sufficiency", "source_reliability", "calculation_replay", "conflict_detection"],
+      "properties": {
+        "coverage": {"type": "string", "enum": ["pass", "fail", "not_applicable"]},
+        "evidence_sufficiency": {"type": "string", "enum": ["pass", "fail", "not_applicable"]},
+        "source_reliability": {"type": "string", "enum": ["pass", "fail", "not_applicable"]},
+        "calculation_replay": {"type": "string", "enum": ["pass", "fail", "not_applicable"]},
+        "conflict_detection": {"type": "string", "enum": ["pass", "fail", "not_applicable"]}
+      }
+    },
+    "decision_rationale": {"type": "string"},
+    "required_next_action": {"type": "string", "enum": ["none", "additional_research", "calculation_replay", "human_review", "remove_from_report", "add_caveat"]},
+    "research_gap_ids": {"type": "array", "items": {"type": "string"}}
+  }
+}

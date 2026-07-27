@@ -1,0 +1,4 @@
+﻿PCE layer,Where it sits in the full workflow,What it checks,What it does NOT replace,Files
+Proposal,After Agent has generated candidate trajectory and draft recommendation,Whether trajectory is complete enough to certify,It is not final delivery,01_agent_core; 02_data_and_run_outputs; proposed recommendation outputs
+Certification,Governance module after Certified Research Trace,"Mandate, source, retrieval, universe, HF-ER/BRB, DD evidence, DD-ER/BRB, calculations, claims, risk and human review",It does not replace lawyer/investment committee/final transaction approval,04_governance_pce_certification
+Execution,Only after certification passes,Final materials only cite certified claims,It cannot bypass PCE or use unsupported claims,05_execution_delivery

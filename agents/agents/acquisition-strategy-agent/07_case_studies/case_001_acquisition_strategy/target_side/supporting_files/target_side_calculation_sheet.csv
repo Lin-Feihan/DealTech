@@ -1,4 +1,0 @@
-calculation_id,calculation_type,input_metric,input_value,input_unit,source_id,formula,output_value,output_unit,calculation_replayed,limitation,linked_claim_id,human_review_required
-CALC-T01,offer_premium,deal value,Unknown,USD,SRC-ACQ-T05,Scenario only; cannot compute without deal value,Unknown,%,No,Deal value not disclosed.,CLM-ACQ-T05,Yes
-CALC-T02,revenue_multiple,revenue,Unknown,USD,SRC-ACQ-T05,deal value / revenue; cannot compute with Unknown inputs,Unknown,x,No,DarwinAI revenue not disclosed.,CLM-ACQ-T05,Yes
-CALC-T03,EBITDA_multiple,EBITDA,Unknown,USD,SRC-ACQ-T05,deal value / EBITDA; cannot compute with Unknown inputs,Unknown,x,No,DarwinAI EBITDA not disclosed.,CLM-ACQ-T05,Yes

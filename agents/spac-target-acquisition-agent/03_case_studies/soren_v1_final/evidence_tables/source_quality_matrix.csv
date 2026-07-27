@@ -1,0 +1,6 @@
+source_category,examples,used_for,quality_note
+Buyer filings,SEC prospectus and IPO/closing materials,"Trust size, target focus, securities, deadline, sponsor profile",High for buyer facts; medium for qualitative target focus
+Company official sources,Company websites/newsrooms,"Operations, footprint, management, service model",High for self-disclosed facts; requires diligence validation
+Sponsor/advisor transaction sources,"PE sponsor pages, advisor/law-firm deal announcements","Ownership, entry year, transaction context",Medium-high when multiple sources align
+Trade publications,Healthcare M&A and subsector coverage,"Market timing, multiple ranges, sector risks",Medium; use as directional context
+Financial estimates,Public scale proxies + sector unit economics,Revenue/EBITDA/EV frames,Low-medium; must be confirmed in outreach and QofE

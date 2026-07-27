@@ -1,7 +1,0 @@
-alternative_id,alternative_name,description,value_driver,key_risk,source_id,evidence_id,data_quality,human_review_required,linked_claim_id
-ALT-T01,accept_Apple_acquisition,"Accept Apple acquisition only if terms, value, certainty, and legal review support it.",Strategic buyer certainty / platform fit,Deal value and fairness Unknown.,SRC-ACQ-T03,EVI-ACQ-T03,Caveated source-backed transaction report,Yes,CLM-ACQ-T04
-ALT-T02,remain_independent,Continue standalone path.,Retain upside and strategic control,Funding and commercial scaling Unknown.,SRC-ACQ-T06,EVI-ACQ-T06,Framework only,Yes,CLM-ACQ-T06
-ALT-T03,raise_private_financing,Raise private capital instead of selling.,Extend runway and valuation option value,Financing terms and investor appetite Unknown.,SRC-ACQ-T06,EVI-ACQ-T06,Framework only,Yes,CLM-ACQ-T06
-ALT-T04,seek_alternative_strategic_buyer,Market check with other strategic buyers.,Potential competitive tension,No alternative-buyer evidence in package.,SRC-ACQ-T06,EVI-ACQ-T06,Framework only,Yes,CLM-ACQ-T06
-ALT-T05,license_technology,License technology while staying independent.,Non-sale monetization,Commercial terms Unknown.,SRC-ACQ-T06,EVI-ACQ-T06,Framework only,Yes,CLM-ACQ-T06
-ALT-T06,partnership_without_sale,Strategic partnership without change of control.,Access to distribution/technical integration,Partner appetite and economics Unknown.,SRC-ACQ-T06,EVI-ACQ-T06,Framework only,Yes,CLM-ACQ-T06

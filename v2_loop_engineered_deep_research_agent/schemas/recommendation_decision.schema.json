@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/v2/schemas/recommendation_decision.schema.json",
+  "title": "Analysis-Authored Buyer Recommendation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "disposition",
+    "decision",
+    "unrestricted_approval_allowed",
+    "price_position",
+    "structure_position",
+    "financing_position",
+    "conditions",
+    "red_lines",
+    "next_actions"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "disposition": {"type": "string", "enum": ["Proceed", "Proceed with Conditions", "Renegotiate", "Defer", "Walk Away"]},
+    "decision": {"type": "string", "minLength": 1},
+    "unrestricted_approval_allowed": {"type": "boolean"},
+    "price_position": {"type": "string", "minLength": 1},
+    "structure_position": {"type": "string", "minLength": 1},
+    "financing_position": {"type": "string", "minLength": 1},
+    "conditions": {"type": "array", "items": {"type": "string"}},
+    "red_lines": {"type": "array", "items": {"type": "string"}},
+    "next_actions": {"type": "array", "items": {"type": "string"}}
+  }
+}

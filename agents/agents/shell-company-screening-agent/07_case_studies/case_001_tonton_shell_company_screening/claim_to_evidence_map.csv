@@ -1,5 +1,0 @@
-claim_id,claim_text,source_id,evidence_id,calculation_required,calculation_replayed,human_review_required,certification_status
-CLM-SHELL-001,"TonTon/Tuntun shell-screening source inventory and trace package are present and usable as a certified trace base.",SRC-SHELL-001,EVI-SHELL-001,No,No,Yes,Certified with Caveat
-CLM-SHELL-002,"DD evidence table supports case-level shell company diligence review with caveats.",SRC-SHELL-002,EVI-SHELL-002,No,No,Yes,Certified with Caveat
-CLM-SHELL-003,"Migrated ER/BRB and PCE artifacts can be used only as caveated certification artifacts, not standalone primary evidence.",SRC-SHELL-003,EVI-SHELL-003,No,No,Yes,Certified with Caveat
-CLM-SHELL-004,"Final delivery can be issued only with visible caveats and human-review flags preserved.",SRC-SHELL-004,EVI-SHELL-004,No,No,Yes,Certified with Caveat

@@ -1,0 +1,88 @@
+{
+  "agent_id": "acquisition_strategy_agent.buyer_side.v2",
+  "agent_name": "Buyer-Side Acquisition Strategy Agent V2",
+  "system_type": "loop_engineered_certified_deep_research_agent",
+  "perspective": "buyer",
+  "runtime_status": "executable_analysis_and_report_runtime",
+  "runtime": {
+    "entrypoint": "../../../runtime/run_agent.py",
+    "implemented_sequence": [
+      "load_certified_case_inputs",
+      "load_authoritative_case_analysis",
+      "validate_current_case_input_sovereignty",
+      "route_case_applicable_methods",
+      "replay_typed_models",
+      "run_analysis_provenance_gate",
+      "generate_professional_report",
+      "run_report_leakage_gate",
+      "emit_analysis_and_report_outputs"
+    ],
+    "upstream_not_implemented": [
+      "automated_source_retrieval",
+      "research_planning_execution",
+      "claim_evidence_graph_construction",
+      "claim_certification"
+    ]
+  },
+  "source_baseline": {
+    "v1_agent_folder": "../../../../agents/acquisition-strategy-agent",
+    "v1_flowchart": "../../../../agents/acquisition-strategy-agent/01_business_workflow/flowcharts/buyer-flowchart.jpg",
+    "v1_prompt": "../../../../agents/acquisition-strategy-agent/02_prompts/buyer_acquisition_strategy_prompt.md",
+    "v1_structured_spec": "../../../../agents/acquisition-strategy-agent/02_prompts/buyer_acquisition_strategy_agent.json"
+  },
+  "local_bundle_files": {
+    "prompt": "prompt.md",
+    "workflow": "workflow.json",
+    "loop_policy": "loop_policy.json",
+    "certification_policy": "certification_policy.json",
+    "report_writer_policy": "report_writer_policy.json",
+    "output_contract": "output_contract.json",
+    "runbook": "runbook.md"
+  },
+  "shared_schemas": {
+    "mandate": "../../../schemas/mandate.schema.json",
+    "research_plan": "../../../schemas/research_plan.schema.json",
+    "claim": "../../../schemas/claim.schema.json",
+    "evidence": "../../../schemas/evidence.schema.json",
+    "certification": "../../../schemas/certification.schema.json",
+    "report_manifest": "../../../schemas/report_manifest.schema.json",
+    "case_analysis": "../../../schemas/case_analysis.schema.json",
+    "section_analysis": "../../../schemas/section_analysis.schema.json",
+    "analysis_package": "../../../schemas/analysis_package.schema.json",
+    "recommendation_decision": "../../../schemas/recommendation_decision.schema.json"
+  },
+  "shared_policies": {
+    "policy_pi": "../../../policies/policy_pi.md",
+    "source_quality": "../../../policies/source_quality_policy.md",
+    "calculation_replay": "../../../policies/calculation_replay_policy.md",
+    "human_review": "../../../policies/human_review_policy.md"
+  },
+  "primary_runtime_sequence": [
+    "parse_mandate",
+    "create_research_plan",
+    "run_research_loop",
+    "write_evidence_repository",
+    "build_claim_evidence_graph",
+    "run_certification_loop",
+    "run_deal_analysis_loop",
+    "route_case_applicable_methods",
+    "run_thesis_certification",
+    "run_analysis_quality_control",
+    "synthesize_validated_report_content",
+    "generate_professional_report",
+    "run_report_certification",
+    "emit_final_outputs"
+  ],
+  "final_outputs": [
+    "final_report.md",
+    "case_analysis.json",
+    "analysis_package.json",
+    "recommendation_decision.json",
+    "claim_evidence_graph.json",
+    "certification_results.json",
+    "report_manifest.json",
+    "research_gaps.json",
+    "human_review_items.json",
+    "analysis_quality_control.json"
+  ]
+}

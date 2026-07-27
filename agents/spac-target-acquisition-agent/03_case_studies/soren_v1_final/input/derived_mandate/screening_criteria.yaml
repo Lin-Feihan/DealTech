@@ -1,0 +1,71 @@
+project:
+  name: US_SPAC_Target_Acquisition_Agent_v1
+  buyer: Soren Acquisition Corp.
+  geography: United States
+  target_status: private_unlisted
+  data_policy: public_free_sources_only
+  version_note: v1 replaces prior v0.1 output and folder naming
+
+buyer_spac:
+  sec_url: https://www.sec.gov/Archives/edgar/data/0002086263/000121390026002346/ea0260278-04.htm
+  cik: '0002086263'
+  base_ipo_size_usd: 220000000
+  consummated_units: 25300000
+  gross_proceeds_usd: 253000000
+  trust_size_usd_screening_assumption: 253000000
+  target_focus_inferred: healthcare
+  transaction_size_guide:
+    lower_ev_multiple_of_trust: 3
+    upper_ev_multiple_of_trust: 8
+    lower_ev_usd: 759000000
+    upper_ev_usd: 2024000000
+    note: practical screening band only; PIPE, seller rollover, earnout, redemption level and valuation reset can move feasibility
+
+thesis_design:
+  architecture: buyer_backward_then_candidate_forward
+  primary_question: Where can Soren form fast conviction and offer differentiated SPAC currency?
+  priority_subsectors:
+    - rank: 1
+      name: Physician services / MSO with payer, hospital, or value-based-care interface
+      rationale: strongest convergence of provider operations, reimbursement, policy, and public-market consolidation story
+    - rank: 2
+      name: Behavioral health platforms with clean reimbursement and maturing ownership
+      rationale: differentiated credit/regulatory reading plus possible structured-listing alternative where traditional IPO remains difficult
+    - rank: 3
+      name: Value-based care, post-acute, senior services, and care-management platforms
+      rationale: broad board relevance, but buyer competition is high and targets must be specific enough for Soren's edge
+    - rank: 4
+      name: Healthcare staffing
+      rationale: reserve category; market need exists but board labor-cost edge is weaker
+    - rank: 5
+      name: AI-enabled clinical/data platforms
+      rationale: treat as an enabling layer inside services businesses, not standalone target sourcing at this scale
+
+hard_filters:
+  - id: HF1
+    name: U.S. private / unlisted operating company
+  - id: HF2
+    name: Priority healthcare subsector fit
+  - id: HF3
+    name: Real operating platform with customers/sites/lives/providers/revenue evidence
+  - id: HF4
+    name: Plausible SPAC transaction size fit or structure path
+  - id: HF5
+    name: Ownership/capital-event receptivity
+  - id: HF6
+    name: Audit-ready and public-company readiness potential
+  - id: HF7
+    name: No fatal public legal/regulatory/reimbursement red flag
+  - id: HF8
+    name: Clear SPAC currency / public-market story rationale
+
+policy_assumptions:
+  loss_making_targets: allowed_if_losses_are_controlled
+  controlled_loss_definition:
+    - evidence_of_real_revenue_or_contracts
+    - losses_tied_to_growth_or_care_network_buildout_not_business_failure
+    - financing_history_or_runway_plausible
+    - no_public_evidence_of_severe_financial_distress
+  otc_policy: exclude_from_main_shortlist_use_only_as_watchlist_or_comps
+  private_company_data_limitation: valuation_revenue_and_ebitda_are_public_source_estimates_until_confirmed
+  evidence_standard: every shortlist name needs why_company_why_now_why_soren_and_first_contact_path

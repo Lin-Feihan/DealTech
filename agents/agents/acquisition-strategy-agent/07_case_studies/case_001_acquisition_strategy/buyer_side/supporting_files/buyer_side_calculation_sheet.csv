@@ -1,4 +1,0 @@
-calculation_id,calculation_type,input_metric,input_value,input_unit,source_id,formula,output_value,output_unit,calculation_replayed,limitation,linked_claim_id,human_review_required
-CALC-B01,deal value scenario,deal value,Unknown,USD,SRC-ACQ-B05,Scenario only; no real conclusion because deal value is Unknown,Unknown,USD / %,No,Deal value not disclosed.,CLM-ACQ-B05,Yes
-CALC-B02,revenue_multiple,revenue,Unknown,USD,SRC-ACQ-B05,deal value / revenue; cannot compute with Unknown inputs,Unknown,x,No,DarwinAI revenue not disclosed.,CLM-ACQ-B05,Yes
-CALC-B03,EBITDA_multiple,EBITDA,Unknown,USD,SRC-ACQ-B05,deal value / EBITDA; cannot compute with Unknown inputs,Unknown,x,No,DarwinAI EBITDA not disclosed.,CLM-ACQ-B05,Yes

@@ -32,6 +32,14 @@ These agents cover three transaction research scenarios:
 | Acquisition transactions | Supporting buyer-side and seller-side acquisition analysis |
 | Merger transactions | Assessing strategic rationale, synergy, governance, and integration feasibility |
 
+The repository also includes a V2 architecture package:
+
+```text
+v2_loop_engineered_deep_research_agent/
+```
+
+V2 upgrades the V1 DealTech agents toward a Loop-Engineered Certified Deep Research System. The first V2 pilot is a runtime-ready buyer-side Acquisition Strategy Agent specification. It does not include a case study yet.
+
 ---
 
 ## Why This Matters
@@ -194,7 +202,7 @@ The broader prototype is designed around the following stack:
 
 OpenClaw handles agent orchestration. Context engineering organizes prompts, inputs, sources, and intermediate files. FastAPI supports backend interfaces. Postgres stores structured states and intermediate results. Static or portable web frontends support demonstration and interaction.
 
-The technical stack above describes the broader design direction and earlier prototypes in this repository. The current Buyer-side Acquisition Loop Agent is independently packaged as a Python application and command-line interface, with deterministic, recorded, and optional OpenAI live provider modes.
+The technical stack above describes the broader design direction and earlier prototypes in this repository. The current V2 buyer-side executable stage uses standard-library Python and consumes already-certified case inputs; automated search, claim certification, databases, and live model adapters remain future integration layers.
 
 ---
 
@@ -216,59 +224,58 @@ Key contributions include:
 
 ## Latest Runnable Implementation
 
-### Buyer-side Acquisition Loop Agent `v0.1.0-rc1`
+### V2 Buyer-side Acquisition Analysis and Report Runtime `3.1.0-general-method-routing`
 
-The **Buyer-side Acquisition Loop Agent** is the latest runnable implementation of the Acquisition Strategy Agent in this repository.
-
-It extends the earlier Deep Research framework with a unified Loop Engineering mechanism for validation, gap diagnosis, targeted repair, re-planning, Human Review, and termination control.
-
-The implementation follows this workflow:
+The V2 Acquisition Strategy Agent now includes an executable post-certification runtime at:
 
 ```text
-Case Intake
-→ Mandate and Research Contract
-→ Block A: Strategic Thesis
-→ Gate A
-→ Block B: Value Creation, Financial Analysis, and Pricing
-→ Gate B
-→ Block C: Due Diligence, Risk, and Decision
-→ Gate C
-→ Decision State
-→ Final Report
-→ Delivery Verification
+v2_loop_engineered_deep_research_agent/runtime/
 ```
 
-The current release includes:
+It implements the following bounded workflow:
 
-- 17 buyer-side M&A research modules across Blocks A, B, and C;
-- Gate A, Gate B, and Gate C;
-- typed gap diagnosis and targeted Loop repair;
-- Source–Evidence–Claim lineage;
-- financial calculations and independent calculation replay;
-- separate PCE, ER/BRB, business Gate, and Loop Controller responsibilities;
-- Human Review pause and resume;
-- cross-block consistency checks;
-- final acquisition strategy reporting and delivery verification;
-- deterministic and recorded provider modes;
-- an optional `openai_live` provider.
+```text
+Certified claims + supporting case materials
+→ 15 structured section-analysis objects
+→ valuation / competition / financing / returns decision gates
+→ bounded recommendation
+→ professional buyer-side acquisition strategy report
+→ report manifest + research gaps + human-review items
+```
 
-The complete recorded A → B → C pipeline has been validated locally and through GitHub Actions.
+The current runtime includes:
 
-The public recorded example is fictional and is intended for reproducible demonstration rather than current transaction research.
+- a standard-library Python command-line runner;
+- 15 buyer-side acquisition strategy analysis modules;
+- structured section objects with judgments, evidence, analysis, decision impact, buyer actions, and research gaps;
+- deterministic recommendation gates that block unrestricted `Proceed` while material evidence gates remain open;
+- separate business-facing report and audit manifest layers;
+- internal audit-marker leakage rejection;
+- schema files for section analysis, analysis packages, recommendation decisions, and report manifests;
+- synthetic portability, fail-closed input, recommendation-gate, and leakage tests.
 
-The `openai_live` provider has been implemented but has not yet received paid end-to-end live validation. This release is therefore presented as a research release candidate rather than a production-ready transaction system.
+Run it from the repository root:
 
-Documentation and runnable examples:
+```bash
+python3 v2_loop_engineered_deep_research_agent/runtime/run_agent.py \
+  --case-dir /path/to/certified_case \
+  --output-dir /path/to/output \
+  --json
+```
+
+The runner deliberately starts after claim certification. It does not yet automate source retrieval, research planning, claim-evidence graph construction, or Policy π claim certification. No V2 case study is committed; portability tests create temporary synthetic fixtures at test time.
+
+Documentation and runtime files:
 
 | Resource | Link |
 |---|---|
-| Agent Overview | [Open README](agents/agents/buyer-side-acquisition-loop-agent/README.md) |
-| Quick Start | [Open Quick Start](agents/agents/buyer-side-acquisition-loop-agent/QUICKSTART.md) |
-| Architecture | [Open Architecture](agents/agents/buyer-side-acquisition-loop-agent/ARCHITECTURE.md) |
-| Case Input Guide | [Open Case Input Guide](agents/agents/buyer-side-acquisition-loop-agent/CASE_INPUT_GUIDE.md) |
-| Recorded Sample Output | [Open Sample Output](agents/agents/buyer-side-acquisition-loop-agent/06_examples/recorded_full_pipeline_case/sample_output/) |
+| V2 Overview | [Open README](v2_loop_engineered_deep_research_agent/README.md) |
+| Buyer-side Runbook | [Open Runbook](v2_loop_engineered_deep_research_agent/agents/acquisition_strategy_agent/buyer_side/runbook.md) |
+| Runtime Entrypoint | [Open Runner](v2_loop_engineered_deep_research_agent/runtime/run_agent.py) |
+| Analysis Engine | [Open Analysis Engine](v2_loop_engineered_deep_research_agent/runtime/acquisition_analysis.py) |
+| Runtime Tests | [Open Tests](v2_loop_engineered_deep_research_agent/runtime/tests/test_runtime.py) |
 
-The original Acquisition Strategy Agent and the other research agents remain preserved as earlier research and prototype assets. The Buyer-side Acquisition Loop Agent is maintained alongside them as the latest executable implementation.
+The original Acquisition Strategy Agent and the other research agents remain preserved as earlier research and prototype assets.
 
 ---
 

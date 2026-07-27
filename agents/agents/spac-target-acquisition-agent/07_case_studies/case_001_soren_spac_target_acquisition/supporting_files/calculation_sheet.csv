@@ -1,4 +1,0 @@
-calculation_id,metric,candidate_id,input_value,calculation_output,source_id,evidence_id,calculation_replayed,human_review_required
-CALC-SPAC-001,Revenue,MULTI,Unknown,Unknown,SRC-SPAC-005,EVI-SPAC-009,No,Yes
-CALC-SPAC-002,EBITDA,MULTI,Unknown,Unknown,SRC-SPAC-005,EVI-SPAC-009,No,Yes
-CALC-SPAC-003,Deal value / SPAC fit,MULTI,Unknown,Unknown,SRC-SPAC-005,EVI-SPAC-009,No,Yes

@@ -1,0 +1,7 @@
+company,finance_team_visibility,audit_pcaob_risk,accounting_complexity,regulatory_disclosure_burden,overall_readiness_risk,next_readiness_check
+US Heart and Vascular,unknown,medium,high for acquisitive MSO / physician economics / VBC contracts,medium,medium-high,"CFO/controller, audit history, acquisition accounting, VBC contract accounting"
+Centria,unknown,medium-high,medium-high for multi-state services and reimbursement controls,high,high,"billing controls, state compliance, quality metrics, audit history"
+Hopebridge,unknown,medium-high,medium for center economics and reimbursement controls,high,high,"clinical outcomes, staff model, payer mix, audit readiness"
+ERC / Pathlight,unknown,medium-high,medium-high for facilities/virtual programs and outcomes disclosure,high,high,"payer mix, clinical outcomes, labor model, facility-level economics"
+Anne Arundel Dermatology,unknown,medium,high for bolt-on acquisitions and physician retention economics,medium,medium,"CFO/controller, audit history, acquisition pipeline accounting, physician compensation"
+Strive Health,unknown,high,high for risk-bearing/VBC medical cost accruals,high,high,"risk contract accounting, medical cost accruals, actuarial support, SEC-ready KPIs"

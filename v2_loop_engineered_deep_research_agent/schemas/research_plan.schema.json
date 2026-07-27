@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/v2/schemas/research_plan.schema.json",
+  "title": "Research Plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["plan_id", "mandate_id", "modules", "open_questions", "status"],
+  "properties": {
+    "plan_id": {"type": "string"},
+    "mandate_id": {"type": "string"},
+    "status": {"type": "string", "enum": ["planned", "researching", "gap_research_required", "certified", "human_review_required", "terminated"]},
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["module_id", "name", "research_questions", "priority", "status"],
+        "properties": {
+          "module_id": {"type": "string"},
+          "name": {"type": "string"},
+          "research_questions": {"type": "array", "items": {"type": "string"}},
+          "expected_claim_types": {"type": "array", "items": {"type": "string"}},
+          "priority": {"type": "integer", "minimum": 1},
+          "status": {"type": "string", "enum": ["planned", "researching", "evidence_collected", "verification_failed", "certified", "human_review_required"]}
+        }
+      }
+    },
+    "open_questions": {"type": "array", "items": {"type": "string"}},
+    "research_gaps": {"type": "array", "items": {"type": "string"}}
+  }
+}

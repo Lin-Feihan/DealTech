@@ -1,5 +1,0 @@
-risk_id,risk_category,risk_description,buyer_impact,likelihood,severity,mitigation_or_next_check,source_id,evidence_id,human_review_required,linked_claim_id
-BRISK-001,deal_terms_unknown,Deal value and consideration are not disclosed.,"Blocks pricing, EPS, ROI, and go/no-go certification.",High,High,Replay transaction terms from primary/credible sources or mark Unknown.,SRC-ACQ-B04,EVI-ACQ-B04,Yes,CLM-ACQ-B05
-BRISK-002,valuation_unknown,"No DarwinAI revenue, EBITDA, or deal value is available.",Valuation and fairness claims cannot be certified.,High,High,Obtain financials and replay multiples.,SRC-ACQ-B05,EVI-ACQ-B05,Yes,CLM-ACQ-B05
-BRISK-003,integration_execution,Technology/team integration risk is not source-replayed.,Strategic rationale remains caveated.,Unknown,Medium,Check hiring/product integration evidence.,SRC-ACQ-B03,EVI-ACQ-B03,Yes,CLM-ACQ-B06
-BRISK-004,source_quality,Imported report is context only.,Blocks direct reuse of old recommendation.,High,High,Use source registry and PCE audit.,SRC-ACQ-B01,EVI-ACQ-B01,Yes,CLM-ACQ-B01

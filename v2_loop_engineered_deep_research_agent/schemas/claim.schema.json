@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/v2/schemas/claim.schema.json",
+  "title": "Claim",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["claim_id", "module_id", "claim_type", "statement", "evidence_ids", "certification_status"],
+  "properties": {
+    "claim_id": {"type": "string"},
+    "module_id": {"type": "string"},
+    "claim_type": {"type": "string", "enum": ["factual_claim", "financial_claim", "calculation_claim", "valuation_claim", "risk_claim", "strategic_judgment_claim", "recommendation_claim"]},
+    "statement": {"type": "string"},
+    "evidence_ids": {"type": "array", "items": {"type": "string"}},
+    "source_ids": {"type": "array", "items": {"type": "string"}},
+    "calculation_ids": {"type": "array", "items": {"type": "string"}},
+    "depends_on_claim_ids": {"type": "array", "items": {"type": "string"}},
+    "conflicts_with_claim_ids": {"type": "array", "items": {"type": "string"}},
+    "confidence": {"type": "string", "enum": ["high", "medium", "low", "unknown"]},
+    "certification_status": {"type": "string", "enum": ["Certified", "Certified with Caveat", "Needs Human Review", "Not Certified", "Internal Trace Only", "Pending"]},
+    "caveat": {"type": "string"},
+    "human_review_flag": {"type": "boolean"}
+  }
+}

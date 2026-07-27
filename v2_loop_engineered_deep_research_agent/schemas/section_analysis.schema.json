@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/v2/schemas/section_analysis.schema.json",
+  "title": "Analysis-Authored Report Chapter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["number", "title", "judgment", "paragraphs", "basis_ids"],
+  "properties": {
+    "number": {"type": "integer", "minimum": 1, "maximum": 15},
+    "title": {"type": "string", "minLength": 1},
+    "judgment": {"type": "string", "minLength": 1},
+    "paragraphs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "basis_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "model_refs": {"type": "array", "items": {"type": "string"}},
+    "dynamic_tables": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(strategic_alternatives|model:[A-Za-z0-9_-]+)$"
+      }
+    },
+    "tables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "headers", "rows"],
+        "properties": {
+          "title": {"type": "string", "minLength": 1},
+          "headers": {"type": "array", "minItems": 2},
+          "rows": {"type": "array", "minItems": 1, "items": {"type": "array"}}
+        }
+      }
+    }
+  }
+}

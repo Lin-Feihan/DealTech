@@ -1,0 +1,16 @@
+commit	date	subject	prompt_case_demo_tracked_file_count
+d77e8a9	2026-06-06	Initial commit	0
+731ba7c	2026-06-06	Revise README for AI-Native DealTech project	0
+6a38b1f	2026-06-06	Revise README for clarity on project objectives	0
+d0cae1a	2026-06-07	add certified shell company screening agent	19
+32ce2f6	2026-06-14	upload agents to the latest version	143
+f17642a	2026-06-14	add PCE instructions	143
+e759f39	2026-06-14	Update README.md	143
+bd76cbd	2026-06-14	add agents	143
+9652bee	2026-06-14	Merge branch 'main' of https://github.com/Lin-Feihan/DealTech	143
+5766cec	2026-06-14	Update README.md	143
+2b272c8	2026-07-18	feat: add buyer-side acquisition loop agent v0.1.0-rc1	188
+8033408	2026-07-18	fix: make sample manifest hashes cross-platform	188
+7df089b	2026-07-18	Merge pull request #1 from Lin-Feihan/release/buyer-side-acquisition-loop-agent-v0.1.0-rc1	188
+f85c965	2026-07-19	Revise README for Buyer-side Acquisition Loop Agent	188
+0fbdfe0	2026-07-19	Update README with structured sections and formatting	188
