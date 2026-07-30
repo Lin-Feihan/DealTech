@@ -41,9 +41,9 @@ class V3LiteMandateToResearchPlanTest(unittest.TestCase):
         verification_text = json.dumps(research_plan["verification_targets"])
         self.assertIn("web search", verification_text)
 
-    def test_fronthera_mandate_generates_case_aware_research_plan(self) -> None:
+    def test_named_case_mandate_generates_generic_research_plan(self) -> None:
         mandate_path = RUNTIME_ROOT / "examples" / "fronthera_esker_alumis_mandate.json"
-        output_dir = self.root / "outputs" / "fronthera_run"
+        output_dir = self.root / "outputs" / "named_case_run"
 
         run_pipeline(mandate_path, output_dir)
 
@@ -52,12 +52,15 @@ class V3LiteMandateToResearchPlanTest(unittest.TestCase):
         plan_text = json.dumps(research_plan)
 
         self.assertEqual(research_plan["case_id"], "fronthera_esker_alumis_2021_acquisition_m1")
-        self.assertGreaterEqual(len(research_plan["workstreams"]), 7)
-        self.assertNotIn("How should the plan cover requested scope item", plan_text)
-        for term in ("upfront", "milestone", "headline value", "TYK2", "Bohan Jin"):
-            self.assertIn(term, plan_text)
-        self.assertTrue("ESK-001" in plan_text or "envudeucitinib" in plan_text)
-        self.assertTrue("personal proceeds" in plan_text or "personal realized proceeds" in plan_text)
+        self.assertEqual(len(research_plan["workstreams"]), 9)
+        self.assertIn("Transaction Background and Mandate Clarification", plan_text)
+        self.assertIn("Buyer Strategic Rationale and Acquisition Alternatives", plan_text)
+        self.assertIn("Target Business Quality and Competitive Position", plan_text)
+        self.assertIn("Valuation, Deal Structure, Synergy, and Returns", plan_text)
+        self.assertIn("Diligence Priorities and Risk Review", plan_text)
+        self.assertIn("IC Decision Framework and Red-Line Conditions", plan_text)
+        for term in ("TYK2", "Bohan Jin", "ESK-001", "envudeucitinib", "$60M", "$120M", "$180M", "11.12%"):
+            self.assertNotIn(term, plan_text)
 
     def test_required_mandate_fields_fail_closed(self) -> None:
         required_fields = (
