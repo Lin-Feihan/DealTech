@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/schemas/v3-lite/research_gaps.schema.json",
+  "title": "V3-Lite Research Gaps",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["case_id", "generated_artifact", "stage", "created_from_certification_result_id", "research_gaps"],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "generated_artifact": {"type": "string", "const": "research_gaps.json"},
+    "stage": {"type": "string", "const": "M5_research_gaps"},
+    "created_from_certification_result_id": {"type": "string", "minLength": 1},
+    "research_gaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "research_gap_id",
+          "gap_type",
+          "related_claim_ids",
+          "related_gap_node_ids",
+          "missing_source_need_ids",
+          "gap_description",
+          "severity",
+          "blocks_certification",
+          "recommended_repair_target",
+          "suggested_source_types"
+        ],
+        "properties": {
+          "research_gap_id": {"type": "string", "minLength": 1},
+          "gap_type": {"type": "string", "minLength": 1},
+          "related_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "related_gap_node_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "missing_source_need_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "gap_description": {"type": "string", "minLength": 1},
+          "severity": {"type": "string", "enum": ["low", "medium", "high"]},
+          "blocks_certification": {"type": "boolean"},
+          "recommended_repair_target": {"type": "string", "minLength": 1},
+          "suggested_source_types": {"type": "array", "items": {"type": "string", "minLength": 1}}
+        }
+      }
+    }
+  }
+}

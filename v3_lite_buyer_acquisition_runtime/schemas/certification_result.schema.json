@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/schemas/v3-lite/certification_result.schema.json",
+  "title": "V3-Lite Certification Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "generated_artifact",
+    "stage",
+    "source_bounded",
+    "evidence_coverage_status",
+    "created_from_claim_evidence_graph_id",
+    "created_from_evidence_repository_id",
+    "created_at",
+    "overall_certification_status",
+    "claim_certifications",
+    "verification_checks",
+    "numeric_verification_results",
+    "citation_verification_results",
+    "temporal_verification_results",
+    "human_review_items",
+    "next_action"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "generated_artifact": {"type": "string", "const": "certification_result.json"},
+    "stage": {"type": "string", "const": "M5_loop_certification"},
+    "source_bounded": {"type": "boolean", "const": true},
+    "evidence_coverage_status": {"type": "string", "enum": ["complete", "partial"]},
+    "created_from_claim_evidence_graph_id": {"type": "string", "minLength": 1},
+    "created_from_evidence_repository_id": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "minLength": 1},
+    "overall_certification_status": {"type": "string", "enum": ["passed_with_caveats", "failed", "repair_required", "human_review_required"]},
+    "claim_certifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "claim_certification_id",
+          "claim_id",
+          "claim_type",
+          "claim_statement",
+          "certification_status",
+          "certification_basis",
+          "supporting_evidence_record_ids",
+          "related_source_gap_ids",
+          "citation_check_status",
+          "temporal_check_status",
+          "numeric_check_status",
+          "caveats",
+          "requires_human_review",
+          "downstream_use_warning"
+        ],
+        "properties": {
+          "claim_certification_id": {"type": "string", "minLength": 1},
+          "claim_id": {"type": "string", "minLength": 1},
+          "claim_type": {"type": "string", "minLength": 1},
+          "claim_statement": {"type": "string", "minLength": 1},
+          "certification_status": {
+            "type": "string",
+            "enum": ["certified", "certified_with_caveat", "failed", "blocked_by_source_gap", "unsupported", "requires_numeric_verification", "requires_human_review", "not_applicable"]
+          },
+          "certification_basis": {"type": "string", "minLength": 1},
+          "supporting_evidence_record_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "related_source_gap_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "citation_check_status": {"type": "string", "minLength": 1},
+          "temporal_check_status": {"type": "string", "minLength": 1},
+          "numeric_check_status": {"type": "string", "minLength": 1},
+          "caveats": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "requires_human_review": {"type": "boolean"},
+          "downstream_use_warning": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "verification_checks": {"type": "array", "items": {"type": "object"}},
+    "numeric_verification_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["numeric_check_id", "related_claim_id", "inputs", "formula", "computed_result", "verification_status", "caveat", "downstream_use_warning"],
+        "properties": {
+          "numeric_check_id": {"type": "string", "minLength": 1},
+          "related_claim_id": {"type": "string", "minLength": 1},
+          "inputs": {"type": "array", "items": {"type": "object"}},
+          "formula": {"type": "string", "minLength": 1},
+          "computed_result": {"type": "integer"},
+          "verification_status": {"type": "string", "enum": ["passed", "passed_with_caveat", "failed"]},
+          "caveat": {"type": "string", "minLength": 1},
+          "downstream_use_warning": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "citation_verification_results": {"type": "array", "items": {"type": "object"}},
+    "temporal_verification_results": {"type": "array", "items": {"type": "object"}},
+    "human_review_items": {"type": "array", "items": {"type": "object"}},
+    "next_action": {"type": "string", "minLength": 1}
+  }
+}

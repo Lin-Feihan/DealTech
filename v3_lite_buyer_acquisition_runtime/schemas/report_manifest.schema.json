@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/schemas/v3-lite/report_manifest.schema.json",
+  "title": "V3-Lite Report Rendering Gate Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "generated_artifact",
+    "stage",
+    "source_bounded",
+    "created_from_analysis_package_id",
+    "created_from_certification_result_id",
+    "created_from_repair_plan_id",
+    "created_at",
+    "rendering_status",
+    "final_report_generated",
+    "blocked_reasons",
+    "allowed_sections",
+    "excluded_sections",
+    "required_repairs_before_report",
+    "human_review_required",
+    "next_action"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "generated_artifact": {"type": "string", "const": "report_manifest.json"},
+    "stage": {"type": "string", "const": "M7_report_rendering_gate"},
+    "source_bounded": {"type": "boolean", "const": true},
+    "created_from_analysis_package_id": {"type": "string", "minLength": 1},
+    "created_from_certification_result_id": {"type": "string", "minLength": 1},
+    "created_from_repair_plan_id": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "minLength": 1},
+    "rendering_status": {
+      "type": "string",
+      "enum": [
+        "ready_to_render",
+        "blocked_by_repair_required",
+        "blocked_by_certification_failure",
+        "blocked_by_human_review",
+        "blocked_by_analysis_readiness",
+        "failed_closed"
+      ]
+    },
+    "final_report_generated": {"type": "boolean"},
+    "blocked_reasons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["blocked_reason_id", "reason", "gate", "severity"],
+        "properties": {
+          "blocked_reason_id": {"type": "string", "minLength": 1},
+          "reason": {"type": "string", "minLength": 1},
+          "gate": {"type": "string", "minLength": 1},
+          "severity": {"type": "string", "enum": ["low", "medium", "high"]}
+        }
+      }
+    },
+    "allowed_sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["section_id", "section_name", "status"],
+        "properties": {
+          "section_id": {"type": "string", "minLength": 1},
+          "section_name": {"type": "string", "minLength": 1},
+          "status": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "excluded_sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["section_id", "section_name", "status"],
+        "properties": {
+          "section_id": {"type": "string", "minLength": 1},
+          "section_name": {"type": "string", "minLength": 1},
+          "status": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "required_repairs_before_report": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "repair_step_id",
+          "reason",
+          "target_state",
+          "target_artifact",
+          "related_claim_ids",
+          "related_research_gap_ids",
+          "required_source_types"
+        ],
+        "properties": {
+          "repair_step_id": {"type": "string", "minLength": 1},
+          "reason": {"type": "string", "minLength": 1},
+          "target_state": {"type": "string", "minLength": 1},
+          "target_artifact": {"type": "string", "minLength": 1},
+          "related_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "related_research_gap_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "required_source_types": {"type": "array", "items": {"type": "string", "minLength": 1}}
+        }
+      }
+    },
+    "human_review_required": {"type": "boolean"},
+    "next_action": {"type": "string", "minLength": 1}
+  }
+}

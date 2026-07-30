@@ -1,0 +1,24 @@
+{
+  "allowed_sections": [
+    {
+      "section_id": "AS-001",
+      "section_name": "evidence-bounded analysis package exists",
+      "status": "internal_non_final_material"
+    }
+  ],
+  "blocked_reasons": [],
+  "case_id": "report_ready_fixture_case",
+  "created_at": "2026-07-29T12:30:00Z",
+  "created_from_analysis_package_id": "ANALYSIS-report_ready_fixture_case-2026-07-29T12:20:00Z",
+  "created_from_certification_result_id": "CERT-report_ready_fixture_case-2026-07-29T12:10:00Z",
+  "created_from_repair_plan_id": "REPAIR-report_ready_fixture_case-none",
+  "excluded_sections": [],
+  "final_report_generated": true,
+  "generated_artifact": "report_manifest.json",
+  "human_review_required": false,
+  "next_action": "render_final_report_after_explicit_user_request",
+  "rendering_status": "ready_to_render",
+  "required_repairs_before_report": [],
+  "source_bounded": true,
+  "stage": "M7_report_rendering_gate"
+}

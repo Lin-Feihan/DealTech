@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/schemas/v3-lite/case_seed.schema.json",
+  "title": "V3-Lite Case Seed",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "seed_id",
+    "seed_type",
+    "source_description",
+    "case_parties",
+    "transaction_leads",
+    "key_assets_or_topics",
+    "known_dates",
+    "known_amounts",
+    "source_leads",
+    "uncertainty_warnings"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "seed_id": {"type": "string", "minLength": 1},
+    "seed_type": {"type": "string", "minLength": 1},
+    "source_description": {"type": "string", "minLength": 1},
+    "case_parties": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["buyer_or_acquiring_vehicle", "target"],
+      "properties": {
+        "buyer_or_acquiring_vehicle": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "target": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "people": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "transaction_leads": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "key_assets_or_topics": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "known_dates": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "known_amounts": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "source_leads": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "uncertainty_warnings": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+  }
+}
+

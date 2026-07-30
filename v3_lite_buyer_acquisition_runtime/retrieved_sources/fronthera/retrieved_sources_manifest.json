@@ -1,0 +1,168 @@
+{
+  "case_id": "fronthera_esker_alumis_2021_acquisition_m1",
+  "generated_artifact": "retrieved_sources_manifest.json",
+  "retrieval_mode": "manual_retrieved_sources",
+  "retrieval_date": "2026-07-29",
+  "source_discovery_plan_id": "SDP-fronthera_esker_alumis_2021_acquisition_m1-CASE-SEED-FRONTHERA-ESKER-ALUMIS-001",
+  "evidence_coverage_status": "partial",
+  "retrieved_sources": [
+    {
+      "source_id": "SRC-SEC-SPA-001",
+      "title": "SEC Exhibit 10.22 Stock Purchase Agreement dated March 5, 2021",
+      "url_or_file": "https://www.sec.gov/Archives/edgar/data/1847367/000110465924069735/tm2411163d6_ex10-22.htm",
+      "source_type": "SEC filing / signed stock purchase agreement",
+      "source_tier": "Tier 1",
+      "source_owner": "SEC / Alumis",
+      "retrieval_date": "2026-07-29",
+      "retrieved_by": "manual_official_source_cache",
+      "related_source_need_ids": [
+        "SN-001",
+        "SN-002",
+        "SN-004",
+        "SN-006"
+      ],
+      "related_search_query_ids": [
+        "SQ-001",
+        "SQ-002",
+        "SQ-004",
+        "SQ-006"
+      ],
+      "reliability_reason": "Downloaded from SEC Archives; official filing exhibit containing the FronThera stock purchase agreement and TYK2 portfolio lead identifiers.",
+      "use_limitations": "Agreement can support transaction terms and patent lead identifiers, but is not an official patent database record and cannot verify missing Haisco/Bohan ownership facts.",
+      "source_date_or_period": "2021-03-05",
+      "source_time_relation_to_decision_date": "at_decision",
+      "permitted_use": "transaction_terms_verification",
+      "local_cache_path": "cache/sec_exhibit_10_22_stock_purchase_agreement.htm"
+    },
+    {
+      "source_id": "SRC-SEC-424B4-001",
+      "title": "Alumis SEC 424B4 Prospectus",
+      "url_or_file": "https://www.sec.gov/Archives/edgar/data/1847367/000110465924076337/tm2411163-14_424b4.htm",
+      "source_type": "SEC filing / prospectus",
+      "source_tier": "Tier 1",
+      "source_owner": "SEC / Alumis",
+      "retrieval_date": "2026-07-29",
+      "retrieved_by": "manual_official_source_cache",
+      "related_source_need_ids": [
+        "SN-002",
+        "SN-003",
+        "SN-004",
+        "SN-006",
+        "SN-007"
+      ],
+      "related_search_query_ids": [
+        "SQ-002",
+        "SQ-003",
+        "SQ-004",
+        "SQ-006",
+        "SQ-007"
+      ],
+      "reliability_reason": "Downloaded from SEC Archives; official IPO prospectus for Alumis with company, asset, and transaction context.",
+      "use_limitations": "Prospectus evidence remains raw and source-bounded; conflicts, coverage gaps, and certification are downstream.",
+      "source_date_or_period": "2024 IPO prospectus",
+      "source_time_relation_to_decision_date": "post_decision",
+      "permitted_use": "retrospective_outcome_validation",
+      "local_cache_path": "cache/sec_alumis_424b4_2024.htm"
+    },
+    {
+      "source_id": "SRC-SEC-10K-2025-001",
+      "title": "Alumis SEC 2025 10-K",
+      "url_or_file": "https://www.sec.gov/Archives/edgar/data/1847367/000184736725000012/tmb-20241231x10k.htm",
+      "source_type": "SEC filing / annual report",
+      "source_tier": "Tier 1",
+      "source_owner": "SEC / Alumis",
+      "retrieval_date": "2026-07-29",
+      "retrieved_by": "manual_official_source_cache",
+      "related_source_need_ids": [
+        "SN-003",
+        "SN-004",
+        "SN-006",
+        "SN-007"
+      ],
+      "related_search_query_ids": [
+        "SQ-003",
+        "SQ-004",
+        "SQ-006",
+        "SQ-007"
+      ],
+      "reliability_reason": "Downloaded from SEC Archives; official annual report candidate for milestone and pipeline evidence.",
+      "use_limitations": "Raw source only; exact milestone support depends on bounded extraction hits and downstream review.",
+      "source_date_or_period": "2025 annual report / FY2024 reporting period",
+      "source_time_relation_to_decision_date": "post_decision",
+      "permitted_use": "retrospective_outcome_validation",
+      "local_cache_path": "cache/sec_alumis_2025_10k.htm"
+    },
+    {
+      "source_id": "SRC-SEC-10K-2026-001",
+      "title": "Alumis SEC 2026 10-K",
+      "url_or_file": "https://www.sec.gov/Archives/edgar/data/1847367/000184736726000006/alms-20251231x10k.htm",
+      "source_type": "SEC filing / annual report",
+      "source_tier": "Tier 1",
+      "source_owner": "SEC / Alumis",
+      "retrieval_date": "2026-07-29",
+      "retrieved_by": "manual_official_source_cache",
+      "related_source_need_ids": [
+        "SN-003",
+        "SN-004",
+        "SN-006",
+        "SN-007"
+      ],
+      "related_search_query_ids": [
+        "SQ-003",
+        "SQ-004",
+        "SQ-006",
+        "SQ-007"
+      ],
+      "reliability_reason": "Downloaded from SEC Archives; official annual report candidate for milestone and pipeline evidence.",
+      "use_limitations": "Raw source only; exact milestone support depends on bounded extraction hits and downstream review.",
+      "source_date_or_period": "2026 annual report / FY2025 reporting period",
+      "source_time_relation_to_decision_date": "post_decision",
+      "permitted_use": "retrospective_outcome_validation",
+      "local_cache_path": "cache/sec_alumis_2026_10k.htm"
+    },
+    {
+      "source_id": "SRC-ALUMIS-PIPELINE-001",
+      "title": "Alumis Official Pipeline Page",
+      "url_or_file": "https://www.alumis.com/pipeline/",
+      "source_type": "official company pipeline page",
+      "source_tier": "Tier 2",
+      "source_owner": "Alumis official website",
+      "retrieval_date": "2026-07-29",
+      "retrieved_by": "manual_official_source_cache",
+      "related_source_need_ids": [
+        "SN-007"
+      ],
+      "related_search_query_ids": [
+        "SQ-007"
+      ],
+      "reliability_reason": "Downloaded from the Alumis official website; official company pipeline page for ESK-001 / envudeucitinib context.",
+      "use_limitations": "Official company source, not SEC-certified evidence; pipeline status needs date and downstream validation.",
+      "source_date_or_period": "current as of retrieval date 2026-07-29",
+      "source_time_relation_to_decision_date": "retrospective",
+      "permitted_use": "retrospective_outcome_validation",
+      "local_cache_path": "cache/alumis_pipeline_page.html"
+    }
+  ],
+  "failed_source_needs": [
+    {
+      "source_need_id": "SN-005",
+      "missing_source": "Haisco / CNINFO / SZSE disclosure showing Bohan Jin role and 2017 11.12% shareholding",
+      "reason": "CNINFO/Haisco official disclosure was not retrievable with tested official queries; do not verify Bohan Jin role or 2017 11.12% shareholding from SEC context, case_seed, mandate notes, Bohan PDF, or fixtures."
+    },
+    {
+      "source_need_id": "SN-006",
+      "missing_source": "Official patent-office records for TYK2 inhibitor chemistry",
+      "reason": "SEC Exhibit 10.22 provides patent lead identifiers, but WIPO/USPTO official patent record text was not retrievable; do not treat SEC agreement patent references as official patent-office evidence."
+    },
+    {
+      "source_need_id": "SN-008",
+      "missing_source": "Direct source on Bohan Jin personal realized proceeds",
+      "reason": "No direct authoritative source was retrieved for personal realized proceeds; do not infer proceeds from ownership leads or transaction consideration."
+    },
+    {
+      "source_need_id": "SN-008",
+      "missing_source": "Immediately pre-2021 FronThera cap table source",
+      "reason": "No authoritative source was retrieved for the immediate pre-sale cap table; leave cap table coverage as a gap."
+    }
+  ]
+}

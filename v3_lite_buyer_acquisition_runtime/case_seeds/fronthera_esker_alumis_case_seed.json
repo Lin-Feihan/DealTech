@@ -1,0 +1,58 @@
+{
+  "case_id": "fronthera_esker_alumis_2021_acquisition_m1",
+  "seed_id": "CASE-SEED-FRONTHERA-ESKER-ALUMIS-001",
+  "seed_type": "case_brief_lead_document",
+  "source_description": "User-provided Bohan Jin / FronThera case brief. This seed identifies a case to investigate and must not be treated as authoritative evidence.",
+  "case_parties": {
+    "buyer_or_acquiring_vehicle": [
+      "FL2021-001",
+      "Esker Therapeutics",
+      "Alumis"
+    ],
+    "target": [
+      "FronThera"
+    ],
+    "people": [
+      "Bohan Jin"
+    ]
+  },
+  "transaction_leads": [
+    "March 2021 sale of FronThera to FL2021-001 / Esker / Alumis",
+    "March 5, 2021 stock purchase agreement",
+    "FronThera stock purchase agreement Exhibit 10.22"
+  ],
+  "key_assets_or_topics": [
+    "TYK2 inhibitor chemistry",
+    "ESK-001",
+    "envudeucitinib",
+    "FronThera founder / key-person diligence",
+    "Bohan Jin personal proceeds uncertainty"
+  ],
+  "known_dates": [
+    "March 2021",
+    "2021-03-05",
+    "2022 milestone payment lead",
+    "2024 milestone payment lead"
+  ],
+  "known_amounts": [
+    "$60M base initial consideration lead",
+    "up to $120M milestone consideration lead",
+    "$180M maximum aggregate headline value lead",
+    "$37M milestone paid in 2022 lead",
+    "$23M milestone paid in 2024 lead",
+    "2017 11.12% FronThera shareholding lead for Bohan Jin"
+  ],
+  "source_leads": [
+    "SEC filings and exhibits for Alumis / Esker / FronThera transaction agreements",
+    "Alumis annual reports, S-1, prospectus, or 10-K filings for milestone payments and entity history",
+    "Haisco disclosure or direct filing for FronThera ownership, governance, and Bohan Jin role / 11.12% shareholding",
+    "Official patent databases for TYK2 inhibitor chemistry lineage",
+    "Clinical trial databases and official Alumis pipeline pages for ESK-001 / envudeucitinib"
+  ],
+  "uncertainty_warnings": [
+    "Case seed is not authoritative evidence and cannot directly support high-confidence claims.",
+    "Do not infer Bohan Jin personal realized proceeds without direct source evidence.",
+    "Do not treat $180M headline maximum value as all-cash upfront consideration.",
+    "Use retrieved authoritative sources before extracting raw evidence."
+  ]
+}

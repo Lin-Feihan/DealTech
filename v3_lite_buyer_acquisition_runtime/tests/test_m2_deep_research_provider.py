@@ -1,0 +1,406 @@
+from __future__ import annotations
+
+import json
+import os
+import tempfile
+import unittest
+from pathlib import Path
+from unittest.mock import patch
+
+from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m2_deep_research import (
+    M2DeepResearchFailClosed,
+    run_m2_deep_research_pipeline,
+)
+
+
+RUNTIME_ROOT = Path(__file__).resolve().parents[1]
+
+
+class V3LiteM2DeepResearchProviderTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp_dir.name)
+        self.mandate_path = RUNTIME_ROOT / "outputs" / "fronthera_esker_alumis_m1_5" / "mandate.json"
+        self.research_plan_path = RUNTIME_ROOT / "outputs" / "fronthera_esker_alumis_m1_5" / "research_plan.json"
+        self.case_seed_path = RUNTIME_ROOT / "case_seeds" / "fronthera_esker_alumis_case_seed.json"
+        self.source_discovery_plan_path = (
+            RUNTIME_ROOT / "outputs" / "fronthera_esker_alumis_m2_real_source_partial" / "source_discovery_plan.json"
+        )
+
+    def tearDown(self) -> None:
+        self.temp_dir.cleanup()
+
+    def test_missing_openai_api_key_fails_closed_after_request_artifact(self) -> None:
+        output_dir = self.root / "live_missing_key"
+        with patch.dict(os.environ, {"OPENAI_DEEP_RESEARCH_MODEL": "o3-deep-research-test"}, clear=False):
+            with patch.dict(os.environ, {"OPENAI_API_KEY": ""}, clear=False):
+                with self.assertRaises(M2DeepResearchFailClosed) as context:
+                    run_m2_deep_research_pipeline(
+                        mandate_path=self.mandate_path,
+                        research_plan_path=self.research_plan_path,
+                        case_seed_path=self.case_seed_path,
+                        source_discovery_plan_path=self.source_discovery_plan_path,
+                        output_dir=output_dir,
+                        mode="live_openai_deep_research",
+                    )
+
+        self.assertIn("Missing OPENAI_API_KEY", str(context.exception))
+        self.assertTrue((output_dir / "deep_research_request.json").exists())
+        self.assertFalse((output_dir / "deep_research_response.raw.json").exists())
+        self.assertFalse((output_dir / "retrieved_sources_manifest.json").exists())
+        self.assertFalse((output_dir / "raw_evidence.json").exists())
+
+    def test_missing_model_config_fails_closed_after_request_artifact(self) -> None:
+        output_dir = self.root / "live_missing_model"
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key", "OPENAI_DEEP_RESEARCH_MODEL": ""}, clear=False):
+            with self.assertRaises(M2DeepResearchFailClosed) as context:
+                run_m2_deep_research_pipeline(
+                    mandate_path=self.mandate_path,
+                    research_plan_path=self.research_plan_path,
+                    case_seed_path=self.case_seed_path,
+                    source_discovery_plan_path=self.source_discovery_plan_path,
+                    output_dir=output_dir,
+                    mode="live_openai_deep_research",
+                )
+
+        self.assertIn("Missing OPENAI_DEEP_RESEARCH_MODEL", str(context.exception))
+        self.assertTrue((output_dir / "deep_research_request.json").exists())
+        self.assertFalse((output_dir / "deep_research_response.raw.json").exists())
+        self.assertFalse((output_dir / "retrieved_sources_manifest.json").exists())
+        self.assertFalse((output_dir / "raw_evidence.json").exists())
+
+    def test_external_replay_response_normalizes_into_manifest_and_raw_evidence(self) -> None:
+        output_dir = self.root / "replay_success"
+        replay_path = self._write_replay_response(self._valid_replay_response())
+
+        artifacts = run_m2_deep_research_pipeline(
+            mandate_path=self.mandate_path,
+            research_plan_path=self.research_plan_path,
+            case_seed_path=self.case_seed_path,
+            source_discovery_plan_path=self.source_discovery_plan_path,
+            output_dir=output_dir,
+            mode="replay_deep_research_response",
+            replay_response_path=replay_path,
+        )
+
+        manifest = self._load_json(artifacts["retrieved_sources_manifest"])
+        raw_evidence = self._load_json(artifacts["raw_evidence"])
+        source_ids = {source["source_id"] for source in manifest["retrieved_sources"]}
+        sources_by_id = {source["source_id"]: source for source in manifest["retrieved_sources"]}
+
+        self.assertNotIn("deep_research_request", artifacts)
+        self.assertNotIn("deep_research_response_raw", artifacts)
+        self.assertFalse((output_dir / "deep_research_request.json").exists())
+        self.assertFalse((output_dir / "deep_research_response.raw.json").exists())
+        self.assertEqual(manifest["retrieval_mode"], "deep_research")
+        self.assertEqual(raw_evidence["generated_artifact"], "raw_evidence.json")
+        self.assertTrue(raw_evidence["external_retrieval_performed"])
+        self.assertEqual(manifest["evidence_coverage_status"], "partial")
+        self.assertEqual(raw_evidence["evidence_coverage_status"], "partial")
+        self.assertTrue(manifest["failed_source_needs"])
+
+        self.assertEqual(sources_by_id["SRC-DR-PS-001"]["source_tier"], "Tier 1")
+        self.assertEqual(sources_by_id["SRC-DR-PS-002"]["source_tier"], "Tier 2")
+        self.assertEqual(sources_by_id["SRC-DR-PS-003"]["source_tier"], "Tier 3")
+        self.assertEqual(sources_by_id["SRC-DR-PS-004"]["source_tier"], "Tier 4")
+
+        self.assertEqual(sources_by_id["SRC-DR-PS-001"]["source_time_relation_to_decision_date"], "at_decision")
+        self.assertEqual(sources_by_id["SRC-DR-PS-001"]["permitted_use"], "transaction_terms_verification")
+        self.assertEqual(sources_by_id["SRC-DR-PS-002"]["source_time_relation_to_decision_date"], "retrospective")
+        self.assertEqual(sources_by_id["SRC-DR-PS-002"]["permitted_use"], "retrospective_outcome_validation")
+        self.assertEqual(sources_by_id["SRC-DR-PS-003"]["source_time_relation_to_decision_date"], "post_decision")
+
+        raw_source_ids = {item["source_id"] for item in raw_evidence["raw_evidence_items"]}
+        self.assertTrue(raw_source_ids.issubset(source_ids))
+        self.assertIn("SRC-DR-PS-001", raw_source_ids)
+        self.assertIn("SRC-DR-PS-002", raw_source_ids)
+        self.assertIn("SRC-DR-PS-003", raw_source_ids)
+        self.assertNotIn("SRC-DR-PS-004", raw_source_ids)
+
+        for item in raw_evidence["raw_evidence_items"]:
+            self.assertEqual(item["evidence_time_relation_to_decision_date"], sources_by_id[item["source_id"]]["source_time_relation_to_decision_date"])
+            self.assertEqual(item["permitted_use"], sources_by_id[item["source_id"]]["permitted_use"])
+            self.assertTrue(item["hindsight_leakage_warning"])
+
+        failed_reasons = "\n".join(entry["reason"] for entry in manifest["failed_source_needs"])
+        self.assertIn("Tier 4 material", failed_reasons)
+        self.assertIn("forbidden non-source material", failed_reasons)
+
+    def test_external_source_tier_and_temporal_classification_are_preserved(self) -> None:
+        output_dir = self.root / "replay_preserve_classification"
+        response = self._valid_replay_response()
+        response["sources"][2]["source_tier"] = "Tier 2"
+        response["sources"][2]["source_time_relation_to_decision_date"] = "pre_decision"
+        response["sources"][2]["permitted_use"] = "source_lead_only"
+        replay_path = self._write_replay_response(response)
+
+        artifacts = run_m2_deep_research_pipeline(
+            mandate_path=self.mandate_path,
+            research_plan_path=self.research_plan_path,
+            case_seed_path=self.case_seed_path,
+            source_discovery_plan_path=self.source_discovery_plan_path,
+            output_dir=output_dir,
+            mode="replay_deep_research_response",
+            replay_response_path=replay_path,
+        )
+
+        manifest = self._load_json(artifacts["retrieved_sources_manifest"])
+        raw_evidence = self._load_json(artifacts["raw_evidence"])
+        source = {item["source_id"]: item for item in manifest["retrieved_sources"]}["SRC-DR-PS-003"]
+        evidence = [item for item in raw_evidence["raw_evidence_items"] if item["source_id"] == "SRC-DR-PS-003"][0]
+
+        self.assertEqual(source["source_tier"], "Tier 2")
+        self.assertEqual(source["source_time_relation_to_decision_date"], "pre_decision")
+        self.assertEqual(source["permitted_use"], "source_lead_only")
+        self.assertEqual(evidence["source_tier"], "Tier 2")
+        self.assertEqual(evidence["evidence_time_relation_to_decision_date"], "pre_decision")
+        self.assertEqual(evidence["permitted_use"], "source_lead_only")
+
+    def test_invalid_external_package_fails_closed(self) -> None:
+        output_dir = self.root / "replay_invalid_package"
+        response = self._valid_replay_response()
+        del response["sources"]
+        replay_path = self._write_replay_response(response)
+
+        with self.assertRaises(M2DeepResearchFailClosed) as context:
+            run_m2_deep_research_pipeline(
+                mandate_path=self.mandate_path,
+                research_plan_path=self.research_plan_path,
+                case_seed_path=self.case_seed_path,
+                source_discovery_plan_path=self.source_discovery_plan_path,
+                output_dir=output_dir,
+                mode="replay_deep_research_response",
+                replay_response_path=replay_path,
+            )
+
+        self.assertIn("deep_research_response missing field(s): sources", str(context.exception))
+        self.assertFalse((output_dir / "deep_research_request.json").exists())
+        self.assertFalse((output_dir / "deep_research_response.raw.json").exists())
+        self.assertFalse((output_dir / "retrieved_sources_manifest.json").exists())
+        self.assertFalse((output_dir / "raw_evidence.json").exists())
+
+    def test_source_less_evidence_item_is_rejected(self) -> None:
+        output_dir = self.root / "replay_missing_source"
+        response = self._valid_replay_response()
+        response["evidence_items"].append(
+            {
+                "provider_evidence_id": "PE-MISSING",
+                "provider_source_id": "PS-MISSING",
+                "extracted_text_or_summary": "Unsupported unsourced claim.",
+                "extraction_location_if_available": None,
+                "fact_type": "headline_maximum_value",
+                "related_workstream_ids": ["WS-005"],
+                "related_evidence_requirement_ids": ["ER-006"],
+                "related_verification_target_ids": ["VT-003"],
+                "confidence_preliminary": "medium",
+                "caveats": ["No supporting source provided."],
+            }
+        )
+        replay_path = self._write_replay_response(response)
+
+        with self.assertRaises(M2DeepResearchFailClosed):
+            run_m2_deep_research_pipeline(
+                mandate_path=self.mandate_path,
+                research_plan_path=self.research_plan_path,
+                case_seed_path=self.case_seed_path,
+                source_discovery_plan_path=self.source_discovery_plan_path,
+                output_dir=output_dir,
+                mode="replay_deep_research_response",
+                replay_response_path=replay_path,
+            )
+
+        self.assertFalse((output_dir / "deep_research_request.json").exists())
+        self.assertFalse((output_dir / "deep_research_response.raw.json").exists())
+        self.assertFalse((output_dir / "retrieved_sources_manifest.json").exists())
+        self.assertFalse((output_dir / "raw_evidence.json").exists())
+
+    def test_no_downstream_artifacts_are_generated(self) -> None:
+        output_dir = self.root / "replay_no_downstream"
+        replay_path = self._write_replay_response(self._valid_replay_response())
+
+        run_m2_deep_research_pipeline(
+            mandate_path=self.mandate_path,
+            research_plan_path=self.research_plan_path,
+            case_seed_path=self.case_seed_path,
+            source_discovery_plan_path=self.source_discovery_plan_path,
+            output_dir=output_dir,
+            mode="replay_deep_research_response",
+            replay_response_path=replay_path,
+        )
+
+        self.assertFalse((output_dir / "evidence_repository.json").exists())
+        self.assertFalse((output_dir / "claim_evidence_graph.json").exists())
+        self.assertFalse((output_dir / "certification_result.json").exists())
+        self.assertFalse((output_dir / "analysis_package.json").exists())
+        self.assertFalse((output_dir / "final_report.md").exists())
+        self.assertFalse((output_dir / "recommendation_decision.json").exists())
+        self.assertFalse((output_dir / "deep_research_request.json").exists())
+        self.assertFalse((output_dir / "deep_research_response.raw.json").exists())
+
+    def test_external_research_package_template_validates(self) -> None:
+        template_path = RUNTIME_ROOT / "external_research_packages" / "template_deep_research_response.json"
+        template = self._load_json(template_path)
+        replay_path = self._write_replay_response(template)
+
+        with self.assertRaises(M2DeepResearchFailClosed) as context:
+            run_m2_deep_research_pipeline(
+                mandate_path=self.mandate_path,
+                research_plan_path=self.research_plan_path,
+                case_seed_path=self.case_seed_path,
+                source_discovery_plan_path=self.source_discovery_plan_path,
+                output_dir=self.root / "template_case_mismatch",
+                mode="replay_deep_research_response",
+                replay_response_path=replay_path,
+            )
+
+        self.assertIn("case_id must match", str(context.exception))
+
+    def _write_replay_response(self, response: dict) -> Path:
+        path = self.root / "deep_research_replay_response.json"
+        path.write_text(json.dumps(response, indent=2), encoding="utf-8")
+        return path
+
+    @staticmethod
+    def _load_json(path: Path) -> dict:
+        return json.loads(path.read_text(encoding="utf-8"))
+
+    @staticmethod
+    def _valid_replay_response() -> dict:
+        return {
+            "case_id": "fronthera_esker_alumis_2021_acquisition_m1",
+            "provider": "openai_deep_research",
+            "model": "o3-deep-research-test",
+            "response_id": "resp_test_001",
+            "completed_at": "2026-07-29T22:40:00Z",
+            "sources": [
+                {
+                    "provider_source_id": "PS-001",
+                    "title": "SEC Exhibit 10.22 Stock Purchase Agreement",
+                    "url": "https://www.sec.gov/Archives/example-spa.htm",
+                    "source_type": "SEC filing",
+                    "source_owner": "SEC / Alumis",
+                    "source_date_or_period": "2021-03-05",
+                    "source_reliability_rationale": "Primary SEC filing containing the signed agreement.",
+                    "source_limitations": "Agreement supports transaction terms only; later certification still required."
+                },
+                {
+                    "provider_source_id": "PS-002",
+                    "title": "Official Alumis pipeline page for ESK-001",
+                    "url": "https://www.alumis.com/pipeline/esk-001",
+                    "source_type": "official company pipeline page",
+                    "source_owner": "Alumis",
+                    "source_date_or_period": "current as of retrieval date 2026-07-29",
+                    "source_reliability_rationale": "Official company pipeline page for current product naming.",
+                    "source_limitations": "Current page is retrospective to the 2021 decision date."
+                },
+                {
+                    "provider_source_id": "PS-003",
+                    "title": "Reuters coverage of later milestone events",
+                    "url": "https://www.reuters.com/example-future-milestone",
+                    "source_type": "reputable financial news",
+                    "source_owner": "Reuters",
+                    "source_date_or_period": "2024",
+                    "source_reliability_rationale": "Reputable financial news with later outcome context.",
+                    "source_limitations": "Secondary source and post-decision."
+                },
+                {
+                    "provider_source_id": "PS-004",
+                    "title": "Deep Research summary memo",
+                    "url": "deep-research-summary://memo-1",
+                    "source_type": "model-generated research summary",
+                    "source_owner": "OpenAI Deep Research",
+                    "source_date_or_period": "2026-07-29",
+                    "source_reliability_rationale": "Provider synthesis only.",
+                    "source_limitations": "Not an original authoritative source."
+                },
+                {
+                    "provider_source_id": "PS-005",
+                    "title": "Bohan PDF personal proceeds notes",
+                    "url": "file://bohan-pdf-notes",
+                    "source_type": "user-provided case brief",
+                    "source_owner": "user-provided",
+                    "source_date_or_period": "unknown",
+                    "source_reliability_rationale": "User-provided notes only.",
+                    "source_limitations": "Not authoritative evidence."
+                }
+            ],
+            "evidence_items": [
+                {
+                    "provider_evidence_id": "PE-001",
+                    "provider_source_id": "PS-001",
+                    "extracted_text_or_summary": "The stock purchase agreement states a $60 million base initial consideration and up to $120 million milestone consideration.",
+                    "extraction_location_if_available": {"section": "Consideration", "page": 3},
+                    "fact_type": "base_initial_consideration",
+                    "related_workstream_ids": ["WS-005"],
+                    "related_evidence_requirement_ids": ["ER-001", "ER-006"],
+                    "related_verification_target_ids": ["VT-001", "VT-003"],
+                    "confidence_preliminary": "high",
+                    "caveats": []
+                },
+                {
+                    "provider_evidence_id": "PE-002",
+                    "provider_source_id": "PS-002",
+                    "extracted_text_or_summary": "The official pipeline page identifies ESK-001 as envudeucitinib in the current Alumis pipeline.",
+                    "extraction_location_if_available": {"section": "Pipeline"},
+                    "fact_type": "envudeucitinib_asset_lineage",
+                    "related_workstream_ids": ["WS-003", "WS-008"],
+                    "related_evidence_requirement_ids": ["ER-005"],
+                    "related_verification_target_ids": ["VT-006"],
+                    "confidence_preliminary": "medium",
+                    "caveats": ["Current pipeline page is retrospective to 2021."]
+                },
+                {
+                    "provider_evidence_id": "PE-003",
+                    "provider_source_id": "PS-003",
+                    "extracted_text_or_summary": "Reuters reported a later milestone event tied to the FronThera acquisition program in 2024.",
+                    "extraction_location_if_available": "article body",
+                    "fact_type": "milestone_payment_2024",
+                    "related_workstream_ids": ["WS-006"],
+                    "related_evidence_requirement_ids": ["ER-002", "ER-006"],
+                    "related_verification_target_ids": ["VT-001", "VT-002"],
+                    "confidence_preliminary": "low",
+                    "caveats": ["Secondary source; requires downstream confirmation."]
+                },
+                {
+                    "provider_evidence_id": "PE-004",
+                    "provider_source_id": "PS-004",
+                    "extracted_text_or_summary": "Deep Research summary says the headline value was $180 million.",
+                    "extraction_location_if_available": "provider memo",
+                    "fact_type": "headline_maximum_value",
+                    "related_workstream_ids": ["WS-005"],
+                    "related_evidence_requirement_ids": ["ER-006"],
+                    "related_verification_target_ids": ["VT-003"],
+                    "confidence_preliminary": "medium",
+                    "caveats": ["Provider summary only."]
+                },
+                {
+                    "provider_evidence_id": "PE-005",
+                    "provider_source_id": "PS-005",
+                    "extracted_text_or_summary": "Bohan PDF suggests founder economics and personal proceeds.",
+                    "extraction_location_if_available": "PDF note",
+                    "fact_type": "personal_proceeds_not_verified",
+                    "related_workstream_ids": ["WS-004", "WS-009"],
+                    "related_evidence_requirement_ids": ["ER-007"],
+                    "related_verification_target_ids": ["VT-004", "VT-007"],
+                    "confidence_preliminary": "low",
+                    "caveats": ["User note only."]
+                }
+            ],
+            "unresolved_gaps": [
+                {
+                    "gap_id": "GAP-001",
+                    "gap_description": "Direct authoritative support for Bohan Jin personal realized proceeds remains unresolved.",
+                    "attempted_source_types": ["stock exchange announcement", "company filing"],
+                    "reason_unresolved": "Deep Research did not identify a direct authoritative source.",
+                    "recommended_next_search": "Search official Haisco, CNINFO, and SZSE disclosures for personal proceeds or cap table evidence."
+                }
+            ],
+            "provider_notes": [
+                "Primary official sources were preferred where available.",
+                "Secondary and retrospective sources remain caveated."
+            ]
+        }
+
+
+if __name__ == "__main__":
+    unittest.main()

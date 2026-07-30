@@ -1,0 +1,91 @@
+{
+  "case_id": "fronthera_esker_alumis_2021_acquisition_m1",
+  "generated_artifact": "retrieved_sources_manifest.json",
+  "retrieval_mode": "manual_retrieved_sources",
+  "retrieval_date": "2026-07-28",
+  "source_discovery_plan_id": "SDP-fronthera_esker_alumis_2021_acquisition_m1-CASE-SEED-FRONTHERA-ESKER-ALUMIS-001",
+  "evidence_coverage_status": "partial",
+  "retrieved_sources": [
+    {
+      "source_id": "SRC-SEC-SPA-001",
+      "title": "SEC Stock Purchase Agreement / Exhibit 10.22 Fixture Excerpt",
+      "url_or_file": "fronthera_authoritative_sources/sec_stock_purchase_agreement_excerpt.txt",
+      "source_type": "SEC filing / signed stock purchase agreement fixture",
+      "source_tier": "Tier 1",
+      "source_owner": "SEC / Alumis fixture",
+      "retrieval_date": "2026-07-28",
+      "retrieved_by": "manual_retrieved_sources_provider_fixture",
+      "related_source_need_ids": ["SN-001", "SN-002"],
+      "related_search_query_ids": ["SQ-001", "SQ-002"],
+      "reliability_reason": "Fixture represents an authoritative SEC filing or signed stock purchase agreement excerpt for contract testing; not a case brief or model summary.",
+      "use_limitations": "Fixture for M2b contract tests only; raw extraction must not be treated as certified analysis.",
+      "local_cache_path": "fronthera_authoritative_sources/sec_stock_purchase_agreement_excerpt.txt"
+    },
+    {
+      "source_id": "SRC-ALUMIS-10K-001",
+      "title": "Alumis SEC Filing / 10-K Fixture Excerpt",
+      "url_or_file": "fronthera_authoritative_sources/alumis_10k_excerpt.txt",
+      "source_type": "SEC filing / annual report fixture",
+      "source_tier": "Tier 1",
+      "source_owner": "SEC / Alumis fixture",
+      "retrieval_date": "2026-07-28",
+      "retrieved_by": "manual_retrieved_sources_provider_fixture",
+      "related_source_need_ids": ["SN-003", "SN-004"],
+      "related_search_query_ids": ["SQ-003", "SQ-004"],
+      "reliability_reason": "Fixture represents an authoritative Alumis SEC filing excerpt for milestone payments and entity lineage testing.",
+      "use_limitations": "Fixture for M2b contract tests only; raw extraction must not be treated as certified analysis.",
+      "local_cache_path": "fronthera_authoritative_sources/alumis_10k_excerpt.txt"
+    },
+    {
+      "source_id": "SRC-HAISCO-001",
+      "title": "Haisco Stock Exchange Announcement Fixture Excerpt",
+      "url_or_file": "fronthera_authoritative_sources/haisco_disclosure_excerpt.txt",
+      "source_type": "stock exchange announcement fixture",
+      "source_tier": "Tier 1",
+      "source_owner": "Haisco / stock exchange fixture",
+      "retrieval_date": "2026-07-28",
+      "retrieved_by": "manual_retrieved_sources_provider_fixture",
+      "related_source_need_ids": ["SN-005", "SN-008"],
+      "related_search_query_ids": ["SQ-005"],
+      "reliability_reason": "Fixture represents an authoritative stock exchange announcement or company filing excerpt for founder role and ownership testing.",
+      "use_limitations": "Fixture for M2b contract tests only; personal proceeds remain unverified unless direct source evidence exists.",
+      "local_cache_path": "fronthera_authoritative_sources/haisco_disclosure_excerpt.txt"
+    },
+    {
+      "source_id": "SRC-PATENT-TYK2-001",
+      "title": "Official Patent Database TYK2 Fixture Excerpt",
+      "url_or_file": "fronthera_authoritative_sources/tyk2_patent_excerpt.txt",
+      "source_type": "official patent database fixture",
+      "source_tier": "Tier 1",
+      "source_owner": "official patent database fixture",
+      "retrieval_date": "2026-07-28",
+      "retrieved_by": "manual_retrieved_sources_provider_fixture",
+      "related_source_need_ids": ["SN-006"],
+      "related_search_query_ids": ["SQ-006"],
+      "reliability_reason": "Fixture represents an authoritative patent database excerpt for TYK2/IP lineage testing.",
+      "use_limitations": "Fixture for M2b contract tests only; patent scope and ownership require downstream validation.",
+      "local_cache_path": "fronthera_authoritative_sources/tyk2_patent_excerpt.txt"
+    },
+    {
+      "source_id": "SRC-ALUMIS-PIPELINE-001",
+      "title": "Alumis Official Pipeline Page Fixture Excerpt",
+      "url_or_file": "fronthera_authoritative_sources/alumis_pipeline_excerpt.txt",
+      "source_type": "official company pipeline page fixture",
+      "source_tier": "Tier 2",
+      "source_owner": "Alumis official company fixture",
+      "retrieval_date": "2026-07-28",
+      "retrieved_by": "manual_retrieved_sources_provider_fixture",
+      "related_source_need_ids": ["SN-007"],
+      "related_search_query_ids": ["SQ-007"],
+      "reliability_reason": "Fixture represents an official company pipeline page excerpt for ESK-001 / envudeucitinib testing.",
+      "use_limitations": "Fixture for M2b contract tests only; pipeline status requires downstream date and source validation.",
+      "local_cache_path": "fronthera_authoritative_sources/alumis_pipeline_excerpt.txt"
+    }
+  ],
+  "failed_source_needs": [
+    {
+      "source_need_id": "SN-008",
+      "reason": "Direct evidence for Bohan Jin personal realized proceeds and immediately pre-sale cap table is not present in retrieved authoritative fixtures. Record as source gap; do not infer proceeds."
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "case_id": "fronthera_esker_alumis_2021_acquisition_m1",
+  "buyer": {
+    "name": "Esker Therapeutics / Alumis acquisition vehicle",
+    "description": "Foresite-backed acquisition vehicle FL2021-001, later known as Esker Therapeutics and then Alumis, evaluating the March 2021 acquisition of FronThera."
+  },
+  "target": {
+    "name": "FronThera",
+    "description": "Biotech company associated with TYK2 inhibitor chemistry and the asset lineage later connected to ESK-001 / envudeucitinib."
+  },
+  "transaction_context": {
+    "transaction_type": "buyer-side acquisition evaluation",
+    "stage": "retrospective pre-deal research planning",
+    "decision_need": "Define the buyer-side research plan that would be needed to evaluate whether acquiring FronThera creates strategic, scientific, and economic value."
+  },
+  "decision_date": "2021-03-05",
+  "requested_scope": [
+    "transaction background and buyer-side deal rationale",
+    "target company and founder / key-person background",
+    "scientific asset quality and TYK2 / ESK-001 / envudeucitinib lineage",
+    "strategic fit for Esker / Alumis",
+    "deal structure: upfront, milestone, and headline value distinction",
+    "valuation and acceptable purchase price planning",
+    "milestone economics and value realization risks",
+    "diligence priorities around patents, clinical development, ownership, liabilities, and regulatory path",
+    "key risks and red flags",
+    "final decision recommendation planning"
+  ],
+  "source_pack_reference": {
+    "reference_id": "BOHAN-JIN-FRONTHERA-CASE-PDF",
+    "description": "User-provided Bohan Jin document containing FronThera career timeline, 2021 acquisition summary, transaction economics, scientific contribution summary, and source register. Milestone 1 may reference this source pack but must not extract evidence or generate evidence_repository."
+  },
+  "constraints": {
+    "no_web_search": true,
+    "no_evidence_generation": true,
+    "no_report_generation": true,
+    "notes": [
+      "Case positioning: retrospective buyer-side acquisition planning case.",
+      "Target: FronThera.",
+      "Buyer / acquiring vehicle: FL2021-001, later Esker Therapeutics, later Alumis.",
+      "Transaction timing: March 2021; stock purchase agreement date: March 5, 2021.",
+      "Transaction structure: $60 million base initial consideration plus up to $120 million milestone consideration; maximum aggregate headline value: $180 million.",
+      "Later Alumis filings show $37 million milestone paid in 2022 and $23 million milestone paid in 2024.",
+      "By end-2024, at least around $120 million had become payable or paid, before any remaining approval milestones.",
+      "Bohan Jin was publicly documented as FronThera co-founder, VP of Chemistry, director, and 11.12% shareholder in 2017.",
+      "The scientifically important asset lineage is FronThera / Esker / Alumis TYK2 inhibitor chemistry associated with ESK-001 / envudeucitinib.",
+      "Do not state Jin's personal realized proceeds as fact; ownership and payout implications are future diligence questions because no public filing disclosed his realized personal proceeds.",
+      "Milestone 1 stops after mandate.json and research_plan.json."
+    ]
+  },
+  "output_requirements": {
+    "expected_artifacts": [
+      "mandate.json",
+      "research_plan.json"
+    ],
+    "language": "English"
+  }
+}

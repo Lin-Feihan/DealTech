@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/schemas/v3-lite/source_discovery_plan.schema.json",
+  "title": "V3-Lite Source Discovery Plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "seed_id",
+    "generated_artifact",
+    "discovery_scope",
+    "source_needs",
+    "search_queries",
+    "retrieval_targets",
+    "source_priority_rules",
+    "forbidden_source_uses"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "seed_id": {"type": "string", "minLength": 1},
+    "generated_artifact": {"type": "string", "const": "source_discovery_plan.json"},
+    "discovery_scope": {"type": "string", "minLength": 1},
+    "source_needs": {"type": "array", "minItems": 1},
+    "search_queries": {"type": "array", "minItems": 1},
+    "retrieval_targets": {"type": "array", "minItems": 1},
+    "source_priority_rules": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "forbidden_source_uses": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+  }
+}
+

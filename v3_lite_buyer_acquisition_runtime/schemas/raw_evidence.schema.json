@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/schemas/v3-lite/raw_evidence.schema.json",
+  "title": "V3-Lite Raw Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "generated_artifact",
+    "stage",
+    "source_bounded",
+    "evidence_coverage_status",
+    "failed_source_needs",
+    "external_retrieval_performed",
+    "source_discovery_plan_id",
+    "retrieved_sources_manifest_id",
+    "raw_evidence_items"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "generated_artifact": {"type": "string", "const": "raw_evidence.json"},
+    "stage": {"type": "string", "const": "M2_raw_evidence_extraction"},
+    "source_bounded": {"type": "boolean", "const": true},
+    "evidence_coverage_status": {"type": "string", "enum": ["complete", "partial"]},
+    "failed_source_needs": {"type": "array"},
+    "external_retrieval_performed": {"type": "boolean"},
+    "source_discovery_plan_id": {"type": "string", "minLength": 1},
+    "retrieved_sources_manifest_id": {"type": "string", "minLength": 1},
+    "raw_evidence_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "evidence_id",
+          "case_id",
+          "source_id",
+          "source_title",
+          "source_url_or_file",
+          "source_type",
+          "source_tier",
+          "retrieval_date",
+          "extraction_location",
+          "extracted_text_or_summary",
+          "extraction_mode",
+          "related_source_need_ids",
+          "related_workstream_ids",
+          "related_evidence_requirement_ids",
+          "related_verification_target_ids",
+          "evidence_category",
+          "raw_fact_type",
+          "confidence_preliminary",
+          "source_is_authoritative",
+          "case_seed_only",
+          "extraction_notes",
+          "downstream_use_warning",
+          "evidence_time_relation_to_decision_date",
+          "permitted_use",
+          "hindsight_leakage_warning"
+        ],
+        "properties": {
+          "evidence_id": {"type": "string", "minLength": 1},
+          "case_id": {"type": "string", "minLength": 1},
+          "source_id": {"type": "string", "minLength": 1},
+          "source_title": {"type": "string", "minLength": 1},
+          "source_url_or_file": {"type": "string", "minLength": 1},
+          "source_type": {"type": "string", "minLength": 1},
+          "source_tier": {"type": "string", "enum": ["Tier 1", "Tier 2", "Tier 3", "Tier 4"]},
+          "retrieval_date": {"type": "string", "minLength": 1},
+          "extraction_location": {"type": "object"},
+          "extracted_text_or_summary": {"type": "string", "minLength": 1},
+          "extraction_mode": {"type": "string", "enum": ["exact_quote", "bounded_summary"]},
+          "related_source_need_ids": {"type": "array", "items": {"type": "string"}},
+          "related_workstream_ids": {"type": "array", "items": {"type": "string"}},
+          "related_evidence_requirement_ids": {"type": "array", "items": {"type": "string"}},
+          "related_verification_target_ids": {"type": "array", "items": {"type": "string"}},
+          "evidence_category": {"type": "string", "minLength": 1},
+          "raw_fact_type": {"type": "string", "minLength": 1},
+          "confidence_preliminary": {"type": "string", "enum": ["low", "medium", "high"]},
+          "source_is_authoritative": {"type": "boolean"},
+          "case_seed_only": {"type": "boolean", "const": false},
+          "extraction_notes": {"type": "string", "minLength": 1},
+          "downstream_use_warning": {"type": "string", "minLength": 1},
+          "evidence_time_relation_to_decision_date": {
+            "type": "string",
+            "enum": ["pre_decision", "at_decision", "post_decision", "retrospective", "unknown"]
+          },
+          "permitted_use": {
+            "type": "string",
+            "enum": ["ex_ante_deal_evaluation", "transaction_terms_verification", "retrospective_outcome_validation", "source_lead_only", "gap_tracking"]
+          },
+          "hindsight_leakage_warning": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

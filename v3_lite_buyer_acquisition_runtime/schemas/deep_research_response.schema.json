@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/schemas/v3-lite/deep_research_response.schema.json",
+  "title": "V3-Lite Deep Research Response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "provider",
+    "model",
+    "response_id",
+    "completed_at",
+    "sources",
+    "evidence_items",
+    "unresolved_gaps",
+    "provider_notes"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "provider": {"type": "string", "minLength": 1},
+    "model": {"type": "string", "minLength": 1},
+    "response_id": {"type": "string", "minLength": 1},
+    "completed_at": {"type": "string", "minLength": 1},
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "provider_source_id",
+          "title",
+          "url",
+          "source_type",
+          "source_owner",
+          "source_date_or_period",
+          "source_reliability_rationale",
+          "source_limitations"
+        ],
+        "properties": {
+          "provider_source_id": {"type": "string", "minLength": 1},
+          "title": {"type": "string", "minLength": 1},
+          "url": {"type": "string", "minLength": 1},
+          "source_type": {"type": "string", "minLength": 1},
+          "source_owner": {"type": "string", "minLength": 1},
+          "source_date_or_period": {"type": "string", "minLength": 1},
+          "source_tier": {"type": "string", "enum": ["Tier 1", "Tier 2", "Tier 3", "Tier 4"]},
+          "source_time_relation_to_decision_date": {
+            "type": "string",
+            "enum": ["pre_decision", "at_decision", "post_decision", "retrospective", "unknown"]
+          },
+          "permitted_use": {
+            "type": "string",
+            "enum": [
+              "ex_ante_deal_evaluation",
+              "transaction_terms_verification",
+              "retrospective_outcome_validation",
+              "source_lead_only",
+              "gap_tracking"
+            ]
+          },
+          "source_reliability_rationale": {"type": "string", "minLength": 1},
+          "source_limitations": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "evidence_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "provider_evidence_id",
+          "provider_source_id",
+          "extracted_text_or_summary",
+          "extraction_location_if_available",
+          "fact_type",
+          "related_workstream_ids",
+          "related_evidence_requirement_ids",
+          "related_verification_target_ids",
+          "confidence_preliminary",
+          "caveats"
+        ],
+        "properties": {
+          "provider_evidence_id": {"type": "string", "minLength": 1},
+          "provider_source_id": {"type": "string", "minLength": 1},
+          "extracted_text_or_summary": {"type": "string", "minLength": 1},
+          "extraction_location_if_available": {
+            "oneOf": [
+              {"type": "string", "minLength": 1},
+              {"type": "object"},
+              {"type": "null"}
+            ]
+          },
+          "fact_type": {"type": "string", "minLength": 1},
+          "related_workstream_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "related_evidence_requirement_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "related_verification_target_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "confidence_preliminary": {"type": "string", "minLength": 1},
+          "caveats": {"type": "array", "items": {"type": "string", "minLength": 1}}
+        }
+      }
+    },
+    "unresolved_gaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "gap_id",
+          "gap_description",
+          "attempted_source_types",
+          "reason_unresolved",
+          "recommended_next_search"
+        ],
+        "properties": {
+          "gap_id": {"type": "string", "minLength": 1},
+          "gap_description": {"type": "string", "minLength": 1},
+          "attempted_source_types": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "reason_unresolved": {"type": "string", "minLength": 1},
+          "recommended_next_search": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "provider_notes": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    }
+  }
+}

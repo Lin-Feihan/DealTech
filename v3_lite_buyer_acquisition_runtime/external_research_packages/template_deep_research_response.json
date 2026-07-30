@@ -1,0 +1,48 @@
+{
+  "case_id": "<case_id>",
+  "provider": "external_deep_research_executor",
+  "model": "external_model_name",
+  "response_id": "example_response_id",
+  "completed_at": "<YYYY-MM-DDTHH:MM:SSZ>",
+  "sources": [
+    {
+      "provider_source_id": "SRC-001",
+      "title": "<original source title>",
+      "url": "<https://... or stable document identifier>",
+      "source_type": "<SEC filing | stock exchange disclosure | patent record | clinical trial registry | official company page | reputable financial news | other>",
+      "source_owner": "<source owner or publisher>",
+      "source_date_or_period": "<source date or period>",
+      "source_tier": "Tier 1",
+      "source_time_relation_to_decision_date": "at_decision",
+      "permitted_use": "transaction_terms_verification",
+      "source_reliability_rationale": "<why this original source is reliable for the bounded fact>",
+      "source_limitations": "<known limitations, timing caveats, or scope restrictions>"
+    }
+  ],
+  "evidence_items": [
+    {
+      "provider_evidence_id": "EV-001",
+      "provider_source_id": "SRC-001",
+      "extracted_text_or_summary": "<exact quote or tightly bounded summary from the original source>",
+      "extraction_location_if_available": "<page, section, exhibit, table, paragraph, or null if unavailable>",
+      "fact_type": "<bounded_fact_type>",
+      "related_workstream_ids": ["<WS-...>"],
+      "related_evidence_requirement_ids": ["<ER-...>"],
+      "related_verification_target_ids": ["<VT-...>"],
+      "confidence_preliminary": "<high | medium | low>",
+      "caveats": ["<non-empty caveat or limitation>"]
+    }
+  ],
+  "unresolved_gaps": [
+    {
+      "gap_id": "GAP-001",
+      "gap_description": "<source need or fact not resolved by external research>",
+      "attempted_source_types": ["<attempted source type>"],
+      "reason_unresolved": "<why the gap remains unresolved>",
+      "recommended_next_search": "<next source type, database, filing family, or human review step>"
+    }
+  ],
+  "provider_notes": [
+    "<method note; not evidence>"
+  ]
+}

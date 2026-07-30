@@ -1,0 +1,46 @@
+{
+  "case_id": "demo_buyer_acquisition_milestone_1",
+  "buyer": {
+    "name": "Northstar Therapeutics",
+    "description": "Strategic buyer evaluating an acquisition target."
+  },
+  "target": {
+    "name": "Meridian BioAssets",
+    "description": "Potential acquisition target requiring buyer-side diligence planning."
+  },
+  "transaction_context": {
+    "transaction_type": "buyer-side acquisition evaluation",
+    "stage": "pre-diligence planning",
+    "decision_need": "Define the research plan before evidence collection or report generation."
+  },
+  "decision_date": "2026-07-28",
+  "requested_scope": [
+    "transaction background and deal logic",
+    "buyer strategic objectives",
+    "target business quality",
+    "valuation and acceptable purchase price",
+    "due diligence priorities",
+    "final decision recommendation planning"
+  ],
+  "source_pack_reference": {
+    "reference_id": "SOURCE-PACK-DEMO-001",
+    "description": "Placeholder source pack reference for future stages; Milestone 1 does not inspect or retrieve evidence."
+  },
+  "constraints": {
+    "no_web_search": true,
+    "no_evidence_generation": true,
+    "no_report_generation": true,
+    "notes": [
+      "Milestone 1 stops after research_plan.json.",
+      "Do not modify V2 runtime."
+    ]
+  },
+  "output_requirements": {
+    "expected_artifacts": [
+      "mandate.json",
+      "research_plan.json"
+    ],
+    "language": "English"
+  }
+}
+

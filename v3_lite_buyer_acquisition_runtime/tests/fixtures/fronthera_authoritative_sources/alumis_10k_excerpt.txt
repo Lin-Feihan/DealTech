@@ -1,0 +1,3 @@
+Alumis SEC filing / 10-K fixture excerpt. This local test fixture represents an authoritative SEC annual report or prospectus excerpt; it is not the Bohan Jin / FronThera case PDF and is not a model-generated source.
+
+Later Alumis filings state a $37M milestone payment in 2022 and a $23.0 million milestone payment in 2024 related to the FronThera acquisition. The filing context identifies FL2021-001, Esker Therapeutics, and Alumis in the entity history and supports the buyer/acquisition vehicle lineage.

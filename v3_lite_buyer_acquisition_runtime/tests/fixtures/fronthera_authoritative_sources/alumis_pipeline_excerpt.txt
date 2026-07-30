@@ -1,0 +1,3 @@
+Alumis official pipeline page fixture excerpt. This local test fixture represents an official company pipeline page excerpt; it is not the Bohan Jin / FronThera case PDF.
+
+Alumis official pipeline materials identify ESK-001 / envudeucitinib as a TYK2 inhibitor program. The pipeline source supports official asset lineage evidence for ESK-001 and envudeucitinib.
