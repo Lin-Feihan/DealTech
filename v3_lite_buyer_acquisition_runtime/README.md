@@ -1,34 +1,62 @@
 # V3-Lite Buyer Acquisition Runtime
 
-This directory is the V3-Lite runtime for the buyer-side Acquisition Strategy Agent.
+This directory is the V3-Lite buyer-side acquisition runtime prototype.
 
-Milestone 1 only implements:
+V3-Lite currently implements an M1-M7.1 closed-loop prototype. It is source-bounded, gate-controlled, and provider-agnostic: external tools may retrieve or research sources, but V3-Lite controls normalization, evidence repository construction, certification, repair planning, evidence-bounded analysis, and report gating.
+
+Current external Deep Research direction:
+
+- OpenClaw / GPT-5.5 or human-assisted research can act as an external Deep Research executor by saving a structured `deep_research_response.json` package.
+- OpenAI Deep Research API support remains future-ready, but it is not required for current runs and is fail-closed unless explicitly configured.
+- The runtime is not production-ready and still has known limitations, including FronThera-specific planning, claim mapping, numeric verification, and analysis behavior that must be generalized later.
+
+Current artifact chain:
 
 ```text
-mandate.json -> research_plan.json
+mandate.json
+-> research_plan.json
+-> case_seed.json
+-> source_discovery_plan.json
+-> retrieved_sources_manifest.json
+-> raw_evidence.json
+-> evidence_repository.json
+-> claim_evidence_graph.json
+-> certification_result.json
+-> research_gaps.json
+-> repair_plan.json
+-> targeted_source_discovery_plan.json / repair_attempt_log.json when repair is needed
+-> analysis_package.json
+-> report_manifest.json
+-> final_report.md only if gate allows
 ```
-
-It is a deterministic planning runtime. It accepts a structured buyer-side acquisition mandate, validates it, stores the accepted mandate, and emits a structured research plan.
 
 ## Current Scope
 
-Included in Milestone 1:
+Implemented prototype scope:
 
 - mandate intake
 - fail-closed mandate validation
 - deterministic research-plan generation
-- local artifact writing for `mandate.json` and `research_plan.json`
-- tests for valid and invalid mandate handling
-
-Excluded from Milestone 1:
-
-- web search
-- evidence collection
+- case seed loading and source discovery planning
+- manual retrieved-source ingestion
+- external Deep Research package ingestion
+- raw evidence extraction
 - evidence repository construction
-- claim graph construction
-- certification
-- report generation
-- V2 runtime changes
+- claim evidence graph construction
+- loop certification and repair planning
+- evidence-bounded deal analysis package generation
+- report rendering gate
+- gate-controlled report rendering when allowed
+- unit tests for M1-M7.1 prototype behavior
+
+Current exclusions and fail-closed boundaries:
+
+- no built-in search engine
+- no configured live OpenAI Deep Research API run required
+- no custom SEC EDGAR, patent, or clinical-trials providers implemented
+- no fake source repair
+- no production-ready professional M&A recommendation engine
+- no V1/V2 runtime changes
 
 ## Run
 
@@ -46,10 +74,12 @@ v3_lite_buyer_acquisition_runtime/outputs/demo_run/
 └── research_plan.json
 ```
 
+Later M2-M7.1 stages have dedicated runners under `runtime/`. They remain artifact-gated; running M1 does not run a new case through the full loop.
+
 ## Test
 
 ```bash
-python3 -m unittest v3_lite_buyer_acquisition_runtime.tests.test_mandate_to_research_plan
+python3 -m unittest discover -s v3_lite_buyer_acquisition_runtime/tests
 ```
 
 ## M2 Source Retrieval Boundary
@@ -182,8 +212,24 @@ M5 responsibilities:
 
 M5 numeric verification confirms arithmetic only. For example, `$60M + $120M = $180M` can be recorded as a derived relationship, but it is not a direct source quote or final deal-value conclusion unless later source repair supplies direct authoritative support or wording preserves the caveat.
 
+## Known Limitations / Next Fixes
+
+1. Remove FronThera-specific hard-code from runtime.
+2. Generalize canonical facts and claim mapping.
+3. Make numeric verifier formula-driven.
+4. Strengthen citation verifier from provenance check to semantic claim-evidence alignment.
+5. Expand buyer-side M&A analysis package beyond evidence summary.
+6. Upgrade report renderer to professional gate-controlled report writer.
+
+Additional current limitations:
+
+- The runtime is a prototype, not production-ready.
+- OpenAI Deep Research live API mode is future-ready but not configured for current runs.
+- Generic M&A case generalization is not solved.
+- External Deep Research ingestion validates structured packages but does not independently re-fetch and verify every source quote.
+
 ## Future Notes
 
-ATL adapter support is future work. Milestone 1 does not create `atl_manifest`, `agent_card`, `runner_api`, or related platform-wrapper files.
+ATL adapter support is future work. V3-Lite does not create `atl_manifest`, `agent_card`, `runner_api`, or related platform-wrapper files.
 
-Validate-Trace-Enforce is a future internal mechanism for Loop Certification. Loop Certification remains a future state-machine state and is not implemented in Milestone 1.
+Validate-Trace-Enforce remains the certification design direction, but the current implementation is still a lightweight prototype and must not be treated as production-grade verification.

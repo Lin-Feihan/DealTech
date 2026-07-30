@@ -1,119 +1,202 @@
 {
   "runtime": "v3_lite_buyer_acquisition_runtime",
-  "milestone": "1",
-  "scope": "mandate_to_research_plan_only",
+  "current_status": "M1-M7.1 closed-loop prototype implemented",
+  "production_status": "prototype_not_production_ready",
+  "scope": "buyer_side_acquisition_research_runtime_with_external_deep_research_ingestion",
+  "initial_state": "mandate_intake",
+  "terminal_state": "gate_controlled_report_rendering_when_allowed_or_blocked_report_manifest",
   "states": [
     {
       "name": "mandate_intake",
       "implemented": true,
-      "status": "implemented",
+      "status": "implemented_prototype",
       "input_artifacts": [
         "mandate_source.json"
       ],
       "output_artifacts": [
         "mandate.json"
       ],
-      "description": "Load and validate mandate.json."
+      "description": "Load and validate a buyer-side acquisition mandate."
     },
     {
       "name": "research_planning",
       "implemented": true,
-      "status": "implemented",
+      "status": "implemented_prototype",
       "input_artifacts": [
         "mandate.json"
       ],
       "output_artifacts": [
         "research_plan.json"
       ],
-      "description": "Create deterministic research_plan.json from a valid mandate."
+      "description": "Create a deterministic research plan from a valid mandate."
     },
     {
-      "name": "evidence_collection",
-      "implemented": false,
-      "status": "future",
+      "name": "case_seed_loading",
+      "implemented": true,
+      "status": "implemented_prototype",
       "input_artifacts": [
+        "case_seed.json"
+      ],
+      "output_artifacts": [
+        "validated case_seed"
+      ],
+      "description": "Load and validate structured case seed inputs used for planning only."
+    },
+    {
+      "name": "source_discovery_planning",
+      "implemented": true,
+      "status": "implemented_prototype",
+      "input_artifacts": [
+        "case_seed.json",
         "research_plan.json"
       ],
       "output_artifacts": [
-        "raw_evidence.json"
+        "source_discovery_plan.json"
       ],
-      "description": "Future state for source-bounded evidence collection; not implemented in Milestone 1."
+      "description": "Build source needs and search targets from the case seed and research plan."
     },
     {
-      "name": "evidence_normalization",
-      "implemented": false,
-      "status": "future",
+      "name": "source_retrieval_or_external_deep_research_ingestion",
+      "implemented": true,
+      "status": "implemented_prototype",
       "input_artifacts": [
+        "source_discovery_plan.json",
+        "retrieved_sources_manifest.json OR external deep_research_response.json"
+      ],
+      "output_artifacts": [
+        "retrieved_sources_manifest.json"
+      ],
+      "description": "Accept manual retrieved-source manifests or normalize structured external Deep Research packages into a retrieved source manifest.",
+      "notes": [
+        "manual retrieved sources supported",
+        "external deep research package ingestion supported",
+        "OpenAI Deep Research live API remains future-ready and fail-closed unless configured",
+        "custom SEC, patent, and clinical providers are not implemented"
+      ]
+    },
+    {
+      "name": "raw_evidence_extraction",
+      "implemented": true,
+      "status": "implemented_prototype",
+      "input_artifacts": [
+        "retrieved_sources_manifest.json"
+      ],
+      "output_artifacts": [
         "raw_evidence.json"
+      ],
+      "description": "Extract source-bounded raw evidence from retrieved sources."
+    },
+    {
+      "name": "evidence_repository_building",
+      "implemented": true,
+      "status": "implemented_prototype",
+      "input_artifacts": [
+        "raw_evidence.json",
+        "retrieved_sources_manifest.json"
       ],
       "output_artifacts": [
         "evidence_repository.json"
       ],
-      "description": "Future state for normalizing collected evidence; not implemented in Milestone 1."
+      "description": "Normalize, deduplicate, classify, and gap-track raw evidence into an evidence repository."
     },
     {
-      "name": "claim_evidence_mapping",
-      "implemented": false,
-      "status": "future",
+      "name": "claim_evidence_graph_building",
+      "implemented": true,
+      "status": "implemented_prototype",
       "input_artifacts": [
         "evidence_repository.json"
       ],
       "output_artifacts": [
         "claim_evidence_graph.json"
       ],
-      "description": "Future state for mapping claims to evidence lineage; not implemented in Milestone 1."
+      "description": "Build candidate claims, evidence edges, and source-gap nodes."
     },
     {
       "name": "loop_certification",
-      "implemented": false,
-      "status": "future",
+      "implemented": true,
+      "status": "implemented_prototype",
       "input_artifacts": [
-        "claim_evidence_graph.json"
+        "claim_evidence_graph.json",
+        "evidence_repository.json"
       ],
       "output_artifacts": [
         "certification_result.json",
         "research_gaps.json",
         "repair_plan.json"
       ],
-      "description": "Future state for lightweight Validate-Trace-Enforce certification; not implemented in Milestone 1."
+      "description": "Certify eligible candidate claims, identify unresolved gaps, and produce repair instructions."
     },
     {
-      "name": "deal_analysis",
-      "implemented": false,
-      "status": "future",
+      "name": "repair_loop_planning",
+      "implemented": true,
+      "status": "implemented_prototype",
       "input_artifacts": [
-        "mandate.json",
-        "research_plan.json",
-        "evidence_repository.json",
+        "research_gaps.json",
+        "repair_plan.json"
+      ],
+      "output_artifacts": [
+        "targeted_source_discovery_plan.json",
+        "repair_attempt_log.json"
+      ],
+      "description": "Plan targeted source repair and log repair attempts without inventing sources.",
+      "notes": [
+        "current repair execution is provider-bounded and fail-closed when retrieval provider is unavailable",
+        "no fake source repair"
+      ]
+    },
+    {
+      "name": "evidence_bounded_deal_analysis",
+      "implemented": true,
+      "status": "implemented_prototype",
+      "input_artifacts": [
+        "certification_result.json",
         "claim_evidence_graph.json",
+        "evidence_repository.json",
+        "research_gaps.json",
+        "repair_plan.json"
+      ],
+      "output_artifacts": [
+        "analysis_package.json"
+      ],
+      "description": "Build a limited evidence-bounded analysis package from certified claims, caveats, and unresolved repair status.",
+      "notes": [
+        "recommendation may still be blocked by certification or repair status",
+        "current analysis remains evidence-bounded and limited"
+      ]
+    },
+    {
+      "name": "report_rendering_gate",
+      "implemented": true,
+      "status": "implemented_prototype",
+      "input_artifacts": [
+        "analysis_package.json",
+        "certification_result.json",
+        "research_gaps.json / repair context"
+      ],
+      "output_artifacts": [
+        "report_manifest.json"
+      ],
+      "description": "Evaluate whether the analysis package is allowed to proceed to report rendering."
+    },
+    {
+      "name": "gate_controlled_report_rendering",
+      "implemented": true,
+      "status": "implemented_prototype",
+      "input_artifacts": [
+        "report_manifest.json",
+        "analysis_package.json",
         "certification_result.json"
       ],
       "output_artifacts": [
-        "analysis_package.json",
-        "recommendation_decision.json"
+        "final_report.md only if gate allows"
       ],
-      "description": "Future state for buyer-side acquisition analysis after evidence and certification exist; not implemented in Milestone 1."
-    },
-    {
-      "name": "report_rendering",
-      "implemented": false,
-      "status": "future",
-      "input_artifacts": [
-        "analysis_package.json",
-        "recommendation_decision.json",
-        "certification_result.json",
-        "claim_evidence_graph.json"
-      ],
-      "output_artifacts": [
-        "final_report.md",
-        "report_manifest.json",
-        "human_review_items.json"
-      ],
-      "description": "Future state for rendering the final report; not implemented in Milestone 1."
+      "description": "Render a final report only when the report manifest allows rendering.",
+      "notes": [
+        "blocked cases do not generate final_report.md",
+        "renderer does not generate recommendation_decision.json"
+      ]
     }
   ],
-  "initial_state": "mandate_intake",
-  "terminal_state": "research_planning",
   "transitions": [
     {
       "from": "mandate_intake",
@@ -123,50 +206,96 @@
     },
     {
       "from": "research_planning",
-      "to": "evidence_collection",
-      "condition": "future_milestone_enabled",
-      "enabled": false
+      "to": "case_seed_loading",
+      "condition": "case_seed_required_for_M2_planning",
+      "enabled": true
     },
     {
-      "from": "evidence_collection",
-      "to": "evidence_normalization",
-      "condition": "future_milestone_enabled",
-      "enabled": false
+      "from": "case_seed_loading",
+      "to": "source_discovery_planning",
+      "condition": "case_seed_valid",
+      "enabled": true
     },
     {
-      "from": "evidence_normalization",
-      "to": "claim_evidence_mapping",
-      "condition": "future_milestone_enabled",
-      "enabled": false
+      "from": "source_discovery_planning",
+      "to": "source_retrieval_or_external_deep_research_ingestion",
+      "condition": "source_discovery_plan_valid",
+      "enabled": true
     },
     {
-      "from": "claim_evidence_mapping",
+      "from": "source_retrieval_or_external_deep_research_ingestion",
+      "to": "raw_evidence_extraction",
+      "condition": "retrieved_sources_manifest_valid",
+      "enabled": true
+    },
+    {
+      "from": "raw_evidence_extraction",
+      "to": "evidence_repository_building",
+      "condition": "raw_evidence_valid",
+      "enabled": true
+    },
+    {
+      "from": "evidence_repository_building",
+      "to": "claim_evidence_graph_building",
+      "condition": "evidence_repository_valid",
+      "enabled": true
+    },
+    {
+      "from": "claim_evidence_graph_building",
       "to": "loop_certification",
-      "condition": "future_milestone_enabled",
-      "enabled": false
+      "condition": "claim_evidence_graph_valid",
+      "enabled": true
     },
     {
       "from": "loop_certification",
-      "to": "deal_analysis",
-      "condition": "future_milestone_enabled",
-      "enabled": false
+      "to": "repair_loop_planning",
+      "condition": "repair_required",
+      "enabled": true
     },
     {
-      "from": "deal_analysis",
-      "to": "report_rendering",
-      "condition": "future_milestone_enabled",
-      "enabled": false
+      "from": "repair_loop_planning",
+      "to": "source_discovery_planning",
+      "condition": "repair_loop_requires_replanned_source_discovery",
+      "enabled": true
+    },
+    {
+      "from": "repair_loop_planning",
+      "to": "source_retrieval_or_external_deep_research_ingestion",
+      "condition": "repair_loop_has_targeted_external_retrieval_package",
+      "enabled": true
+    },
+    {
+      "from": "loop_certification",
+      "to": "evidence_bounded_deal_analysis",
+      "condition": "certification_permits_limited_analysis",
+      "enabled": true
+    },
+    {
+      "from": "evidence_bounded_deal_analysis",
+      "to": "report_rendering_gate",
+      "condition": "analysis_package_valid",
+      "enabled": true
+    },
+    {
+      "from": "report_rendering_gate",
+      "to": "gate_controlled_report_rendering",
+      "condition": "report_manifest.rendering_status == ready_to_render",
+      "enabled": true
     }
   ],
-  "forbidden_in_milestone_1": [
-    "web_search",
-    "evidence_repository",
-    "claim_evidence_graph",
-    "certification",
-    "final_report",
-    "atl_manifest",
-    "agent_card",
-    "runner_api",
-    "v2_runtime_changes"
+  "known_limitations": [
+    "Current runtime is a prototype, not production-ready.",
+    "Some FronThera-specific planning, canonicalization, claim mapping, numeric verification, and analysis behavior still exists and must be generalized in later fixes.",
+    "Citation verification currently checks provenance and forbidden-source markers; it is not yet a full semantic claim-evidence verifier.",
+    "Numeric verification currently supports a narrow FronThera-derived arithmetic case and must become formula-driven later.",
+    "Report renderer is template-based and not yet a professional LLM report writer.",
+    "External Deep Research ingestion validates structured packages but does not independently re-fetch and verify every source quote."
+  ],
+  "explicit_non_claims": [
+    "not_production_ready",
+    "openai_deep_research_live_api_not_configured",
+    "generic_ma_case_generalization_not_solved",
+    "fronthera_specific_code_not_removed",
+    "v1_v2_runtime_unchanged"
   ]
 }
