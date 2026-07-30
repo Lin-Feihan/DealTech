@@ -74,7 +74,7 @@ def build_deep_research_request(
             "Do not rely on model memory.",
             "Do not use the case_seed as evidence.",
             "Do not treat summaries or prior reports as authoritative evidence.",
-            "Do not use mandate notes or Bohan PDF as evidence.",
+            "Do not treat user-provided case briefs, mandate notes, case seeds, model memory, or unverified local notes as evidence.",
         ],
         "output_requirements": [
             "You are not writing the final acquisition report.",
@@ -90,7 +90,7 @@ def build_deep_research_request(
         "raw_evidence_requirements": [
             "Every evidence item must include a source reference, source URL or document identifier, extracted quote or bounded summary, source type, source date or period, reliability rationale, supported fact, and caveats.",
             "No source-less evidence is allowed.",
-            "Do not rely on case_seed, mandate notes, Bohan PDF, or model memory as evidence.",
+            "Only original cited authoritative sources may become evidence.",
         ],
     }
     validate_deep_research_request(request)
