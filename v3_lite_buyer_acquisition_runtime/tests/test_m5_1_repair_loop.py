@@ -84,16 +84,16 @@ class V3LiteM51RepairLoopTest(unittest.TestCase):
         for query in targeted_plan["targeted_search_queries"]:
             self.assertTrue(set(MUST_NOT_USE_SOURCES).issubset(set(query["must_not_use_sources"])))
 
-    def test_expected_fronthera_query_themes_are_present(self) -> None:
+    def test_generic_query_themes_are_present_without_real_case_markers(self) -> None:
         targeted_plan = self._run_targeted_plan("m5_1_queries")
         query_text = "\n".join(query["query_text"] for query in targeted_plan["targeted_search_queries"])
 
-        self.assertIn("CNINFO SZSE Haisco FronThera Bohan Jin 11.12", query_text)
-        self.assertIn("WIPO USPTO PCT/US2019/057485 TYK2 FronThera", query_text)
-        self.assertIn("WIPO USPTO PCT/US2020/021850 TYK2 FronThera", query_text)
-        self.assertIn("official source FronThera pre-2021 cap table ownership", query_text)
-        self.assertIn("official source Bohan Jin personal proceeds", query_text)
-        self.assertIn("SEC FronThera acquisition $180 million maximum aggregate value", query_text)
+        self.assertIn("buyer target acquisition", query_text)
+        self.assertIn("authoritative", query_text)
+        self.assertIn("official filing source", query_text)
+        for marker in ("FronThera", "Bohan", "TYK2", "Alumis", "Esker", "$180", "11.12"):
+            self.assertNotIn(marker, query_text)
+        self.assertTrue(all(need["target_fact_or_question"] for need in targeted_plan["targeted_source_needs"]))
 
     def test_repair_attempt_log_is_dry_run_only(self) -> None:
         artifacts = run_m5_1_pipeline(

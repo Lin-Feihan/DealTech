@@ -5,61 +5,42 @@ from typing import Any
 from v3_lite_buyer_acquisition_runtime.runtime.claim_certifier import certification_result_source_id
 
 
+BLOCKING_CERTIFICATION_STATUSES = {"unsupported", "blocked_by_source_gap", "failed", "requires_numeric_verification", "requires_human_review"}
+FAILED_NUMERIC_STATUSES = {"failed", "insufficient_numeric_support"}
+
+
 def build_research_gaps(certification_result: dict[str, Any], graph: dict[str, Any]) -> dict[str, Any]:
     claim_certs_by_id = {cert["claim_id"]: cert for cert in certification_result["claim_certifications"]}
     claims_by_id = {claim["claim_id"]: claim for claim in graph["claim_nodes"]}
-    gap_nodes_by_source_gap_id = {gap["source_gap_id"]: gap for gap in graph["gap_nodes"]}
     research_gaps = []
+    seen_gap_keys: set[tuple[Any, ...]] = set()
 
     for gap_node in graph["gap_nodes"]:
         related_claim_ids = [cert["claim_id"] for cert in certification_result["claim_certifications"] if gap_node["source_gap_id"] in cert["related_source_gap_ids"]]
-        research_gaps.append(
-            {
-                "research_gap_id": f"RG-{len(research_gaps) + 1:03d}",
-                "gap_type": _gap_type_from_gap_node(gap_node),
-                "related_claim_ids": related_claim_ids,
-                "related_gap_node_ids": [gap_node["gap_node_id"]],
-                "missing_source_need_ids": [gap_node["missing_source_need_id"]],
-                "gap_description": gap_node["gap_statement"],
-                "severity": _gap_severity(gap_node),
-                "blocks_certification": True,
-                "recommended_repair_target": "M2_source_retrieval",
-                "suggested_source_types": _suggested_source_types(gap_node),
-            }
-        )
+        research_gaps.append(_research_gap_from_source_gap(len(research_gaps) + 1, gap_node, related_claim_ids))
+        seen_gap_keys.add(("source_gap", gap_node["source_gap_id"]))
 
-    for claim_id, cert in claim_certs_by_id.items():
-        claim = claims_by_id[claim_id]
-        if claim["claim_type"] == "derived_numeric_candidate":
-            research_gaps.append(
-                {
-                    "research_gap_id": f"RG-{len(research_gaps) + 1:03d}",
-                    "gap_type": "direct_headline_value_source_optional",
-                    "related_claim_ids": [claim_id],
-                    "related_gap_node_ids": [],
-                    "missing_source_need_ids": [],
-                    "gap_description": "Optional direct source for headline $180M maximum value if final report wording needs a direct quoted deal value.",
-                    "severity": "medium",
-                    "blocks_certification": False,
-                    "recommended_repair_target": "M2_source_retrieval_or_M5_numeric_verification",
-                    "suggested_source_types": ["SEC agreement exhibit", "SEC prospectus or 10-K direct headline value disclosure", "buyer or target transaction announcement"],
-                }
-            )
-        if cert["certification_status"] in {"unsupported", "blocked_by_source_gap"} and not cert["related_source_gap_ids"]:
-            research_gaps.append(
-                {
-                    "research_gap_id": f"RG-{len(research_gaps) + 1:03d}",
-                    "gap_type": "unsupported_claim",
-                    "related_claim_ids": [claim_id],
-                    "related_gap_node_ids": [],
-                    "missing_source_need_ids": [],
-                    "gap_description": cert["certification_basis"],
-                    "severity": "high",
-                    "blocks_certification": True,
-                    "recommended_repair_target": "M2_source_retrieval",
-                    "suggested_source_types": ["authoritative transaction or ownership disclosure"],
-                }
-            )
+    for numeric_result in certification_result.get("numeric_verification_results", []):
+        if numeric_result.get("verification_status") in FAILED_NUMERIC_STATUSES:
+            claim_id = numeric_result["related_claim_id"]
+            research_gaps.append(_research_gap_from_numeric_failure(len(research_gaps) + 1, claim_id, claims_by_id.get(claim_id), numeric_result))
+            seen_gap_keys.add(("numeric", claim_id))
+
+    for cert in certification_result["claim_certifications"]:
+        status = cert["certification_status"]
+        if status not in BLOCKING_CERTIFICATION_STATUSES:
+            continue
+        claim = claims_by_id.get(cert["claim_id"], {})
+        if cert["related_source_gap_ids"]:
+            for source_gap_id in cert["related_source_gap_ids"]:
+                if ("source_gap", source_gap_id) not in seen_gap_keys:
+                    research_gaps.append(_research_gap_from_claim(len(research_gaps) + 1, cert, claim, [source_gap_id]))
+                    seen_gap_keys.add(("source_gap", source_gap_id))
+            continue
+        key = ("claim", cert["claim_id"], status)
+        if key not in seen_gap_keys:
+            research_gaps.append(_research_gap_from_claim(len(research_gaps) + 1, cert, claim, []))
+            seen_gap_keys.add(key)
 
     result = {
         "case_id": certification_result["case_id"],
@@ -75,34 +56,43 @@ def build_research_gaps(certification_result: dict[str, Any], graph: dict[str, A
 def build_repair_plan(certification_result: dict[str, Any], research_gaps: dict[str, Any]) -> dict[str, Any]:
     repair_steps = []
     for gap in research_gaps["research_gaps"]:
-        target_state = _repair_target_state(gap)
+        action = _repair_action(gap)
         repair_steps.append(
             {
                 "repair_step_id": f"RP-{len(repair_steps) + 1:03d}",
-                "target_state": target_state,
-                "target_artifact": _target_artifact(target_state),
-                "reason": gap["gap_description"],
+                "repair_action": action,
+                "target_state": _repair_target_state(action),
+                "target_artifact": _target_artifact(action),
+                "reason": _repair_reason(gap, action),
                 "related_claim_ids": gap["related_claim_ids"],
                 "related_research_gap_ids": [gap["research_gap_id"]],
                 "required_source_types": gap["suggested_source_types"],
                 "priority": "high" if gap["blocks_certification"] else "medium",
-                "expected_output": _expected_output(target_state),
+                "expected_output": _expected_output(action),
             }
         )
-    if any(cert["certification_status"] in {"failed", "requires_human_review"} for cert in certification_result["claim_certifications"]):
+
+    failed_or_review_claims = [
+        cert["claim_id"]
+        for cert in certification_result["claim_certifications"]
+        if cert["certification_status"] in {"failed", "requires_human_review"}
+    ]
+    if failed_or_review_claims:
         repair_steps.append(
             {
                 "repair_step_id": f"RP-{len(repair_steps) + 1:03d}",
+                "repair_action": "add_human_review_item",
                 "target_state": "M4_claim_evidence_graph_update",
                 "target_artifact": "claim_evidence_graph.json",
-                "reason": "Downgrade or remap claims if M5 verification failures reveal unsupported claim framing.",
-                "related_claim_ids": [cert["claim_id"] for cert in certification_result["claim_certifications"] if cert["certification_status"] in {"failed", "requires_human_review"}],
+                "reason": "Generic human-review or verification failure requires claim framing review before downstream use.",
+                "related_claim_ids": failed_or_review_claims,
                 "related_research_gap_ids": [],
-                "required_source_types": ["updated verified evidence repository records"],
+                "required_source_types": ["source-bounded evidence records or documented human review decision"],
                 "priority": "medium",
-                "expected_output": "Updated claim evidence graph with unsupported or failed claims downgraded before rerunning M5.",
+                "expected_output": "Updated claim framing or documented human review disposition before rerunning certification.",
             }
         )
+
     result = {
         "case_id": certification_result["case_id"],
         "generated_artifact": "repair_plan.json",
@@ -111,8 +101,8 @@ def build_repair_plan(certification_result: dict[str, Any], research_gaps: dict[
         "next_action": certification_result["next_action"],
         "repair_steps": repair_steps,
         "stop_conditions": [
-            "Do not generate final_report.md until blocked source gaps are repaired or explicitly excluded from report scope.",
-            "Do not use derived $180M wording as direct quoted value unless a direct source is retrieved or wording preserves numeric caveat.",
+            "Do not generate final_report.md until blocking source gaps, failed checks, and human-review requirements are repaired or explicitly excluded from report scope.",
+            "Do not convert inferred or partial numeric support into a final value assertion without explicit formula inputs and preserved caveats.",
             "Do not convert post-decision or retrospective evidence into ex-ante buyer decision support.",
         ],
     }
@@ -159,52 +149,165 @@ def validate_repair_plan(payload: dict[str, Any]) -> None:
                 raise ValueError(f"repair_step missing {field}.")
 
 
-def _gap_type_from_gap_node(gap_node: dict[str, Any]) -> str:
-    affected = set(gap_node["affected_claim_types"])
-    if "personal_proceeds" in affected:
-        return "personal_proceeds_source_gap"
-    if "cap_table" in affected:
-        return "pre_sale_cap_table_source_gap"
-    if "ownership_or_founder_background" in affected:
-        return "founder_ownership_background_source_gap"
-    if "scientific_asset" in affected or "asset_lineage" in affected:
-        return "official_patent_record_source_gap"
-    return "source_gap"
+def _research_gap_from_source_gap(index: int, gap_node: dict[str, Any], related_claim_ids: list[str]) -> dict[str, Any]:
+    affected_fact_types = [_safe_key(value) for value in gap_node.get("affected_claim_types", [])]
+    gap_type = _gap_type(affected_fact_types, default="source_gap")
+    return {
+        "research_gap_id": f"RG-{index:03d}",
+        "gap_type": gap_type,
+        "affected_fact_types": affected_fact_types,
+        "related_claim_ids": related_claim_ids,
+        "related_gap_node_ids": [gap_node["gap_node_id"]],
+        "missing_source_need_ids": [gap_node["missing_source_need_id"]],
+        "gap_description": _gap_description(gap_type, affected_fact_types, gap_node.get("missing_source_need_id")),
+        "severity": _severity_for_gap(affected_fact_types, blocks_certification=True),
+        "blocks_certification": True,
+        "recommended_repair_target": "M2_source_retrieval",
+        "suggested_source_types": _suggested_source_types(affected_fact_types),
+    }
 
 
-def _gap_severity(gap_node: dict[str, Any]) -> str:
-    affected = set(gap_node["affected_claim_types"])
-    if affected.intersection({"personal_proceeds", "cap_table", "ownership_or_founder_background"}):
+def _research_gap_from_numeric_failure(index: int, claim_id: str, claim: dict[str, Any] | None, numeric_result: dict[str, Any]) -> dict[str, Any]:
+    claim_type = _claim_type(claim, fallback="derived_numeric_candidate")
+    return {
+        "research_gap_id": f"RG-{index:03d}",
+        "gap_type": "numeric_formula_or_input_gap",
+        "affected_fact_types": [claim_type],
+        "related_claim_ids": [claim_id],
+        "related_gap_node_ids": [],
+        "missing_source_need_ids": [],
+        "gap_description": f"Numeric verification for {claim_type} requires explicit formula inputs or corrected expected result.",
+        "severity": "high",
+        "blocks_certification": True,
+        "recommended_repair_target": "M5_numeric_verification",
+        "suggested_source_types": ["explicit numeric formula", "source-bounded numeric inputs", "calculation support document"],
+        "failed_verification_reason": numeric_result.get("caveat", "numeric verification failed"),
+    }
+
+
+def _research_gap_from_claim(index: int, cert: dict[str, Any], claim: dict[str, Any], related_source_gap_ids: list[str]) -> dict[str, Any]:
+    claim_type = _claim_type(claim, cert.get("claim_type", "generic_fact"))
+    status = cert["certification_status"]
+    return {
+        "research_gap_id": f"RG-{index:03d}",
+        "gap_type": _gap_type([claim_type], default=status),
+        "affected_fact_types": [claim_type],
+        "related_claim_ids": [cert["claim_id"]],
+        "related_gap_node_ids": [],
+        "missing_source_need_ids": [],
+        "gap_description": f"Claim {cert['claim_id']} with type {claim_type} is not certified because status is {status}.",
+        "severity": "high" if status in {"unsupported", "blocked_by_source_gap", "failed"} else "medium",
+        "blocks_certification": status in {"unsupported", "blocked_by_source_gap", "failed", "requires_numeric_verification"},
+        "recommended_repair_target": _recommended_target_for_status(status),
+        "suggested_source_types": _suggested_source_types([claim_type]),
+        "related_source_gap_ids": related_source_gap_ids,
+        "failed_verification_reason": cert.get("certification_basis", "claim certification did not pass"),
+    }
+
+
+def _gap_type(affected_fact_types: list[str], default: str) -> str:
+    if not affected_fact_types:
+        return default
+    if any("numeric" in value or "valuation" in value or "consideration" in value for value in affected_fact_types):
+        return "numeric_or_transaction_terms_source_gap"
+    if any("ownership" in value or "governance" in value or "proceeds" in value or "cap_table" in value for value in affected_fact_types):
+        return "ownership_or_value_transfer_source_gap"
+    if any("patent" in value or "intellectual" in value or "asset" in value for value in affected_fact_types):
+        return "asset_or_intellectual_property_source_gap"
+    if any("clinical" in value or "regulatory" in value for value in affected_fact_types):
+        return "regulatory_or_clinical_source_gap"
+    return f"{affected_fact_types[0]}_source_gap"
+
+
+def _gap_description(gap_type: str, affected_fact_types: list[str], missing_source_need_id: str | None) -> str:
+    affected = ", ".join(affected_fact_types) if affected_fact_types else "generic_fact"
+    source_need = missing_source_need_id or "unspecified_source_need"
+    return f"Unresolved {gap_type} for {affected}; missing source need {source_need} requires authoritative repair."
+
+
+def _severity_for_gap(affected_fact_types: list[str], blocks_certification: bool) -> str:
+    if blocks_certification and any(value in {"transaction_consideration", "ownership_or_governance", "legal_regulatory_and_diligence_risks"} for value in affected_fact_types):
         return "high"
-    return "medium"
+    return "high" if blocks_certification else "medium"
 
 
-def _suggested_source_types(gap_node: dict[str, Any]) -> list[str]:
-    affected = set(gap_node["affected_claim_types"])
-    if "personal_proceeds" in affected:
-        return ["direct proceeds disclosure", "transaction proceeds schedule", "authoritative ownership and payout record"]
-    if "cap_table" in affected:
-        return ["pre-sale cap table", "equity ownership schedule", "transaction disclosure schedule"]
-    if "ownership_or_founder_background" in affected:
-        return ["Haisco disclosure", "CNINFO filing", "SZSE disclosure", "board or founder-role disclosure"]
-    if "scientific_asset" in affected or "asset_lineage" in affected:
-        return ["official patent-office record", "patent assignment database", "authoritative chemistry patent family record"]
-    return ["authoritative primary source"]
+def _suggested_source_types(affected_fact_types: list[str]) -> list[str]:
+    joined = " ".join(affected_fact_types)
+    if any(term in joined for term in ("numeric", "consideration", "valuation", "payment", "financing")):
+        return ["transaction agreement", "official transaction announcement", "audited filing or authoritative financial disclosure"]
+    if any(term in joined for term in ("ownership", "governance", "proceeds", "cap_table")):
+        return ["ownership disclosure", "capitalization schedule", "transaction disclosure schedule"]
+    if any(term in joined for term in ("patent", "intellectual", "asset")):
+        return ["official intellectual property record", "assignment record", "authoritative product or asset disclosure"]
+    if any(term in joined for term in ("clinical", "regulatory")):
+        return ["regulatory filing", "clinical registry record", "official development-status disclosure"]
+    return ["authoritative primary source", "official filing", "signed transaction document"]
 
 
-def _repair_target_state(gap: dict[str, Any]) -> str:
-    if gap["gap_type"] == "direct_headline_value_source_optional":
+def _repair_action(gap: dict[str, Any]) -> str:
+    gap_type = gap["gap_type"]
+    if "numeric" in gap_type or gap.get("recommended_repair_target") == "M5_numeric_verification":
+        return "repair_numeric_formula_or_inputs"
+    if "conflict" in gap_type:
+        return "resolve_source_conflict"
+    if gap.get("missing_source_need_ids"):
+        return "rerun_m2_source_retrieval"
+    if gap.get("blocks_certification"):
+        return "retrieve_authoritative_source"
+    return "add_human_review_item"
+
+
+def _repair_target_state(action: str) -> str:
+    if action == "repair_numeric_formula_or_inputs":
         return "M2_source_retrieval_or_M5_numeric_verification"
+    if action in {"resolve_source_conflict", "add_human_review_item"}:
+        return "M4_claim_evidence_graph_update"
     return "M2_source_retrieval"
 
 
-def _target_artifact(target_state: str) -> str:
-    if target_state == "M2_source_retrieval_or_M5_numeric_verification":
+def _target_artifact(action: str) -> str:
+    if action == "repair_numeric_formula_or_inputs":
         return "retrieved_sources_manifest.json or certification_result.json"
+    if action in {"resolve_source_conflict", "add_human_review_item"}:
+        return "claim_evidence_graph.json"
     return "retrieved_sources_manifest.json"
 
 
-def _expected_output(target_state: str) -> str:
-    if target_state == "M2_source_retrieval_or_M5_numeric_verification":
-        return "Either a direct source for headline $180M wording or a preserved numeric caveat confirming arithmetic only."
-    return "Updated retrieved source manifest and raw evidence enabling M3/M4/M5 rerun."
+def _repair_reason(gap: dict[str, Any], action: str) -> str:
+    claim_ids = ", ".join(gap["related_claim_ids"]) if gap["related_claim_ids"] else "no direct claim id"
+    return f"{action} for {gap['gap_type']} affecting {claim_ids}; {gap['gap_description']}"
+
+
+def _expected_output(action: str) -> str:
+    if action == "repair_numeric_formula_or_inputs":
+        return "Explicit formula inputs or corrected numeric support before rerunning M5 numeric verification."
+    if action in {"resolve_source_conflict", "add_human_review_item"}:
+        return "Updated claim framing, conflict disposition, or documented human review before rerunning M4/M5."
+    return "Updated retrieved source manifest enabling M3/M4/M5 rerun with source-bounded evidence."
+
+
+def _recommended_target_for_status(status: str) -> str:
+    if status == "requires_numeric_verification":
+        return "M5_numeric_verification"
+    if status in {"failed", "requires_human_review"}:
+        return "M4_claim_evidence_graph_update"
+    return "M2_source_retrieval"
+
+
+def _claim_type(claim: dict[str, Any] | None, fallback: str = "generic_fact") -> str:
+    if not claim:
+        return _safe_key(fallback)
+    return _safe_key(str(claim.get("canonical_fact_type") or claim.get("claim_type") or fallback))
+
+
+def _safe_key(value: str) -> str:
+    normalized = []
+    previous_separator = False
+    for character in value.lower():
+        if character.isalnum():
+            normalized.append(character)
+            previous_separator = False
+        elif not previous_separator:
+            normalized.append("_")
+            previous_separator = True
+    return "".join(normalized).strip("_") or "generic_fact"

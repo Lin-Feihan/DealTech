@@ -94,13 +94,13 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
     def test_source_gaps_become_research_gaps(self) -> None:
         artifacts = run_m5_pipeline(self.graph_path, self.repository_path, self.root / "m5_gaps")
         research_gaps = self._load(artifacts["research_gaps"])
-        descriptions = {gap["gap_description"] for gap in research_gaps["research_gaps"]}
+        descriptions = "\n".join(gap["gap_description"] for gap in research_gaps["research_gaps"])
 
-        self.assertIn("Haisco / CNINFO / SZSE disclosure for Bohan Jin role and 2017 11.12% shareholding", descriptions)
-        self.assertIn("Official patent-office records for TYK2 inhibitor chemistry", descriptions)
-        self.assertIn("Direct source on Bohan Jin personal realized proceeds", descriptions)
-        self.assertIn("Immediately pre-2021 FronThera cap table source", descriptions)
-        self.assertIn("Optional direct source for headline $180M maximum value if final report wording needs a direct quoted deal value.", descriptions)
+        self.assertTrue(research_gaps["research_gaps"])
+        self.assertTrue(all("Unresolved" in gap["gap_description"] or "not certified" in gap["gap_description"] for gap in research_gaps["research_gaps"]))
+        self.assertTrue(all(gap["suggested_source_types"] for gap in research_gaps["research_gaps"]))
+        for marker in ("FronThera", "Bohan", "TYK2", "Alumis", "Esker", "$180M", "11.12"):
+            self.assertNotIn(marker, descriptions)
 
     def test_repair_plan_points_source_gaps_to_m2_source_retrieval(self) -> None:
         artifacts = run_m5_pipeline(self.graph_path, self.repository_path, self.root / "m5_repair")
@@ -108,8 +108,9 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
         source_gap_steps = [step for step in repair_plan["repair_steps"] if step["priority"] == "high"]
 
         self.assertTrue(source_gap_steps)
-        self.assertTrue(all(step["target_state"] == "M2_source_retrieval" for step in source_gap_steps))
-        self.assertTrue(any(step["target_state"] == "M2_source_retrieval_or_M5_numeric_verification" for step in repair_plan["repair_steps"]))
+        self.assertTrue(all(step["target_state"] in {"M2_source_retrieval", "M2_source_retrieval_or_M5_numeric_verification"} for step in source_gap_steps))
+        self.assertTrue(any(step.get("repair_action") == "repair_numeric_formula_or_inputs" for step in repair_plan["repair_steps"]))
+        self.assertTrue(all(step.get("repair_action") for step in repair_plan["repair_steps"]))
 
     def test_no_final_report_or_analysis_package_generated(self) -> None:
         output_dir = self.root / "m5_forbidden_outputs"

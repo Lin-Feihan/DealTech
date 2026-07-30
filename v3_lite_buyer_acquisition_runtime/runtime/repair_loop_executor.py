@@ -16,7 +16,7 @@ ALLOWED_REPAIR_TARGET_STATES = {
     "M4_claim_evidence_graph_update",
 }
 FORBIDDEN_OUTPUT_MARKERS = {"final_report.md", "analysis_package.json", "final_report", "analysis_package"}
-MUST_NOT_USE_SOURCES = ["case_seed", "mandate_notes", "Bohan PDF", "model memory", "test fixtures"]
+MUST_NOT_USE_SOURCES = ["case_seed", "mandate_notes", "model memory", "test fixtures", "unverified local notes"]
 REPAIR_STEP_REQUIRED_FIELDS = {
     "repair_step_id",
     "target_state",
@@ -107,17 +107,19 @@ def build_targeted_source_discovery_plan(
     repair_plan: dict[str, Any],
 ) -> dict[str, Any]:
     gaps_by_id = {gap["research_gap_id"]: gap for gap in research_gaps["research_gaps"]}
+    certs_by_id = {cert["claim_id"]: cert for cert in certification_result["claim_certifications"]}
+    case_context = _case_context(certification_result)
     targeted_source_needs = []
     blocked_or_deferred_repairs = []
     for step in repair_plan["repair_steps"]:
         if "M2_source_retrieval" in step["target_state"]:
             related_gap = _first_related_gap(step, gaps_by_id)
-            targeted_source_needs.append(_targeted_source_need(len(targeted_source_needs) + 1, step, related_gap))
+            targeted_source_needs.append(_targeted_source_need(len(targeted_source_needs) + 1, step, related_gap, certs_by_id, case_context))
         else:
             blocked_or_deferred_repairs.append(_blocked_or_deferred_repair(step, "non_m2_repair_target_deferred"))
     targeted_search_queries = []
     for need in targeted_source_needs:
-        for query_text in _query_texts_for_need(need):
+        for query_text in _query_texts_for_need(need, case_context):
             targeted_search_queries.append(
                 {
                     "query_id": f"TSQ-{len(targeted_search_queries) + 1:03d}",
@@ -167,7 +169,7 @@ def build_repair_attempt_log(targeted_plan: dict[str, Any], repair_plan: dict[st
         next_action = (
             "Supply manual authoritative sources or configure a retrieval provider, then rerun M2 source retrieval."
             if is_m2
-            else "Handle after source repair or claim graph update decision."
+            else "Handle after source repair, claim graph update, or human review decision."
         )
         attempts.append(
             {
@@ -290,20 +292,30 @@ def validate_repair_attempt_log(log: Any) -> None:
             raise RepairLoopError("M5.1 dry run must not mark retrieval output artifacts as generated.")
 
 
-def _targeted_source_need(index: int, step: dict[str, Any], research_gap: dict[str, Any] | None) -> dict[str, Any]:
+def _targeted_source_need(
+    index: int,
+    step: dict[str, Any],
+    research_gap: dict[str, Any] | None,
+    certs_by_id: dict[str, dict[str, Any]],
+    case_context: dict[str, str],
+) -> dict[str, Any]:
     gap_id = research_gap["research_gap_id"] if research_gap else step["related_research_gap_ids"][0]
-    description = research_gap["gap_description"] if research_gap else step["reason"]
+    fact_types = _fact_types_for_step(step, research_gap, certs_by_id)
+    target_question = _target_fact_or_question(step, research_gap, fact_types)
+    required_source_types = _required_source_types(step, research_gap, fact_types)
     return {
         "targeted_source_need_id": f"TSN-{index:03d}",
         "original_research_gap_id": gap_id,
         "related_claim_ids": step["related_claim_ids"],
         "missing_source_need_ids": research_gap.get("missing_source_need_ids", []) if research_gap else [],
-        "missing_source_description": description,
-        "required_source_types": step.get("required_source_types", research_gap.get("suggested_source_types", []) if research_gap else []),
-        "preferred_source_owners": _preferred_source_owners(description, step.get("required_source_types", [])),
+        "missing_source_description": target_question,
+        "target_fact_or_question": target_question,
+        "affected_fact_types": fact_types,
+        "required_source_types": required_source_types,
+        "preferred_source_owners": _preferred_source_owners(required_source_types, case_context),
         "source_tier_required": "Tier 1" if step["priority"] == "high" else "Tier 1 preferred",
         "priority": step["priority"],
-        "purpose": _purpose_for_need(description),
+        "purpose": _purpose_for_need(fact_types),
         "expected_downstream_update": _expected_downstream_update(step),
     }
 
@@ -324,66 +336,146 @@ def _first_related_gap(step: dict[str, Any], gaps_by_id: dict[str, dict[str, Any
     return None
 
 
-def _query_texts_for_need(need: dict[str, Any]) -> list[str]:
-    text = need["missing_source_description"].lower()
-    if "cninfo" in text or "haisco" in text or "11.12" in text:
-        return [
-            "CNINFO SZSE Haisco FronThera Bohan Jin 11.12 disclosure",
-            "Haisco disclosure FronThera Bohan Jin VP Chemistry director 11.12%",
-        ]
-    if "patent" in text or "tyk2" in text:
-        return [
-            "WIPO USPTO PCT/US2019/057485 TYK2 FronThera",
-            "WIPO USPTO PCT/US2020/021850 TYK2 FronThera",
-        ]
-    if "personal realized proceeds" in text or "personal proceeds" in text:
-        return ["official source Bohan Jin personal proceeds FronThera acquisition"]
-    if "cap table" in text:
-        return ["official source FronThera pre-2021 cap table ownership"]
-    if "$180" in text or "180m" in text:
-        return ["SEC FronThera acquisition $180 million maximum aggregate value"]
-    return [need["missing_source_description"]]
+def _query_texts_for_need(need: dict[str, Any], case_context: dict[str, str]) -> list[str]:
+    query_parts = [
+        case_context.get("buyer", "buyer"),
+        case_context.get("target", "target"),
+        case_context.get("transaction_type", "acquisition"),
+        " ".join(need.get("affected_fact_types", [])),
+        " ".join(need.get("required_source_types", [])),
+    ]
+    base = _clean_query(" ".join(part for part in query_parts if part))
+    if not base:
+        base = "buyer target acquisition authoritative source"
+    return [base, _clean_query(f"{base} official filing source")]
 
 
 def _intended_provider_for_need(need: dict[str, Any]) -> str:
-    owners = " ".join(need["preferred_source_owners"]).lower()
-    if "patent" in owners or "wipo" in owners or "uspto" in owners:
-        return "patent_provider_or_manual_authoritative_source_supply"
-    if "sec" in owners:
-        return "sec_edgar_provider_or_manual_authoritative_source_supply"
-    if "cninfo" in owners or "szse" in owners:
-        return "stock_exchange_disclosure_provider_or_manual_authoritative_source_supply"
+    text = " ".join(need["required_source_types"] + need["preferred_source_owners"]).lower()
+    if "intellectual" in text or "assignment" in text:
+        return "official_ip_record_provider_or_manual_authoritative_source_supply"
+    if "filing" in text or "official" in text:
+        return "official_filing_provider_or_manual_authoritative_source_supply"
+    if "clinical" in text or "regulatory" in text:
+        return "regulatory_or_clinical_provider_or_manual_authoritative_source_supply"
     return "manual_authoritative_source_supply_or_configured_retrieval_provider"
 
 
-def _preferred_source_owners(description: str, required_source_types: list[str]) -> list[str]:
-    text = " ".join([description, " ".join(required_source_types)]).lower()
-    if "cninfo" in text or "szse" in text or "haisco" in text:
-        return ["Haisco / CNINFO / SZSE"]
-    if "patent" in text or "tyk2" in text:
-        return ["WIPO / USPTO / official patent office"]
-    if "sec" in text or "$180" in text:
-        return ["SEC / Alumis / official transaction parties"]
-    if "cap table" in text or "ownership" in text:
-        return ["FronThera / Haisco / transaction disclosure schedule owner"]
+def _preferred_source_owners(required_source_types: list[str], case_context: dict[str, str]) -> list[str]:
+    buyer = case_context.get("buyer")
+    target = case_context.get("target")
+    if buyer and target:
+        return [f"{buyer} or {target} authoritative source owner"]
+    if buyer:
+        return [f"{buyer} authoritative source owner"]
+    if target:
+        return [f"{target} authoritative source owner"]
+    if any("regulatory" in item or "clinical" in item for item in required_source_types):
+        return ["official regulatory or clinical source owner"]
+    if any("intellectual" in item or "assignment" in item for item in required_source_types):
+        return ["official intellectual property source owner"]
     return ["authoritative primary source owner"]
 
 
-def _purpose_for_need(description: str) -> str:
-    if "180" in description:
-        return "Determine whether direct headline maximum value wording exists; otherwise preserve numeric caveat."
-    return "Retrieve authoritative source support for unresolved certification-blocking repair gap."
+def _purpose_for_need(fact_types: list[str]) -> str:
+    fact_text = ", ".join(fact_types) if fact_types else "generic acquisition fact"
+    return f"Retrieve authoritative source support for unresolved {fact_text} repair need."
 
 
 def _expected_downstream_update(step: dict[str, Any]) -> str:
     if step["target_state"] == "M2_source_retrieval_or_M5_numeric_verification":
-        return "Either update M2 retrieved sources if a direct source exists, or keep M5 numeric verification caveat unchanged."
+        return "Update M2 retrieved sources or M5 numeric verification inputs, then rerun downstream certification."
     return "If authoritative sources are supplied, rerun M2 then M3/M4/M5 to update evidence and certification state."
 
 
 def _requests_forbidden_output(step: dict[str, Any]) -> bool:
     text = " ".join(str(step.get(field, "")) for field in ("target_artifact", "reason", "expected_output", "target_state")).lower()
     return any(marker in text for marker in FORBIDDEN_OUTPUT_MARKERS)
+
+
+def _fact_types_for_step(step: dict[str, Any], research_gap: dict[str, Any] | None, certs_by_id: dict[str, dict[str, Any]]) -> list[str]:
+    if research_gap and research_gap.get("affected_fact_types"):
+        return [_safe_key(str(value)) for value in research_gap["affected_fact_types"]]
+    claim_types = []
+    for claim_id in step["related_claim_ids"]:
+        cert = certs_by_id.get(claim_id)
+        if cert and cert.get("claim_type"):
+            claim_types.append(_safe_key(str(cert["claim_type"])))
+    if claim_types:
+        return sorted(set(claim_types))
+    return [_safe_key(str(step.get("repair_action") or "generic_fact"))]
+
+
+def _target_fact_or_question(step: dict[str, Any], research_gap: dict[str, Any] | None, fact_types: list[str]) -> str:
+    explicit = step.get("target_fact_or_question") or (research_gap or {}).get("target_fact_or_question")
+    if isinstance(explicit, str) and explicit.strip():
+        return _neutral_text(explicit)
+    fact_text = ", ".join(fact_types) if fact_types else "generic acquisition fact"
+    status_reason = _neutral_text(str((research_gap or {}).get("failed_verification_reason") or step.get("repair_action") or "repair required"))
+    return f"Find authoritative source support for {fact_text}; repair context: {status_reason}."
+
+
+def _required_source_types(step: dict[str, Any], research_gap: dict[str, Any] | None, fact_types: list[str]) -> list[str]:
+    candidates = step.get("required_source_types") or (research_gap or {}).get("suggested_source_types") or []
+    cleaned = [_neutral_text(str(item)) for item in candidates if str(item).strip()]
+    if cleaned:
+        return cleaned
+    fact_text = " ".join(fact_types)
+    if any(term in fact_text for term in ("numeric", "consideration", "valuation", "payment")):
+        return ["transaction agreement", "official transaction announcement", "audited filing or authoritative financial disclosure"]
+    if any(term in fact_text for term in ("ownership", "governance")):
+        return ["ownership disclosure", "capitalization schedule", "transaction disclosure schedule"]
+    if any(term in fact_text for term in ("intellectual", "asset")):
+        return ["official intellectual property record", "assignment record", "authoritative asset disclosure"]
+    return ["authoritative primary source", "official filing", "signed transaction document"]
+
+
+def _case_context(certification_result: dict[str, Any]) -> dict[str, str]:
+    context = certification_result.get("case_context") or certification_result.get("transaction_context") or {}
+    if not isinstance(context, dict):
+        return {}
+    return {
+        key: _clean_query(str(context[key]))
+        for key in ("buyer", "target", "transaction_type")
+        if key in context and isinstance(context[key], str) and context[key].strip()
+    }
+
+
+def _neutral_text(text: str) -> str:
+    words = []
+    for token in text.replace("/", " ").replace("%", " ").split():
+        stripped = token.strip(",.;:()[]{}")
+        if not stripped or any(character.isupper() or character.isdigit() for character in stripped):
+            continue
+        safe = _safe_key(stripped)
+        if safe and not _looks_case_specific(safe):
+            words.append(stripped)
+    return " ".join(words) or "generic source repair requirement"
+
+
+def _clean_query(text: str) -> str:
+    return " ".join(_neutral_text(text).split())
+
+
+def _looks_case_specific(token: str) -> bool:
+    forbidden_tokens = {
+        "specific_pdf",
+        "local_fixture",
+    }
+    return token in forbidden_tokens or token.startswith("pct_us")
+
+
+def _safe_key(value: str) -> str:
+    normalized = []
+    previous_separator = False
+    for character in value.lower():
+        if character.isalnum():
+            normalized.append(character)
+            previous_separator = False
+        elif not previous_separator:
+            normalized.append("_")
+            previous_separator = True
+    return "".join(normalized).strip("_") or "generic_fact"
 
 
 def _now_utc_iso() -> str:

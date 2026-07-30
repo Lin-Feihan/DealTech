@@ -79,12 +79,11 @@ class V3LiteM7ReportRenderingGateTest(unittest.TestCase):
         manifest = self._run_manifest(self.root / "m7_blocked_reasons")
         blocked = self._blocked_reason_text(manifest)
 
-        self.assertIn("unresolved source gaps remain", blocked)
-        self.assertIn("derived $180M wording requires caveat or direct source before final report use", blocked)
-        self.assertIn("founder ownership gap remains unresolved", blocked)
-        self.assertIn("Bohan Jin personal proceeds gap remains unresolved", blocked)
-        self.assertIn("pre-sale cap table gap remains unresolved", blocked)
-        self.assertIn("patent-office verification gap remains unresolved", blocked)
+        self.assertIn("repair plan has unresolved steps", blocked)
+        self.assertIn("one or more claims are failed, unsupported, source-gap-blocked, or require review", blocked)
+        self.assertIn("analysis package contains blocked analysis items", blocked)
+        self.assertNotIn("Bohan", blocked)
+        self.assertNotIn("$180M", blocked)
 
     def test_allowed_and_excluded_sections_are_gate_metadata_only(self) -> None:
         manifest = self._run_manifest(self.root / "m7_sections")
@@ -94,18 +93,18 @@ class V3LiteM7ReportRenderingGateTest(unittest.TestCase):
         self.assertEqual(
             allowed,
             {
-                "evidence-bounded analysis package exists",
-                "certification summary exists",
-                "repair plan exists",
-                "source gap summary exists",
+                "source-bounded analysis package",
+                "certification summary",
+                "repair plan",
+                "source gap summary",
             },
         )
-        self.assertIn("executive investment recommendation", excluded)
-        self.assertIn("final Proceed / Walk Away recommendation", excluded)
-        self.assertIn("uncaveated valuation or headline deal value", excluded)
-        self.assertIn("founder proceeds analysis", excluded)
-        self.assertIn("pre-sale cap table analysis", excluded)
-        self.assertIn("official patent-office validated asset lineage", excluded)
+        self.assertIn("investment recommendation", excluded)
+        self.assertIn("final proceed or walk-away decision", excluded)
+        self.assertIn("uncaveated valuation or deal-value conclusion", excluded)
+        self.assertIn("unsupported value-transfer analysis", excluded)
+        self.assertIn("unsupported ownership analysis", excluded)
+        self.assertIn("unsupported legal or diligence conclusion", excluded)
         self.assertIn("final report narrative", excluded)
 
     def test_required_repairs_before_report_are_carried_forward(self) -> None:
@@ -113,11 +112,10 @@ class V3LiteM7ReportRenderingGateTest(unittest.TestCase):
         repairs_by_id = {repair["repair_step_id"]: repair for repair in manifest["required_repairs_before_report"]}
 
         self.assertEqual(set(repairs_by_id), {"RP-001", "RP-002", "RP-003", "RP-004", "RP-005"})
-        self.assertIn("Haisco / CNINFO / SZSE disclosure", repairs_by_id["RP-001"]["reason"])
-        self.assertIn("Official patent-office records", repairs_by_id["RP-002"]["reason"])
-        self.assertIn("personal realized proceeds", repairs_by_id["RP-003"]["reason"])
-        self.assertIn("pre-2021 FronThera cap table", repairs_by_id["RP-004"]["reason"])
-        self.assertIn("$180M", repairs_by_id["RP-005"]["reason"])
+        self.assertTrue(all("complete source-bounded repair" in repair["reason"] for repair in repairs_by_id.values()))
+        repair_text = json.dumps(manifest["required_repairs_before_report"])
+        for marker in ("FronThera", "Bohan", "TYK2", "Alumis", "Esker", "$180M", "11.12"):
+            self.assertNotIn(marker, repair_text)
 
     def test_no_final_report_or_recommendation_or_valuation_artifacts_are_generated(self) -> None:
         output_dir = self.root / "m7_forbidden_outputs"
