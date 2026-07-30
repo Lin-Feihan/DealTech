@@ -435,8 +435,9 @@ def _temporal_defaults_for_source(source: dict[str, Any]) -> dict[str, str]:
         for field in ("source_id", "title", "source_type", "source_owner", "url_or_file", "local_cache_path")
     ).lower()
     if "stock purchase agreement" in source_text or "sec-spa" in source_text:
+        source_date = str(source.get("source_date_or_period") or source.get("source_date") or "unknown")
         return {
-            "source_date_or_period": "2021-03-05",
+            "source_date_or_period": source_date,
             "source_time_relation_to_decision_date": "at_decision",
             "permitted_use": "transaction_terms_verification",
         }
@@ -460,9 +461,9 @@ def _temporal_defaults_for_source(source: dict[str, Any]) -> dict[str, str]:
             "source_time_relation_to_decision_date": "retrospective",
             "permitted_use": "retrospective_outcome_validation",
         }
-    if "haisco" in source_text or "2017" in source_text:
+    if "stock exchange" in source_text or "ownership disclosure" in source_text or "company filing" in source_text:
         return {
-            "source_date_or_period": "pre-2021 decision period",
+            "source_date_or_period": str(source.get("source_date_or_period") or source.get("source_date") or "unknown"),
             "source_time_relation_to_decision_date": "pre_decision",
             "permitted_use": "ex_ante_deal_evaluation",
         }
