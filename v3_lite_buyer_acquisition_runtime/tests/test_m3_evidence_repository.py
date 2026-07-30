@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from v3_lite_buyer_acquisition_runtime.runtime.case_seed_loader import load_case_seed
-from v3_lite_buyer_acquisition_runtime.runtime.evidence_repository_builder import validate_evidence_repository
+from v3_lite_buyer_acquisition_runtime.runtime.evidence_repository_builder import canonicalize_raw_evidence_item, validate_evidence_repository
 from v3_lite_buyer_acquisition_runtime.runtime.mandate_intake import load_mandate
 from v3_lite_buyer_acquisition_runtime.runtime.research_planning import build_research_plan
 from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m2 import run_m2_pipeline
@@ -72,10 +72,11 @@ class V3LiteM3EvidenceRepositoryTest(unittest.TestCase):
 
         self.assertLess(repository["repository_quality_summary"]["evidence_record_count"], repository["repository_quality_summary"]["raw_evidence_item_count"])
         self.assertGreater(repository["repository_quality_summary"]["duplicate_groups_count"], 0)
-        self.assertIn("milestone_consideration_cap_120m", records_by_key)
-        self.assertEqual(records_by_key["milestone_consideration_cap_120m"]["source_count"], 4)
-        self.assertIn("base_initial_consideration_60m", records_by_key)
-        self.assertIn("fl2021_001_to_esker_to_alumis_entity_lineage", records_by_key)
+        forbidden_key_markers = ("base_initial", "milestone_consideration_cap", "headline_maximum", "fl2021", "esker", "alumis", "180m")
+        self.assertFalse(any(any(marker in key for marker in forbidden_key_markers) for key in records_by_key))
+        self.assertTrue(any(record["source_count"] > 1 for record in repository["evidence_records"]))
+        self.assertTrue(all("structured_attributes" in record for record in repository["evidence_records"]))
+        self.assertTrue(any(record["canonical_fact_type"] in {"transaction_timing", "transaction_parties", "financing_or_payment_mechanics"} for record in repository["evidence_records"]))
 
     def test_failed_source_needs_become_source_gaps_and_not_evidence_records(self) -> None:
         repository = self._run_real_source_repository("m3_source_gaps")
@@ -83,22 +84,29 @@ class V3LiteM3EvidenceRepositoryTest(unittest.TestCase):
         record_keys = {record["canonical_fact_key"] for record in repository["evidence_records"]}
 
         self.assertEqual(len(repository["source_gaps"]), 4)
-        self.assertIn("Haisco / CNINFO / SZSE disclosure for Bohan Jin role and 2017 11.12% shareholding", descriptions)
-        self.assertIn("Official patent-office records for TYK2 inhibitor chemistry", descriptions)
-        self.assertIn("Direct source on Bohan Jin personal realized proceeds", descriptions)
-        self.assertIn("Immediately pre-2021 FronThera cap table source", descriptions)
+        self.assertIn("Missing ownership, governance, cap table, or seller-economics evidence", descriptions)
+        self.assertIn("Missing intellectual-property evidence", descriptions)
         self.assertNotIn("personal_proceeds_not_verified", record_keys)
         self.assertNotIn("pre_sale_cap_table_gap", record_keys)
         self.assertTrue(all(record["support_status"] != "source_gap" for record in repository["evidence_records"]))
 
     def test_temporal_classifications_are_preserved(self) -> None:
         repository = self._run_real_source_repository("m3_temporal")
-        records_by_key = {record["canonical_fact_key"]: record for record in repository["evidence_records"]}
-
-        self.assertEqual(records_by_key["milestone_consideration_cap_120m"]["evidence_time_relation_to_decision_date"], "at_decision")
-        self.assertEqual(records_by_key["milestone_consideration_cap_120m"]["permitted_use"], "transaction_terms_verification")
-        self.assertEqual(records_by_key["alumis_pipeline_current_envudeucitinib"]["evidence_time_relation_to_decision_date"], "retrospective")
-        self.assertEqual(records_by_key["alumis_pipeline_current_envudeucitinib"]["permitted_use"], "retrospective_outcome_validation")
+        self.assertTrue(
+            any(
+                record["canonical_fact_type"] in {"transaction_timing", "transaction_parties", "financing_or_payment_mechanics"}
+                and record["evidence_time_relation_to_decision_date"] == "at_decision"
+                and record["permitted_use"] == "transaction_terms_verification"
+                for record in repository["evidence_records"]
+            )
+        )
+        self.assertTrue(
+            any(
+                "retrospective" in record.get("supporting_time_relations", [])
+                and record["permitted_use"] == "retrospective_outcome_validation"
+                for record in repository["evidence_records"]
+            )
+        )
         for record in repository["evidence_records"]:
             if record["evidence_time_relation_to_decision_date"] in {"post_decision", "retrospective"}:
                 self.assertNotEqual(record["permitted_use"], "ex_ante_deal_evaluation")
@@ -111,6 +119,28 @@ class V3LiteM3EvidenceRepositoryTest(unittest.TestCase):
 
         self.assertFalse(any(item["raw_fact_type"] == "headline_maximum_value" for item in raw_evidence["raw_evidence_items"]))
         self.assertFalse(any("180m" in key or "headline_maximum_value" in key for key in record_keys))
+
+    def test_generic_canonical_attributes_store_values_outside_key(self) -> None:
+        canonical_fact_key, canonical_fact_type, _, structured_attributes = canonicalize_raw_evidence_item(
+            {
+                "evidence_id": "RE-TEST-001",
+                "source_id": "SRC-SYNTHETIC-001",
+                "source_title": "Synthetic transaction agreement",
+                "source_type": "signed agreement",
+                "evidence_category": "transaction",
+                "raw_fact_type": "transaction_consideration",
+                "extracted_text_or_summary": "The buyer agreed to pay $42 million at closing and up to $9 million in contingent payments during 2027.",
+                "related_evidence_requirement_ids": ["ER-TEST"],
+                "related_source_need_ids": ["SN-TEST"],
+            }
+        )
+
+        self.assertEqual(canonical_fact_type, "transaction_consideration")
+        self.assertEqual(canonical_fact_key, "transaction_consideration__er_test")
+        self.assertEqual(structured_attributes["amounts"], ["$42 million", "$9 million"])
+        self.assertEqual(structured_attributes["currency"], "USD")
+        self.assertNotIn("42", canonical_fact_key)
+        self.assertNotIn("9", canonical_fact_key)
 
     def _run_real_source_m2(self, label: str) -> dict[str, Path]:
         return run_m2_pipeline(

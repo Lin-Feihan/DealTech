@@ -188,7 +188,7 @@ class V3LiteM2DeepResearchProviderTest(unittest.TestCase):
                 "provider_source_id": "PS-MISSING",
                 "extracted_text_or_summary": "Unsupported unsourced claim.",
                 "extraction_location_if_available": None,
-                "fact_type": "headline_maximum_value",
+                "fact_type": "transaction_consideration",
                 "related_workstream_ids": ["WS-005"],
                 "related_evidence_requirement_ids": ["ER-006"],
                 "related_verification_target_ids": ["VT-003"],
@@ -275,20 +275,20 @@ class V3LiteM2DeepResearchProviderTest(unittest.TestCase):
             "sources": [
                 {
                     "provider_source_id": "PS-001",
-                    "title": "SEC Exhibit 10.22 Stock Purchase Agreement",
+                    "title": "SEC Exhibit Transaction Agreement",
                     "url": "https://www.sec.gov/Archives/example-spa.htm",
                     "source_type": "SEC filing",
-                    "source_owner": "SEC / Alumis",
-                    "source_date_or_period": "2021-03-05",
+                    "source_owner": "SEC / buyer registrant",
+                    "source_date_or_period": "at decision date",
                     "source_reliability_rationale": "Primary SEC filing containing the signed agreement.",
                     "source_limitations": "Agreement supports transaction terms only; later certification still required."
                 },
                 {
                     "provider_source_id": "PS-002",
-                    "title": "Official Alumis pipeline page for ESK-001",
-                    "url": "https://www.alumis.com/pipeline/esk-001",
+                    "title": "Official buyer product pipeline page",
+                    "url": "https://www.example-buyer.com/pipeline/product-candidate",
                     "source_type": "official company pipeline page",
-                    "source_owner": "Alumis",
+                    "source_owner": "buyer company",
                     "source_date_or_period": "current as of retrieval date 2026-07-29",
                     "source_reliability_rationale": "Official company pipeline page for current product naming.",
                     "source_limitations": "Current page is retrospective to the 2021 decision date."
@@ -315,8 +315,8 @@ class V3LiteM2DeepResearchProviderTest(unittest.TestCase):
                 },
                 {
                     "provider_source_id": "PS-005",
-                    "title": "Bohan PDF personal proceeds notes",
-                    "url": "file://bohan-pdf-notes",
+                    "title": "User notes on seller proceeds",
+                    "url": "file://user-provided-notes",
                     "source_type": "user-provided case brief",
                     "source_owner": "user-provided",
                     "source_date_or_period": "unknown",
@@ -328,9 +328,9 @@ class V3LiteM2DeepResearchProviderTest(unittest.TestCase):
                 {
                     "provider_evidence_id": "PE-001",
                     "provider_source_id": "PS-001",
-                    "extracted_text_or_summary": "The stock purchase agreement states a $60 million base initial consideration and up to $120 million milestone consideration.",
+                    "extracted_text_or_summary": "The transaction agreement states base consideration and possible contingent consideration tied to future milestones.",
                     "extraction_location_if_available": {"section": "Consideration", "page": 3},
-                    "fact_type": "base_initial_consideration",
+                    "fact_type": "transaction_consideration",
                     "related_workstream_ids": ["WS-005"],
                     "related_evidence_requirement_ids": ["ER-001", "ER-006"],
                     "related_verification_target_ids": ["VT-001", "VT-003"],
@@ -340,9 +340,9 @@ class V3LiteM2DeepResearchProviderTest(unittest.TestCase):
                 {
                     "provider_evidence_id": "PE-002",
                     "provider_source_id": "PS-002",
-                    "extracted_text_or_summary": "The official pipeline page identifies ESK-001 as envudeucitinib in the current Alumis pipeline.",
+                    "extracted_text_or_summary": "The official pipeline page identifies the acquired program under its current product candidate name.",
                     "extraction_location_if_available": {"section": "Pipeline"},
-                    "fact_type": "envudeucitinib_asset_lineage",
+                    "fact_type": "asset_or_product_identity",
                     "related_workstream_ids": ["WS-003", "WS-008"],
                     "related_evidence_requirement_ids": ["ER-005"],
                     "related_verification_target_ids": ["VT-006"],
@@ -352,9 +352,9 @@ class V3LiteM2DeepResearchProviderTest(unittest.TestCase):
                 {
                     "provider_evidence_id": "PE-003",
                     "provider_source_id": "PS-003",
-                    "extracted_text_or_summary": "Reuters reported a later milestone event tied to the FronThera acquisition program in 2024.",
+                    "extracted_text_or_summary": "Reuters reported a later milestone event tied to the acquired program after the transaction date.",
                     "extraction_location_if_available": "article body",
-                    "fact_type": "milestone_payment_2024",
+                    "fact_type": "milestone_payment",
                     "related_workstream_ids": ["WS-006"],
                     "related_evidence_requirement_ids": ["ER-002", "ER-006"],
                     "related_verification_target_ids": ["VT-001", "VT-002"],
@@ -364,9 +364,9 @@ class V3LiteM2DeepResearchProviderTest(unittest.TestCase):
                 {
                     "provider_evidence_id": "PE-004",
                     "provider_source_id": "PS-004",
-                    "extracted_text_or_summary": "Deep Research summary says the headline value was $180 million.",
+                    "extracted_text_or_summary": "Deep Research summary says the transaction had a headline value.",
                     "extraction_location_if_available": "provider memo",
-                    "fact_type": "headline_maximum_value",
+                    "fact_type": "transaction_consideration",
                     "related_workstream_ids": ["WS-005"],
                     "related_evidence_requirement_ids": ["ER-006"],
                     "related_verification_target_ids": ["VT-003"],
@@ -376,9 +376,9 @@ class V3LiteM2DeepResearchProviderTest(unittest.TestCase):
                 {
                     "provider_evidence_id": "PE-005",
                     "provider_source_id": "PS-005",
-                    "extracted_text_or_summary": "Bohan PDF suggests founder economics and personal proceeds.",
+                    "extracted_text_or_summary": "User notes suggest seller economics and personal proceeds.",
                     "extraction_location_if_available": "PDF note",
-                    "fact_type": "personal_proceeds_not_verified",
+                    "fact_type": "ownership_or_governance",
                     "related_workstream_ids": ["WS-004", "WS-009"],
                     "related_evidence_requirement_ids": ["ER-007"],
                     "related_verification_target_ids": ["VT-004", "VT-007"],
@@ -389,10 +389,10 @@ class V3LiteM2DeepResearchProviderTest(unittest.TestCase):
             "unresolved_gaps": [
                 {
                     "gap_id": "GAP-001",
-                    "gap_description": "Direct authoritative support for Bohan Jin personal realized proceeds remains unresolved.",
+                    "gap_description": "Direct authoritative support for seller realized proceeds remains unresolved.",
                     "attempted_source_types": ["stock exchange announcement", "company filing"],
                     "reason_unresolved": "Deep Research did not identify a direct authoritative source.",
-                    "recommended_next_search": "Search official Haisco, CNINFO, and SZSE disclosures for personal proceeds or cap table evidence."
+                    "recommended_next_search": "Search official company filings and exchange disclosures for seller proceeds or cap table evidence."
                 }
             ],
             "provider_notes": [

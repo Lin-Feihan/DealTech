@@ -185,22 +185,34 @@ class V3LiteM2SourceDiscoveryAndRawEvidenceTest(unittest.TestCase):
         self.assertTrue((output_dir / "cache" / "SRC-ALUMIS-PIPELINE-001.txt").exists())
 
         raw_evidence = json.loads(artifacts["raw_evidence"].read_text(encoding="utf-8"))
-        raw_text = json.dumps(raw_evidence)
-        self.assertIn("$60", raw_text)
-        self.assertIn("$120", raw_text)
-        self.assertIn("$180", raw_text)
-        self.assertIn("base_initial_consideration", raw_text)
-        self.assertIn("milestone_consideration_cap", raw_text)
-        self.assertIn("headline_maximum_value", raw_text)
-        self.assertIn("milestone_payment_2022", raw_text)
-        self.assertIn("milestone_payment_2024", raw_text)
-        self.assertIn("Bohan Jin", raw_text)
-        self.assertIn("personal realized proceeds", raw_text)
-        self.assertIn("pre_sale_cap_table_gap", raw_text)
-        self.assertIn("TYK2", raw_text)
-        self.assertIn("ESK-001", raw_text)
-        self.assertIn("envudeucitinib", raw_text)
-        self.assertIn("patent_record", raw_text)
+        raw_fact_types = {item["raw_fact_type"] for item in raw_evidence["raw_evidence_items"]}
+        self.assertTrue(raw_evidence["raw_evidence_items"])
+        self.assertTrue(raw_fact_types.issubset({
+            "transaction_background",
+            "transaction_timing",
+            "transaction_document_date",
+            "transaction_parties",
+            "transaction_consideration",
+            "contingent_consideration",
+            "milestone_payment",
+            "financing_or_payment_mechanics",
+            "entity_identity",
+            "entity_lineage",
+            "asset_or_product_identity",
+            "ownership_or_governance",
+            "management_or_key_person",
+            "intellectual_property",
+            "regulatory_or_clinical",
+            "financial_performance",
+            "valuation_input",
+            "synergy_or_value_creation",
+            "market_or_competitive_position",
+            "legal_or_regulatory_risk",
+            "integration_or_operational_risk",
+            "source_gap",
+            "generic_fact",
+        }))
+        self.assertIn("transaction_timing", raw_fact_types)
 
         manifest = json.loads(artifacts["retrieved_sources_manifest"].read_text(encoding="utf-8"))
         manifest_source_ids = {source["source_id"] for source in manifest["retrieved_sources"]}
@@ -251,9 +263,9 @@ class V3LiteM2SourceDiscoveryAndRawEvidenceTest(unittest.TestCase):
             if source["source_id"] in {"SRC-SEC-SPA-001", "SRC-ALUMIS-PIPELINE-001"}
         ]
         manifest["failed_source_needs"] = [
-            {"source_need_id": "SN-005", "reason": "Haisco source unavailable; do not verify Bohan Jin role or 11.12% shareholding."},
-            {"source_need_id": "SN-006", "reason": "Official patent-office record unavailable; do not fabricate patent evidence."},
-            {"source_need_id": "SN-008", "reason": "Personal proceeds and immediate pre-sale cap table unavailable."},
+            {"source_need_id": "SN-005", "reason": "Ownership and governance source unavailable; do not verify role or shareholding."},
+            {"source_need_id": "SN-006", "reason": "Official intellectual-property record unavailable; do not fabricate IP evidence."},
+            {"source_need_id": "SN-008", "reason": "Seller proceeds and immediate pre-sale cap table unavailable."},
         ]
         manifest["evidence_coverage_status"] = "partial"
         manifest_path = self._write_manifest(manifest)
@@ -274,17 +286,38 @@ class V3LiteM2SourceDiscoveryAndRawEvidenceTest(unittest.TestCase):
         )
 
         raw_evidence = json.loads(artifacts["raw_evidence"].read_text(encoding="utf-8"))
-        raw_text = json.dumps(raw_evidence)
         fact_types = {item["raw_fact_type"] for item in raw_evidence["raw_evidence_items"]}
         self.assertEqual(raw_evidence["evidence_coverage_status"], "partial")
         self.assertEqual(len(raw_evidence["failed_source_needs"]), 3)
-        self.assertIn("base_initial_consideration", fact_types)
-        self.assertIn("esk_001_asset_lineage", fact_types)
-        self.assertIn("envudeucitinib_asset_lineage", fact_types)
+        self.assertTrue(fact_types)
+        self.assertTrue(fact_types.issubset({
+            "transaction_background",
+            "transaction_timing",
+            "transaction_document_date",
+            "transaction_parties",
+            "transaction_consideration",
+            "contingent_consideration",
+            "milestone_payment",
+            "financing_or_payment_mechanics",
+            "entity_identity",
+            "entity_lineage",
+            "asset_or_product_identity",
+            "ownership_or_governance",
+            "management_or_key_person",
+            "intellectual_property",
+            "regulatory_or_clinical",
+            "financial_performance",
+            "valuation_input",
+            "synergy_or_value_creation",
+            "market_or_competitive_position",
+            "legal_or_regulatory_risk",
+            "integration_or_operational_risk",
+            "source_gap",
+            "generic_fact",
+        }))
         self.assertNotIn("founder_role", fact_types)
         self.assertNotIn("shareholding_2017", fact_types)
         self.assertNotIn("patent_record", fact_types)
-        self.assertNotIn("SRC-HAISCO-001", raw_text)
         self.assertFalse(any(item["source_id"] == "SRC-HAISCO-001" for item in raw_evidence["raw_evidence_items"]))
         self.assertFalse((output_dir / "evidence_repository.json").exists())
         self.assertFalse((output_dir / "claim_evidence_graph.json").exists())

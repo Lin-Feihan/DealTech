@@ -23,6 +23,31 @@ RAW_REQUIRED_FIELDS = {
     "permitted_use",
     "downstream_use_warning",
 }
+GENERIC_FACT_TYPES = {
+    "transaction_background",
+    "transaction_timing",
+    "transaction_document_date",
+    "transaction_parties",
+    "transaction_consideration",
+    "contingent_consideration",
+    "milestone_payment",
+    "financing_or_payment_mechanics",
+    "entity_identity",
+    "entity_lineage",
+    "asset_or_product_identity",
+    "ownership_or_governance",
+    "management_or_key_person",
+    "intellectual_property",
+    "regulatory_or_clinical",
+    "financial_performance",
+    "valuation_input",
+    "synergy_or_value_creation",
+    "market_or_competitive_position",
+    "legal_or_regulatory_risk",
+    "integration_or_operational_risk",
+    "source_gap",
+    "generic_fact",
+}
 
 
 def load_json_artifact(path: Path) -> dict[str, Any]:
@@ -98,13 +123,14 @@ def build_evidence_repository(raw_evidence: dict[str, Any], retrieved_sources_ma
     for item in raw_evidence["raw_evidence_items"]:
         if item["source_id"] not in sources_by_id:
             raise EvidenceRepositoryError(f"raw_evidence item cites source_id absent from retrieved_sources_manifest: {item['source_id']}")
-        canonical_fact_key, canonical_fact_type, normalized_fact_summary = canonicalize_raw_evidence_item(item)
+        canonical_fact_key, canonical_fact_type, normalized_fact_summary, structured_attributes = canonicalize_raw_evidence_item(item)
         grouped_items[canonical_fact_key].append(item)
         group_metadata.setdefault(
             canonical_fact_key,
             {
                 "canonical_fact_type": canonical_fact_type,
                 "normalized_fact_summary": normalized_fact_summary,
+                "structured_attributes": structured_attributes,
             },
         )
 
@@ -117,6 +143,7 @@ def build_evidence_repository(raw_evidence: dict[str, Any], retrieved_sources_ma
                 canonical_fact_key=canonical_fact_key,
                 canonical_fact_type=group_metadata[canonical_fact_key]["canonical_fact_type"],
                 normalized_fact_summary=group_metadata[canonical_fact_key]["normalized_fact_summary"],
+                structured_attributes=group_metadata[canonical_fact_key]["structured_attributes"],
                 items=grouped_items[canonical_fact_key],
                 gap_need_ids=gap_need_ids,
             )
@@ -181,106 +208,16 @@ def validate_evidence_repository(repository: Any) -> None:
     _validate_repository_quality_summary(repository["repository_quality_summary"])
 
 
-def canonicalize_raw_evidence_item(item: dict[str, Any]) -> tuple[str, str, str]:
+def canonicalize_raw_evidence_item(item: dict[str, Any]) -> tuple[str, str, str, dict[str, Any]]:
     raw_fact_type = item["raw_fact_type"]
-    lower = item["extracted_text_or_summary"].lower()
-    source_id = item["source_id"]
-
-    if raw_fact_type == "base_initial_consideration":
-        if any(token in lower for token in ("$60", "60,000,000", "sixty million")):
-            return (
-                "base_initial_consideration_60m",
-                "transaction_economics",
-                "Base initial consideration is directly stated as $60 million in the transaction agreement.",
-            )
-        return raw_fact_type, "transaction_economics", "Base initial consideration is directly supported by source-bounded evidence."
-
-    if raw_fact_type == "milestone_consideration_cap":
-        if any(token in lower for token in ("$120", "120.0 million", "120,000,000", "total milestone payment amount")):
-            return (
-                "milestone_consideration_cap_120m",
-                "transaction_economics",
-                "Milestone consideration cap is directly stated as $120 million under the FronThera transaction structure.",
-            )
-        return raw_fact_type, "transaction_economics", "Milestone consideration cap is directly supported by source-bounded evidence."
-
-    if raw_fact_type == "headline_maximum_value":
-        if any(token in lower for token in ("$180", "180.0 million", "180,000,000", "maximum aggregate")):
-            return (
-                "headline_maximum_value_180m",
-                "transaction_economics",
-                "Maximum aggregate transaction value is directly stated as $180 million in source-bounded evidence.",
-            )
-        return (
-            "headline_maximum_value_requires_numeric_verification",
-            "transaction_economics",
-            "Potential maximum aggregate value requires direct numeric verification before later-stage use.",
-        )
-
-    if raw_fact_type == "milestone_payment_2022":
-        if any(token in lower for token in ("$37", "37.0 million", "37 million")):
-            return (
-                "milestone_payment_2022_37m",
-                "milestone_economics",
-                "A 2022 milestone payment is directly stated as $37 million.",
-            )
-        return raw_fact_type, "milestone_economics", "A 2022 milestone payment is directly supported by source-bounded evidence."
-
-    if raw_fact_type == "milestone_payment_2024":
-        if any(token in lower for token in ("$23", "23.0 million", "23 million")):
-            return (
-                "milestone_payment_2024_23m",
-                "milestone_economics",
-                "A 2024 milestone payment is directly stated as $23 million.",
-            )
-        return raw_fact_type, "milestone_economics", "A 2024 milestone payment is directly supported by source-bounded evidence."
-
-    if raw_fact_type == "sale_timing":
-        if "march 2021" in lower:
-            return (
-                "acquisition_timing_march_2021",
-                "transaction_terms",
-                "The acquisition timing is described as March 2021 in post-decision source-bounded evidence.",
-            )
-        return raw_fact_type, "transaction_terms", "Transaction timing is directly supported by source-bounded evidence."
-
-    if raw_fact_type == "stock_purchase_agreement_date":
-        return (
-            "stock_purchase_agreement_date_2021_03_05",
-            "transaction_terms",
-            "The stock purchase agreement date is normalized as 2021-03-05 from source-bounded transaction evidence.",
-        )
-
-    if raw_fact_type == "entity_lineage":
-        return (
-            "fl2021_001_to_esker_to_alumis_entity_lineage",
-            "entity_lineage",
-            "Entity lineage shows FL2021-001 becoming Esker Therapeutics and later Alumis.",
-        )
-
-    if raw_fact_type in {"tyk2_inhibitor_chemistry", "esk_001_asset_lineage", "envudeucitinib_asset_lineage"}:
-        if source_id == "SRC-ALUMIS-PIPELINE-001":
-            return (
-                "alumis_pipeline_current_envudeucitinib",
-                "current_pipeline_status",
-                "Current Alumis pipeline evidence places envudeucitinib / ESK-001 in retrospective pipeline context.",
-            )
-        if raw_fact_type == "envudeucitinib_asset_lineage" or "formerly known as esk-001" in lower or "envudeucitinib" in lower:
-            return (
-                "envudeucitinib_formerly_esk_001",
-                "asset_lineage",
-                "Post-decision source-bounded evidence links envudeucitinib to the formerly named ESK-001 asset.",
-            )
-        return (
-            "esk_001_tyk2_inhibitor",
-            "scientific_asset_identity",
-            "Source-bounded evidence identifies ESK-001 as a TYK2 inhibitor asset.",
-        )
-
+    canonical_fact_type = _generic_fact_type(raw_fact_type, item["evidence_category"], item["extracted_text_or_summary"])
+    attributes = _structured_attributes(canonical_fact_type, item)
+    canonical_fact_key = _canonical_fact_key(canonical_fact_type, item, attributes)
     return (
-        _safe_key(raw_fact_type),
-        item["evidence_category"],
-        f"Canonicalized record for raw fact type {raw_fact_type} from source-bounded evidence.",
+        canonical_fact_key,
+        canonical_fact_type,
+        f"Canonicalized {canonical_fact_type} from source-bounded evidence; values remain in structured attributes and supporting raw evidence.",
+        attributes,
     )
 
 
@@ -289,6 +226,7 @@ def _build_evidence_record(
     canonical_fact_key: str,
     canonical_fact_type: str,
     normalized_fact_summary: str,
+    structured_attributes: dict[str, Any],
     items: list[dict[str, Any]],
     gap_need_ids: set[str],
 ) -> dict[str, Any]:
@@ -318,6 +256,7 @@ def _build_evidence_record(
         "canonical_fact_key": canonical_fact_key,
         "canonical_fact_type": canonical_fact_type,
         "normalized_fact_summary": normalized_fact_summary,
+        "structured_attributes": structured_attributes,
         "source_ids": source_ids,
         "source_titles": source_titles,
         "source_tiers": source_tiers,
@@ -362,44 +301,35 @@ def _build_source_gaps(failed_source_needs: list[dict[str, Any]]) -> list[dict[s
 
 
 def _source_gap_enrichments(failed_need: dict[str, Any]) -> dict[str, Any]:
-    source_need_id = failed_need["source_need_id"]
     description = str(failed_need.get("missing_source", "")).lower()
     reason = str(failed_need.get("reason", "")).lower()
     text = f"{description} {reason}"
-
-    if source_need_id == "SN-005":
-        return {
-            "missing_source_description": "Haisco / CNINFO / SZSE disclosure for Bohan Jin role and 2017 11.12% shareholding",
-            "affected_fact_types": ["founder_role", "vp_chemistry_role", "director_status", "shareholding_2017"],
-            "affected_workstreams": ["WS-004"],
-            "downstream_risk": "Founder role and 2017 ownership assertions remain unsupported until authoritative Haisco disclosure is retrieved.",
-        }
-    if source_need_id == "SN-006":
-        return {
-            "missing_source_description": "Official patent-office records for TYK2 inhibitor chemistry",
-            "affected_fact_types": ["patent_record", "tyk2_inhibitor_chemistry", "esk_001_asset_lineage", "envudeucitinib_asset_lineage"],
-            "affected_workstreams": ["WS-002", "WS-003", "WS-004"],
-            "downstream_risk": "IP lineage remains only partially supported because official patent-office evidence is missing.",
-        }
-    if source_need_id == "SN-008" and "personal" in text:
-        return {
-            "missing_source_description": "Direct source on Bohan Jin personal realized proceeds",
-            "affected_fact_types": ["personal_proceeds_not_verified"],
-            "affected_workstreams": ["WS-004", "WS-009"],
-            "downstream_risk": "Personal proceeds cannot be inferred from transaction consideration or ownership leads without direct source evidence.",
-        }
-    if source_need_id == "SN-008" and "cap table" in text:
-        return {
-            "missing_source_description": "Immediately pre-2021 FronThera cap table source",
-            "affected_fact_types": ["pre_sale_cap_table_gap", "shareholding_2017"],
-            "affected_workstreams": ["WS-004", "WS-009"],
-            "downstream_risk": "Ownership and proceeds analysis remain incomplete without an authoritative pre-sale cap table source.",
-        }
+    if any(term in text for term in ("ownership", "governance", "cap table", "seller economics")):
+        return _generic_gap("Missing ownership, governance, cap table, or seller-economics evidence", ["ownership_or_governance"], ["WS-005", "WS-009"], "Ownership and value-transfer analysis must remain caveated until direct supporting sources are retrieved.")
+    if any(term in text for term in ("consideration", "purchase price", "payment", "transaction terms")):
+        return _generic_gap("Missing direct consideration or transaction-term evidence", ["transaction_consideration", "contingent_consideration", "milestone_payment"], ["WS-004", "WS-005"], "Deal economics must not be treated as source-supported until direct transaction evidence is retrieved.")
+    if any(term in text for term in ("patent", "intellectual property", "ip ")):
+        return _generic_gap("Missing intellectual-property evidence", ["intellectual_property"], ["WS-003", "WS-007"], "Asset or technology ownership and protection claims remain incomplete without IP evidence.")
+    if any(term in text for term in ("clinical", "regulatory", "approval", "trial")):
+        return _generic_gap("Missing clinical, regulatory, or approval evidence", ["regulatory_or_clinical"], ["WS-007", "WS-008"], "Regulatory and development-risk claims must remain caveated until authoritative evidence is retrieved.")
+    if any(term in text for term in ("valuation", "financial", "revenue", "margin", "forecast")):
+        return _generic_gap("Missing valuation or financial-support evidence", ["valuation_input", "financial_performance"], ["WS-004"], "Valuation and return analysis must remain unsupported until source-backed financial inputs are retrieved.")
+    if any(term in text for term in ("quote", "page", "location", "excerpt")):
+        return _generic_gap("Missing source quote, page, or location detail", ["generic_fact"], [], "Downstream citation and certification should not rely on this item until source location is repaired.")
     return {
-        "missing_source_description": failed_need.get("missing_source") or f"Unresolved source need {source_need_id}",
+        "missing_source_description": failed_need.get("missing_source") or f"Unresolved source need {failed_need['source_need_id']}",
         "affected_fact_types": [],
         "affected_workstreams": [],
         "downstream_risk": "Downstream stages must treat this unresolved source need as a gap until M2 retrieval repair is completed.",
+    }
+
+
+def _generic_gap(description: str, fact_types: list[str], workstreams: list[str], downstream_risk: str) -> dict[str, Any]:
+    return {
+        "missing_source_description": description,
+        "affected_fact_types": fact_types,
+        "affected_workstreams": workstreams,
+        "downstream_risk": downstream_risk,
     }
 
 
@@ -418,10 +348,10 @@ def _build_repository_quality_summary(
 
     notes = [
         "Carry temporal gating into claim-evidence graph construction; post-decision and retrospective evidence must not be treated as ex-ante decision support without explicit caveat.",
-        f"Repair {len(source_gaps)} source gap(s) via M2_source_retrieval before downstream founder-role, patent, proceeds, or cap-table claims are treated as source-supported.",
+        f"Repair {len(source_gaps)} source gap(s) via M2_source_retrieval before downstream ownership, governance, consideration, IP, regulatory, valuation, or source-location claims are treated as source-supported.",
     ]
-    if not any(record["canonical_fact_key"] == "headline_maximum_value_180m" for record in evidence_records):
-        notes.append("No $180M aggregate value canonical fact was created because M3 did not see direct raw evidence support for that fact in this input.")
+    if not any(record["canonical_fact_type"] == "transaction_consideration" for record in evidence_records):
+        notes.append("No transaction consideration canonical fact was created because M3 did not see direct raw evidence support for that fact type in this input.")
 
     return {
         "raw_evidence_item_count": len(raw_evidence["raw_evidence_items"]),
@@ -471,6 +401,131 @@ def _aggregate_permitted_use(permitted_uses: list[str], relation: str) -> str:
     raise EvidenceRepositoryError("Evidence record has no valid permitted_use.")
 
 
+def _generic_fact_type(raw_fact_type: str, evidence_category: str, summary: str) -> str:
+    candidate = _safe_key(raw_fact_type)
+    if candidate in GENERIC_FACT_TYPES:
+        return candidate
+    text = f"{raw_fact_type} {evidence_category} {summary}".lower()
+    if any(term in text for term in ("document date", "agreement date", "signing date", "effective date")):
+        return "transaction_document_date"
+    if any(term in text for term in ("timing", "closing", "signed", "announced")):
+        return "transaction_timing"
+    if any(term in text for term in ("party", "buyer", "seller", "target", "acquirer")):
+        return "transaction_parties"
+    if any(term in text for term in ("milestone payment", "earnout payment", "contingent payment")):
+        return "milestone_payment"
+    if any(term in text for term in ("contingent", "earnout", "milestone consideration")):
+        return "contingent_consideration"
+    if any(term in text for term in ("consideration", "purchase price", "payment", "transaction value", "deal value")):
+        return "transaction_consideration"
+    if any(term in text for term in ("financing", "funding")):
+        return "financing_or_payment_mechanics"
+    if any(term in text for term in ("entity", "name history", "lineage", "predecessor", "successor")):
+        return "entity_lineage"
+    if any(term in text for term in ("asset", "product", "pipeline", "program", "platform")):
+        return "asset_or_product_identity"
+    if any(term in text for term in ("ownership", "governance", "shareholder", "cap table", "stake")):
+        return "ownership_or_governance"
+    if any(term in text for term in ("management", "director", "officer", "key person", "founder", "executive")):
+        return "management_or_key_person"
+    if any(term in text for term in ("patent", "intellectual property", "ip ", "assignee", "inventor")):
+        return "intellectual_property"
+    if any(term in text for term in ("regulatory", "clinical", "approval", "trial")):
+        return "regulatory_or_clinical"
+    if any(term in text for term in ("revenue", "margin", "profit", "ebitda")):
+        return "financial_performance"
+    if any(term in text for term in ("valuation", "return", "multiple")):
+        return "valuation_input"
+    if any(term in text for term in ("synergy", "value creation")):
+        return "synergy_or_value_creation"
+    if any(term in text for term in ("market", "competitive", "competitor", "customer")):
+        return "market_or_competitive_position"
+    if any(term in text for term in ("legal", "liability", "lawsuit", "consent")):
+        return "legal_or_regulatory_risk"
+    if any(term in text for term in ("integration", "operational", "systems", "transition")):
+        return "integration_or_operational_risk"
+    if any(term in text for term in ("gap", "missing", "unresolved", "not verified")):
+        return "source_gap"
+    return "generic_fact"
+
+
+def _structured_attributes(canonical_fact_type: str, item: dict[str, Any]) -> dict[str, Any]:
+    summary = item["extracted_text_or_summary"]
+    attributes: dict[str, Any] = {"source_record_ids": [item["evidence_id"]]}
+    amounts = _extract_amounts(summary)
+    dates = _extract_dates(summary)
+    percentages = _extract_percentages(summary)
+    if canonical_fact_type in {"transaction_consideration", "contingent_consideration", "milestone_payment", "financing_or_payment_mechanics", "valuation_input", "financial_performance"} and amounts:
+        attributes["amounts"] = amounts
+        attributes["currency"] = "USD" if any("$" in amount for amount in amounts) else "unknown"
+    if canonical_fact_type in {"transaction_timing", "transaction_document_date", "milestone_payment", "entity_lineage", "ownership_or_governance"} and dates:
+        attributes["dates_or_periods"] = dates
+    if canonical_fact_type == "milestone_payment":
+        attributes["trigger_description"] = _bounded_attribute_text(summary)
+    if canonical_fact_type == "transaction_document_date":
+        attributes["document_type"] = _document_type(item)
+    if canonical_fact_type == "ownership_or_governance" and percentages:
+        attributes["stakes_or_percentages"] = percentages
+    if canonical_fact_type in {"entity_identity", "entity_lineage", "asset_or_product_identity", "management_or_key_person", "intellectual_property"}:
+        attributes["described_subject"] = _bounded_attribute_text(summary)
+    if canonical_fact_type == "source_gap":
+        attributes["missing_fact_type"] = "unknown"
+        attributes["next_search_target"] = _bounded_attribute_text(summary)
+    return attributes
+
+
+def _canonical_fact_key(canonical_fact_type: str, item: dict[str, Any], attributes: dict[str, Any]) -> str:
+    relation_ids = item.get("related_evidence_requirement_ids") or item.get("related_source_need_ids") or [item["source_id"]]
+    relation_part = "_".join(_safe_key(str(value)) for value in relation_ids[:3])
+    if canonical_fact_type == "transaction_consideration" and not attributes.get("amounts"):
+        return f"{canonical_fact_type}__requires_numeric_verification__{relation_part}"
+    return f"{canonical_fact_type}__{relation_part}"
+
+
+def _extract_amounts(text: str) -> list[str]:
+    amounts = []
+    parts = text.replace(",", "").split()
+    for index, part in enumerate(parts):
+        cleaned = part.strip(".;:()[]")
+        if cleaned.startswith("$") and any(character.isdigit() for character in cleaned):
+            suffix = parts[index + 1].strip(".;:()[]") if index + 1 < len(parts) else ""
+            if suffix.lower() in {"million", "billion", "thousand"}:
+                amounts.append(f"{cleaned} {suffix}")
+            else:
+                amounts.append(cleaned)
+    return _ordered_unique(amounts)
+
+
+def _extract_dates(text: str) -> list[str]:
+    values = []
+    for raw in text.replace(",", "").split():
+        token = raw.strip(".;:()[]")
+        if len(token) == 4 and token.isdigit() and token.startswith(("19", "20")):
+            values.append(token)
+        if len(token) == 10 and token[4] == "-" and token[7] == "-":
+            values.append(token)
+    return _ordered_unique(values)
+
+
+def _extract_percentages(text: str) -> list[str]:
+    return _ordered_unique(token.strip(".;:()[]") for token in text.split() if "%" in token and any(character.isdigit() for character in token))
+
+
+def _document_type(item: dict[str, Any]) -> str:
+    text = f"{item['source_title']} {item['source_type']} {item['extracted_text_or_summary']}".lower()
+    if "agreement" in text:
+        return "transaction agreement"
+    if "filing" in text:
+        return "regulatory filing"
+    if "presentation" in text:
+        return "presentation"
+    return "source document"
+
+
+def _bounded_attribute_text(text: str) -> str:
+    return " ".join(text.split())[:240]
+
+
 def _aggregate_confidence(items: list[dict[str, Any]], strongest_source_tier: str, source_count: int) -> str:
     confidences = {item.get("confidence_preliminary", "low") for item in items}
     if strongest_source_tier == "Tier 1" and source_count >= 2:
@@ -484,7 +539,7 @@ def _aggregate_confidence(items: list[dict[str, Any]], strongest_source_tier: st
 
 def _detect_conflict_status(canonical_fact_key: str, items: list[dict[str, Any]]) -> str:
     summaries = {_normalized_text(item["extracted_text_or_summary"]) for item in items}
-    if canonical_fact_key == "headline_maximum_value_requires_numeric_verification":
+    if canonical_fact_key.startswith("transaction_consideration__requires_numeric_verification"):
         return "not_evaluated"
     if len(summaries) == 1:
         return "no_conflict_detected"
