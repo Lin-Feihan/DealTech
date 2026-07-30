@@ -11,11 +11,7 @@ def build_source_discovery_plan(case_seed: dict[str, Any], research_plan: dict[s
     if case_seed["case_id"] != research_plan["case_id"]:
         raise SourceDiscoveryPlanValidationError("case_seed and research_plan case_id values must match.")
 
-    is_fronthera_case = "fronthera" in _context_text(case_seed, research_plan).lower()
-    if is_fronthera_case:
-        plan = _build_fronthera_source_discovery_plan(case_seed, research_plan)
-    else:
-        plan = _build_generic_source_discovery_plan(case_seed, research_plan)
+    plan = _build_generic_source_discovery_plan(case_seed, research_plan)
     validate_source_discovery_plan(plan)
     return plan
 
@@ -58,39 +54,17 @@ def validate_source_discovery_plan(plan: Any) -> None:
             raise SourceDiscoveryPlanValidationError(f"Retrieval target references unknown source_need_id(s): {sorted(unknown)}")
 
 
-def _build_fronthera_source_discovery_plan(case_seed: dict[str, Any], research_plan: dict[str, Any]) -> dict[str, Any]:
-    source_needs = [
-        _source_need("SN-001", "Confirm transaction agreement", "SEC stock purchase agreement dated March 5, 2021 for FronThera acquisition", ["SEC filings", "signed transaction agreements"], "Tier 1", ["WS-001", "WS-005"], ["ER-001", "ER-006"], ["VT-001", "VT-002", "VT-003"]),
-        _source_need("SN-002", "Confirm consideration structure", "$60M base initial consideration, up to $120M milestone consideration, and $180M maximum aggregate deal value", ["SEC filings", "signed transaction agreements"], "Tier 1", ["WS-005", "WS-006"], ["ER-001", "ER-006"], ["VT-001", "VT-003"]),
-        _source_need("SN-003", "Confirm later milestone payments", "Alumis filing support for $37M 2022 milestone and $23M 2024 milestone", ["SEC filings", "annual reports", "prospectus"], "Tier 1", ["WS-006"], ["ER-002", "ER-006"], ["VT-001", "VT-002"]),
-        _source_need("SN-004", "Confirm entity lineage", "FL2021-001 -> Esker Therapeutics -> Alumis name and entity history", ["SEC filings", "company filings", "company press releases"], "Tier 1", ["WS-001", "WS-003"], ["ER-002"], ["VT-005"]),
-        _source_need("SN-005", "Confirm Bohan Jin role and ownership lead", "Haisco disclosure on FronThera ownership, Bohan Jin role, director status, and 2017 11.12% shareholding", ["stock exchange announcements", "company filings"], "Tier 1", ["WS-004"], ["ER-003", "ER-007"], ["VT-004", "VT-007"]),
-        _source_need("SN-006", "Confirm patent and asset lineage", "TYK2 inhibitor patents related to FronThera / Esker / Alumis", ["official patent databases", "regulator filings"], "Tier 1", ["WS-002", "WS-003", "WS-004"], ["ER-004", "ER-005"], ["VT-006"]),
-        _source_need("SN-007", "Confirm official pipeline identity", "ESK-001 / envudeucitinib official Alumis pipeline or clinical source", ["official company pipeline pages", "clinical trial databases", "regulatory filings"], "Tier 1", ["WS-002", "WS-003", "WS-008"], ["ER-005"], ["VT-006"]),
-        _source_need("SN-008", "Identify source gap", "Direct evidence for Bohan Jin personal proceeds and FronThera cap table immediately before 2021 transaction", ["SEC filings", "company filings", "stock exchange announcements"], "Tier 1", ["WS-004", "WS-009"], ["ER-003", "ER-007"], ["VT-004", "VT-007"]),
-    ]
-    search_queries = [
-        _search_query("SQ-001", "FronThera stock purchase agreement March 5 2021 Exhibit 10.22 SEC", "Find Tier 1 agreement exhibit", "SEC filing", "Tier 1", ["SN-001", "SN-002"], ["WS-001", "WS-005"], ["VT-001", "VT-003"]),
-        _search_query("SQ-002", "Alumis FronThera acquisition $60 million $120 million milestone $180 million", "Find filing support for consideration structure", "SEC filing", "Tier 1", ["SN-002"], ["WS-005", "WS-006"], ["VT-001", "VT-003"]),
-        _search_query("SQ-003", "Alumis 10-K 2024 FronThera $37 million 2022 $23 million 2024 milestone", "Find filing support for paid milestones", "SEC filing", "Tier 1", ["SN-003"], ["WS-006"], ["VT-001", "VT-002"]),
-        _search_query("SQ-004", "FL2021-001 Esker Therapeutics Alumis name history SEC", "Find entity/name history", "SEC filing", "Tier 1", ["SN-004"], ["WS-001", "WS-003"], ["VT-005"]),
-        _search_query("SQ-005", "Haisco FronThera Bohan Jin 11.12% VP Chemistry director", "Find direct ownership and role disclosure", "stock exchange announcement", "Tier 1", ["SN-005", "SN-008"], ["WS-004"], ["VT-004", "VT-007"]),
-        _search_query("SQ-006", "FronThera Esker Alumis TYK2 inhibitor patent ESK-001 envudeucitinib", "Find patent and asset lineage support", "patent database", "Tier 1", ["SN-006"], ["WS-002", "WS-003"], ["VT-006"]),
-        _search_query("SQ-007", "Alumis ESK-001 envudeucitinib pipeline TYK2 official", "Find official pipeline evidence", "official company pipeline page", "Tier 2", ["SN-007"], ["WS-002", "WS-003", "WS-008"], ["VT-006"]),
-    ]
-    retrieval_targets = [
-        _retrieval_target("RT-001", "SEC filing or exhibit containing FronThera stock purchase agreement Exhibit 10.22", "SEC / Alumis", "SEC filing", "high", ["SN-001", "SN-002"]),
-        _retrieval_target("RT-002", "Alumis annual report, S-1, prospectus, or 10-K showing milestone payments", "SEC / Alumis", "SEC filing", "high", ["SN-003"]),
-        _retrieval_target("RT-003", "SEC or company filing showing FL2021-001 to Esker Therapeutics to Alumis history", "SEC / Alumis", "SEC filing", "high", ["SN-004"]),
-        _retrieval_target("RT-004", "Haisco disclosure for FronThera ownership and Bohan Jin role / 11.12% shareholding", "Haisco / stock exchange", "stock exchange announcement", "high", ["SN-005", "SN-008"]),
-        _retrieval_target("RT-005", "Official patent database records for TYK2 inhibitor chemistry related to FronThera / Esker / Alumis", "Official patent database", "patent database", "medium", ["SN-006"]),
-        _retrieval_target("RT-006", "Official Alumis pipeline page or clinical database entry for ESK-001 / envudeucitinib", "Alumis / clinical trial database", "official pipeline or clinical database", "medium", ["SN-007"]),
-    ]
-
+def _build_generic_source_discovery_plan(case_seed: dict[str, Any], research_plan: dict[str, Any]) -> dict[str, Any]:
+    source_needs = _build_source_needs(research_plan)
+    source_needs.extend(_build_case_seed_source_needs(case_seed, research_plan, len(source_needs) + 1))
+    search_queries = _build_search_queries(case_seed, research_plan, source_needs)
+    retrieval_targets = _build_retrieval_targets(source_needs)
     return _plan(case_seed, source_needs, search_queries, retrieval_targets)
 
 
-def _build_generic_source_discovery_plan(case_seed: dict[str, Any], research_plan: dict[str, Any]) -> dict[str, Any]:
+def _build_source_needs(research_plan: dict[str, Any]) -> list[dict[str, Any]]:
+    workstream_ids = _all_ids(research_plan.get("workstreams", []))
+    verification_target_ids = _all_ids(research_plan.get("verification_targets", []))
     source_needs = []
     for index, requirement in enumerate(research_plan.get("evidence_requirements", []), start=1):
         source_needs.append(
@@ -98,33 +72,127 @@ def _build_generic_source_discovery_plan(case_seed: dict[str, Any], research_pla
                 f"SN-{index:03d}",
                 "Locate authoritative source for evidence requirement",
                 requirement["description"],
-                ["SEC filings", "company filings", "official sources", "reputable financial news"],
+                _preferred_source_types_for_requirement(requirement["description"]),
                 "Tier 1 preferred",
-                _all_ids(research_plan.get("workstreams", [])),
+                workstream_ids,
                 [requirement["id"]],
-                _all_ids(research_plan.get("verification_targets", [])),
+                verification_target_ids,
             )
         )
-    search_queries = [
-        _search_query(
-            f"SQ-{index:03d}",
-            f"{case_seed['case_parties']['target'][0]} {lead}",
-            "Find authoritative source for case seed lead without treating the seed as evidence.",
-            "official source",
-            "Tier 1 preferred",
-            [source_needs[min(index - 1, len(source_needs) - 1)]["source_need_id"]],
-            _all_ids(research_plan.get("workstreams", [])),
-            _all_ids(research_plan.get("verification_targets", [])),
+    return source_needs
+
+
+def _build_case_seed_source_needs(
+    case_seed: dict[str, Any],
+    research_plan: dict[str, Any],
+    start_index: int,
+) -> list[dict[str, Any]]:
+    workstream_ids = _all_ids(research_plan.get("workstreams", []))
+    requirement_ids = _all_ids(research_plan.get("evidence_requirements", []))
+    verification_target_ids = _all_ids(research_plan.get("verification_targets", []))
+    source_needs = []
+    for offset, lead in enumerate(_case_seed_leads(case_seed), start=0):
+        source_needs.append(
+            _source_need(
+                f"SN-{start_index + offset:03d}",
+                "Locate authoritative source for case seed lead",
+                lead,
+                _preferred_source_types_for_requirement(lead),
+                "Tier 1 preferred",
+                workstream_ids,
+                requirement_ids,
+                verification_target_ids,
+            )
         )
-        for index, lead in enumerate(case_seed.get("source_leads", []), start=1)
-    ]
-    retrieval_targets = [
-        _retrieval_target("RT-001", "Authoritative documents for transaction terms and buyer-side diligence", "Official source owner", "official source", "high", _all_ids(source_needs)),
-    ]
-    return _plan(case_seed, source_needs, search_queries, retrieval_targets)
+    return source_needs
 
 
-def _plan(case_seed: dict[str, Any], source_needs: list[dict[str, Any]], search_queries: list[dict[str, Any]], retrieval_targets: list[dict[str, Any]]) -> dict[str, Any]:
+def _build_search_queries(
+    case_seed: dict[str, Any],
+    research_plan: dict[str, Any],
+    source_needs: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    target = case_seed["case_parties"]["target"][0]
+    buyer_names = case_seed.get("case_parties", {}).get("buyer_or_acquiring_vehicle", [])
+    buyer = buyer_names[0] if buyer_names else "buyer"
+    workstream_ids = _all_ids(research_plan.get("workstreams", []))
+    verification_target_ids = _all_ids(research_plan.get("verification_targets", []))
+    search_queries = []
+
+    for index, lead in enumerate(_case_seed_leads(case_seed), start=1):
+        need = source_needs[min(index - 1, len(source_needs) - 1)]
+        search_queries.append(
+            _search_query(
+                f"SQ-{index:03d}",
+                f"{target} {buyer} {lead}",
+                "Find authoritative source for case seed lead without treating the seed as evidence.",
+                _expected_source_type_for_lead(lead),
+                "Tier 1 preferred",
+                [need["source_need_id"]],
+                workstream_ids,
+                verification_target_ids,
+            )
+        )
+
+    if not search_queries:
+        search_queries.append(
+            _search_query(
+                "SQ-001",
+                f"{target} {buyer} acquisition official filing transaction agreement",
+                "Find authoritative transaction and diligence sources for the buyer-side acquisition case.",
+                "official source",
+                "Tier 1 preferred",
+                [source_needs[0]["source_need_id"]],
+                workstream_ids,
+                verification_target_ids,
+            )
+        )
+    return search_queries
+
+
+def _case_seed_leads(case_seed: dict[str, Any]) -> list[str]:
+    leads = list(case_seed.get("source_leads", []))
+    leads.extend(case_seed.get("transaction_leads", []))
+    leads.extend(case_seed.get("key_assets_or_topics", []))
+    return leads
+
+
+def _build_retrieval_targets(source_needs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    source_need_ids = _all_ids(source_needs)
+    return [
+        _retrieval_target(
+            "RT-001",
+            "Transaction agreements, announcements, regulatory filings, or official disclosures supporting deal terms and timing",
+            "Buyer, target, seller, regulator, or securities filing system",
+            "transaction agreement or official filing",
+            "high",
+            source_need_ids,
+        ),
+        _retrieval_target(
+            "RT-002",
+            "Audited financials, management materials, investor presentations, and other source-backed business-quality inputs",
+            "Buyer, target, auditor, regulator, or investor-relations source",
+            "financial or business disclosure",
+            "high",
+            source_need_ids,
+        ),
+        _retrieval_target(
+            "RT-003",
+            "Market, competitive, legal, regulatory, diligence, intellectual-property, and integration-risk sources relevant to the acquisition scope",
+            "Regulator, court, patent office, industry source, company disclosure, or reputable secondary source",
+            "diligence source",
+            "medium",
+            source_need_ids,
+        ),
+    ]
+
+
+def _plan(
+    case_seed: dict[str, Any],
+    source_needs: list[dict[str, Any]],
+    search_queries: list[dict[str, Any]],
+    retrieval_targets: list[dict[str, Any]],
+) -> dict[str, Any]:
     return {
         "case_id": case_seed["case_id"],
         "seed_id": case_seed["seed_id"],
@@ -134,18 +202,18 @@ def _plan(case_seed: dict[str, Any], source_needs: list[dict[str, Any]], search_
         "search_queries": search_queries,
         "retrieval_targets": retrieval_targets,
         "source_priority_rules": [
-            "Tier 1 sources are preferred for transaction economics, signed agreements, regulatory filings, patent, clinical, and stock-exchange evidence.",
-            "Tier 2 official company sources may support pipeline and company identity facts when Tier 1 is unavailable.",
-            "Tier 3 reputable secondary sources may provide leads or context but should not replace official sources for deal economics.",
-            "Tier 4 case briefs can generate leads but cannot alone support high-confidence transaction economics.",
-            "Personal proceeds require direct evidence or remain unverified."
+            "Tier 1 sources are preferred for transaction economics, signed agreements, regulatory filings, official buyer or target disclosures, audited financials, legal, regulatory, and intellectual-property evidence.",
+            "Tier 2 official company sources, investor presentations, and management materials may support strategy, business-quality, pipeline, market-position, synergy, and integration facts when Tier 1 is unavailable.",
+            "Tier 3 market, industry, and reputable secondary sources may provide leads or context but should not replace official sources for transaction economics, valuation inputs, or legal claims.",
+            "Case briefs, analyst notes, and mandate materials can generate leads but cannot alone support high-confidence transaction economics or diligence conclusions.",
+            "Seller economics, ownership, liability, and value-transfer claims require direct evidence or remain unverified.",
         ],
         "forbidden_source_uses": [
             "Do not use model memory as evidence.",
             "Do not use case_seed facts as source-backed evidence.",
             "Do not cite web search results unless the retrieved source is logged in retrieved_sources_manifest.json.",
-            "Do not resolve source conflicts in M2; record them for later certification."
-        ]
+            "Do not resolve source conflicts in M2; record them for later certification.",
+        ],
     }
 
 
@@ -186,16 +254,32 @@ def _retrieval_target(id_: str, description: str, owner: str, expected_type: str
     }
 
 
+def _preferred_source_types_for_requirement(description: str) -> list[str]:
+    text = description.lower()
+    preferred = ["official buyer or target disclosures", "company filings"]
+    if any(term in text for term in ("transaction", "timing", "parties", "structure")):
+        preferred.extend(["signed transaction agreements", "regulatory filings"])
+    if any(term in text for term in ("financial", "valuation", "purchase-price", "financing", "return")):
+        preferred.extend(["audited financials", "investor presentations"])
+    if any(term in text for term in ("market", "competitive", "customer")):
+        preferred.extend(["market reports", "industry reports"])
+    if any(term in text for term in ("legal", "regulatory", "technology", "liability")):
+        preferred.extend(["legal documents", "regulatory databases", "intellectual-property records"])
+    return sorted(set(preferred))
+
+
+def _expected_source_type_for_lead(lead: str) -> str:
+    text = lead.lower()
+    if any(term in text for term in ("agreement", "transaction", "filing", "prospectus", "annual report")):
+        return "official filing or transaction agreement"
+    if any(term in text for term in ("financial", "revenue", "margin", "forecast", "valuation")):
+        return "financial disclosure"
+    if any(term in text for term in ("market", "industry", "competitor", "customer")):
+        return "market or industry source"
+    if any(term in text for term in ("legal", "regulatory", "patent", "license", "approval")):
+        return "legal, regulatory, or intellectual-property source"
+    return "official source"
+
+
 def _all_ids(items: list[dict[str, Any]]) -> list[str]:
     return [item.get("id") or item.get("source_need_id") for item in items if item.get("id") or item.get("source_need_id")]
-
-
-def _context_text(case_seed: dict[str, Any], research_plan: dict[str, Any]) -> str:
-    return "\n".join([
-        case_seed.get("case_id", ""),
-        " ".join(case_seed.get("case_parties", {}).get("target", [])),
-        " ".join(case_seed.get("transaction_leads", [])),
-        " ".join(case_seed.get("key_assets_or_topics", [])),
-        research_plan.get("research_objective", ""),
-    ])
-

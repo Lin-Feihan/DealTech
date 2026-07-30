@@ -88,22 +88,21 @@ class V3LiteM2SourceDiscoveryAndRawEvidenceTest(unittest.TestCase):
                 self.assertFalse((output_dir / "retrieved_sources_manifest.json").exists())
                 self.assertFalse((output_dir / "raw_evidence.json").exists())
 
-    def test_source_discovery_plan_contains_fronthera_authoritative_targets(self) -> None:
+    def test_source_discovery_plan_contains_generic_authoritative_targets(self) -> None:
         plan_text = json.dumps(self.source_discovery_plan)
 
-        self.assertIn("SEC stock purchase agreement dated March 5, 2021", plan_text)
-        self.assertIn("FronThera stock purchase agreement Exhibit 10.22", plan_text)
-        self.assertIn("$60M base initial consideration", plan_text)
-        self.assertIn("up to $120M milestone consideration", plan_text)
-        self.assertIn("$180M maximum aggregate deal value", plan_text)
-        self.assertIn("$37M 2022 milestone", plan_text)
-        self.assertIn("$23M 2024 milestone", plan_text)
-        self.assertIn("FL2021-001", plan_text)
-        self.assertIn("Haisco", plan_text)
-        self.assertIn("11.12%", plan_text)
-        self.assertIn("TYK2 inhibitor patents", plan_text)
-        self.assertIn("ESK-001 / envudeucitinib", plan_text)
-        self.assertIn("personal proceeds", plan_text)
+        self.assertIn("Transaction agreements, announcements, regulatory filings", plan_text)
+        self.assertIn("Audited financials", plan_text)
+        self.assertIn("Market, competitive, legal, regulatory, diligence", plan_text)
+        self.assertIn("Find authoritative source for case seed lead without treating the seed as evidence", plan_text)
+        self.assertIn("Case seed is a lead source only", self.source_discovery_plan["discovery_scope"])
+        self.assertGreaterEqual(len(self.source_discovery_plan["source_needs"]), 8)
+        self.assertGreaterEqual(len(self.source_discovery_plan["search_queries"]), 7)
+
+        source_need_ids = {need["source_need_id"] for need in self.source_discovery_plan["source_needs"]}
+        query_ids = {query["query_id"] for query in self.source_discovery_plan["search_queries"]}
+        self.assertIn("SN-008", source_need_ids)
+        self.assertIn("SQ-007", query_ids)
 
         for query in self.source_discovery_plan["search_queries"]:
             self.assertTrue(query["related_source_need_ids"])
