@@ -435,23 +435,24 @@ def _temporal_defaults_for_source(source: dict[str, Any]) -> dict[str, str]:
         for field in ("source_id", "title", "source_type", "source_owner", "url_or_file", "local_cache_path")
     ).lower()
     if "stock purchase agreement" in source_text or "sec-spa" in source_text:
-        source_date = str(source.get("source_date_or_period") or source.get("source_date") or "unknown")
+        source_date = _source_date_or_unknown(source)
         return {
             "source_date_or_period": source_date,
             "source_time_relation_to_decision_date": "at_decision",
             "permitted_use": "transaction_terms_verification",
         }
     if "424b4" in source_text or "prospectus" in source_text:
+        existing = _existing_temporal_metadata(source)
         return {
-            "source_date_or_period": "2024",
-            "source_time_relation_to_decision_date": "post_decision",
+            "source_date_or_period": existing["source_date_or_period"],
+            "source_time_relation_to_decision_date": existing["source_time_relation_to_decision_date"] or "post_decision",
             "permitted_use": "retrospective_outcome_validation",
         }
-    if "2026" in source_text or "2025" in source_text or "10-k" in source_text or "annual report" in source_text:
-        period = "2026" if "2026" in source_text else "2025" if "2025" in source_text else "post-decision annual report"
+    if "10-k" in source_text or "annual report" in source_text:
+        existing = _existing_temporal_metadata(source)
         return {
-            "source_date_or_period": period,
-            "source_time_relation_to_decision_date": "post_decision",
+            "source_date_or_period": existing["source_date_or_period"],
+            "source_time_relation_to_decision_date": existing["source_time_relation_to_decision_date"] or "post_decision",
             "permitted_use": "retrospective_outcome_validation",
         }
     if "pipeline" in source_text:
@@ -478,6 +479,17 @@ def _temporal_defaults_for_source(source: dict[str, Any]) -> dict[str, str]:
         "source_time_relation_to_decision_date": "unknown",
         "permitted_use": "source_lead_only",
     }
+
+
+def _existing_temporal_metadata(source: dict[str, Any]) -> dict[str, str]:
+    return {
+        "source_date_or_period": _source_date_or_unknown(source),
+        "source_time_relation_to_decision_date": str(source.get("source_time_relation_to_decision_date") or ""),
+    }
+
+
+def _source_date_or_unknown(source: dict[str, Any]) -> str:
+    return str(source.get("source_date_or_period") or source.get("source_date") or "unknown")
 
 
 def _today_utc_date() -> str:
