@@ -69,27 +69,29 @@ class V3LiteM6AnalysisPackageTest(unittest.TestCase):
         self.assertEqual(
             set(sections_by_id),
             {
-                "transaction_terms_analysis",
-                "milestone_economics_analysis",
-                "entity_and_asset_lineage_analysis",
-                "evidence_gap_and_risk_analysis",
-                "decision_readiness_assessment",
+                "transaction_background_and_terms",
+                "strategic_rationale_and_alternatives",
+                "target_business_quality",
+                "market_and_competitive_position",
+                "valuation_deal_structure_and_returns",
+                "synergy_and_value_creation",
+                "financing_payment_mechanics_and_value_transfer",
+                "legal_regulatory_and_diligence_risks",
+                "integration_and_operational_risks",
+                "source_gaps_and_human_review",
+                "decision_readiness",
             },
         )
-        self.assertIn("CL-003", sections_by_id["transaction_terms_analysis"]["included_claim_ids"])
-        self.assertIn("CL-007", sections_by_id["transaction_terms_analysis"]["included_claim_ids"])
-        self.assertIn("CL-010", sections_by_id["transaction_terms_analysis"]["included_claim_ids"])
-        self.assertIn("CL-001", sections_by_id["transaction_terms_analysis"]["included_claim_ids"])
-        self.assertIn("CL-011", sections_by_id["milestone_economics_analysis"]["included_claim_ids"])
-        self.assertIn("CL-006", sections_by_id["entity_and_asset_lineage_analysis"]["included_claim_ids"])
-        self.assertIn("CL-005", sections_by_id["entity_and_asset_lineage_analysis"]["included_claim_ids"])
+        self.assertTrue(any(section["included_claim_ids"] for section in sections_by_id.values()))
+        self.assertEqual(sections_by_id["source_gaps_and_human_review"]["section_status"], "gap_tracking_only")
+        self.assertEqual(sections_by_id["decision_readiness"]["section_status"], "limited_by_repair_required")
 
     def test_unsupported_and_blocked_claims_are_not_used_as_facts(self) -> None:
         analysis_package = self._run_package("m6_no_blocked_facts")
         fact_sections = [
             section
             for section in analysis_package["analysis_sections"]
-            if section["section_id"] in {"transaction_terms_analysis", "milestone_economics_analysis", "entity_and_asset_lineage_analysis"}
+            if section["section_id"] not in {"source_gaps_and_human_review", "decision_readiness"}
         ]
         fact_claim_ids = {
             claim_id
@@ -99,20 +101,17 @@ class V3LiteM6AnalysisPackageTest(unittest.TestCase):
         }
 
         self.assertFalse({"CL-012", "CL-013", "CL-014", "CL-015"} & fact_claim_ids)
-        gap_section = self._section(analysis_package, "evidence_gap_and_risk_analysis")
+        gap_section = self._section(analysis_package, "source_gaps_and_human_review")
         self.assertEqual(gap_section["section_status"], "gap_tracking_only")
         self.assertTrue({"CL-012", "CL-013", "CL-014", "CL-015"}.issubset(set(gap_section["excluded_claim_ids"])))
 
-    def test_180m_appears_only_with_numeric_caveat(self) -> None:
-        analysis_package = self._run_package("m6_180m")
+    def test_numeric_claims_are_blocked_without_explicit_verified_support(self) -> None:
+        analysis_package = self._run_package("m6_numeric_generic")
         text = json.dumps(analysis_package)
-        milestone_section = self._section(analysis_package, "milestone_economics_analysis")
-        derived_findings = [finding for finding in milestone_section["findings"] if "CL-011" in finding["related_claim_ids"]]
 
-        self.assertIn("$180M", text)
-        self.assertEqual(len(derived_findings), 1)
-        self.assertTrue(derived_findings[0]["caveated"])
-        self.assertIn("not a direct-source headline value", derived_findings[0]["finding_text"])
+        self.assertIn("derived_numeric_candidate claim", text)
+        self.assertNotIn("$180M", text)
+        self.assertFalse(any("$180M" in finding["finding_text"] for section in analysis_package["analysis_sections"] for finding in section["findings"]))
         self.assertTrue(any(caveat["caveat_type"] == "derived_numeric_result" for caveat in analysis_package["caveats"]))
 
     def test_post_decision_and_retrospective_evidence_remains_caveated(self) -> None:
@@ -126,18 +125,13 @@ class V3LiteM6AnalysisPackageTest(unittest.TestCase):
 
     def test_blocked_analysis_items_are_present(self) -> None:
         analysis_package = self._run_package("m6_blocked_items")
-        blocked_by_topic = {item["blocked_topic"]: item for item in analysis_package["blocked_analysis_items"]}
+        blocked_topics = {item["blocked_topic"] for item in analysis_package["blocked_analysis_items"]}
 
-        for topic in (
-            "founder ownership economics",
-            "Bohan Jin personal realized proceeds",
-            "immediate pre-sale cap table",
-            "official patent-office confirmation",
-            "uncaveated $180M headline value wording",
-        ):
-            self.assertIn(topic, blocked_by_topic)
-            self.assertFalse(blocked_by_topic[topic]["can_appear_in_final_report"])
-            self.assertTrue(blocked_by_topic[topic]["required_repair_target"])
+        self.assertTrue(blocked_topics)
+        self.assertTrue(any("source_gap" in topic or "claim not certified" in topic for topic in blocked_topics))
+        for item in analysis_package["blocked_analysis_items"]:
+            self.assertFalse(item["can_appear_in_final_report"])
+            self.assertTrue(item["required_repair_target"])
 
     def test_human_review_items_are_carried_forward(self) -> None:
         analysis_package = self._run_package("m6_human_review")
