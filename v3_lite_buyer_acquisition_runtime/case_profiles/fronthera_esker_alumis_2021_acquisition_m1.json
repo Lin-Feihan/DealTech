@@ -1,0 +1,412 @@
+{
+  "generated_artifact": "case_profile.json",
+  "profile_type": "buyer_acquisition_case_profile",
+  "case_id": "fronthera_esker_alumis_2021_acquisition_m1",
+  "profile_id": "CASE-PROFILE-FRONTHERA-ESKER-ALUMIS-2021",
+  "description": "Case profile for the FronThera / Esker / Alumis 2021 acquisition test case. This is test-case configuration, not generic runtime logic.",
+  "planning_profile": {
+    "key_questions": [
+      "What was the buyer-side investment thesis for Esker Therapeutics / Alumis acquisition vehicle acquiring FronThera rather than licensing, partnering, or making a minority investment?",
+      "What scientific and commercial evidence is required to evaluate the TYK2 / ESK-001 / envudeucitinib asset lineage?",
+      "How should the buyer distinguish $60M base initial consideration, up to $120M milestone consideration, and the $180M headline maximum value?",
+      "What milestone triggers, development risks, and approval risks determine value realization?",
+      "What diligence is required around FronThera patents, clinical development status, asset ownership, liabilities, and regulatory path?",
+      "How should Bohan Jin's founder / VP Chemistry / director / 2017 11.12% shareholder role be treated without overclaiming personal realized proceeds?",
+      "What evidence would be required before making any claim about personal payout, founder economics, or cap table economics?",
+      "What buyer alternatives were available besides acquisition, including licensing, partnering, internal discovery, or minority investment?",
+      "What would make the acquisition a Proceed, Proceed with Conditions, Renegotiate, Defer, or Walk Away case?"
+    ],
+    "workstreams": [
+      {
+        "id": "WS-001",
+        "name": "Transaction Background and Buyer Investment Thesis",
+        "objective": "Frame why the buyer would pursue FronThera in March 2021 and what strategic problem the acquisition was meant to solve.",
+        "questions": [
+          "What did FL2021-001 / Esker / Alumis need to believe about FronThera to justify acquisition over licensing or partnership?",
+          "What source-backed timeline is needed for the March 5, 2021 stock purchase agreement and acquisition context?"
+        ],
+        "planned_artifacts": ["research_plan.json"]
+      },
+      {
+        "id": "WS-002",
+        "name": "Target and Scientific Asset Quality",
+        "objective": "Plan diligence on FronThera's scientific platform, development maturity, and commercial relevance.",
+        "questions": [
+          "What evidence is required to assess FronThera's TYK2 inhibitor chemistry quality?",
+          "What pre-deal data would support or weaken the case for clinical and commercial potential?"
+        ],
+        "planned_artifacts": ["research_plan.json"]
+      },
+      {
+        "id": "WS-003",
+        "name": "TYK2 / ESK-001 / envudeucitinib Asset Lineage Diligence",
+        "objective": "Define the source trail needed to connect FronThera chemistry to the later ESK-001 / envudeucitinib asset lineage.",
+        "questions": [
+          "Which documents link FronThera, Esker, Alumis, TYK2, ESK-001, and envudeucitinib?",
+          "What lineage claims must remain caveated until source-supported?"
+        ],
+        "planned_artifacts": ["research_plan.json"]
+      },
+      {
+        "id": "WS-004",
+        "name": "Patent / IP / Ownership and Key-Person Diligence",
+        "objective": "Plan diligence on patents, asset ownership, governance, key-person roles, and founder economics boundaries.",
+        "questions": [
+          "What patent and assignment evidence is needed for the TYK2 chemistry and acquired rights?",
+          "How should Bohan Jin's documented FronThera roles and 2017 11.12% shareholding be verified without asserting personal proceeds?"
+        ],
+        "planned_artifacts": ["research_plan.json"]
+      },
+      {
+        "id": "WS-005",
+        "name": "Deal Economics, Valuation, and Purchase Price Bridge",
+        "objective": "Separate upfront, milestone, and headline value concepts before future valuation or return analysis.",
+        "questions": [
+          "How should the $60M base initial consideration, up to $120M milestones, and $180M headline maximum be bridged?",
+          "What valuation support is needed before determining acceptable purchase price or renegotiation range?"
+        ],
+        "planned_artifacts": ["research_plan.json"]
+      },
+      {
+        "id": "WS-006",
+        "name": "Milestone Consideration and Risk Allocation",
+        "objective": "Identify future diligence needed to understand milestone triggers, payment timing, and risk allocation.",
+        "questions": [
+          "What milestone events triggered the $37M payment in 2022 and $23M payment in 2024?",
+          "Which development, regulatory, approval, or commercial risks remained after 2024?"
+        ],
+        "planned_artifacts": ["research_plan.json"]
+      },
+      {
+        "id": "WS-007",
+        "name": "Strategic Fit, Alternatives, and Value Creation",
+        "objective": "Plan analysis of whether acquisition was superior to build, partner, license, or minority investment alternatives.",
+        "questions": [
+          "What buyer capabilities would FronThera add to Esker / Alumis?",
+          "What alternatives could have delivered similar TYK2 exposure with lower capital or execution risk?"
+        ],
+        "planned_artifacts": ["research_plan.json"]
+      },
+      {
+        "id": "WS-008",
+        "name": "Legal / Regulatory / Clinical / Liability Diligence",
+        "objective": "Define diligence tracks for legal liabilities, clinical development status, regulatory path, and transaction conditions.",
+        "questions": [
+          "What liabilities, consent requirements, and regulatory risks should be checked before closing?",
+          "What clinical-development and regulatory-path evidence is required before downstream deal analysis?"
+        ],
+        "planned_artifacts": ["research_plan.json"]
+      },
+      {
+        "id": "WS-009",
+        "name": "IC Decision Framework and Red-Line Conditions",
+        "objective": "Create the future investment-committee decision framework without drafting a recommendation in Milestone 1.",
+        "questions": [
+          "What evidence would support Proceed, Proceed with Conditions, Renegotiate, Defer, or Walk Away?",
+          "What unsupported claim types must become caveats or human_review_items in future stages?"
+        ],
+        "planned_artifacts": ["research_plan.json"]
+      }
+    ],
+    "evidence_requirements": [
+      {
+        "id": "ER-001",
+        "description": "Stock purchase agreement and consideration schedule supporting March 5, 2021 transaction timing and economics."
+      },
+      {
+        "id": "ER-002",
+        "description": "SEC / Alumis filings supporting FL2021-001, Esker Therapeutics, and Alumis name history and milestone payments."
+      },
+      {
+        "id": "ER-003",
+        "description": "Source evidence on FronThera roles, ownership, governance, Bohan Jin's founder / VP Chemistry / director status, and 2017 11.12% shareholding."
+      },
+      {
+        "id": "ER-004",
+        "description": "Patent evidence for TYK2 inhibitor chemistry and asset lineage."
+      },
+      {
+        "id": "ER-005",
+        "description": "Pipeline, clinical, and regulatory evidence for ESK-001 / envudeucitinib."
+      },
+      {
+        "id": "ER-006",
+        "description": "Source evidence distinguishing $180M headline deal value from $60M upfront/base initial consideration and milestone consideration."
+      },
+      {
+        "id": "ER-007",
+        "description": "Evidence needed to avoid unsupported claims about Bohan Jin's personal proceeds, personal realized proceeds, founder economics, or cap table economics."
+      }
+    ],
+    "verification_targets": [
+      {
+        "id": "VT-001",
+        "target": "Numeric verification",
+        "reason": "$60M upfront/base initial consideration + up to $120M milestone consideration must reconcile to $180M maximum headline value; $60M + $37M + $23M must reconcile to at least around $120M paid or payable by end-2024."
+      },
+      {
+        "id": "VT-002",
+        "target": "Citation verification",
+        "reason": "Each transaction economics claim must link to source evidence before it can be used downstream."
+      },
+      {
+        "id": "VT-003",
+        "target": "Claim verification",
+        "reason": "The phrase '$180M sale' must not be treated as an all-cash upfront purchase price."
+      },
+      {
+        "id": "VT-004",
+        "target": "Claim verification",
+        "reason": "Bohan Jin's 2017 11.12% stake must not be converted into verified personal proceeds or personal realized proceeds."
+      },
+      {
+        "id": "VT-005",
+        "target": "Lineage verification",
+        "reason": "FL2021-001 -> Esker Therapeutics -> Alumis entity/name history must be source-supported before use."
+      },
+      {
+        "id": "VT-006",
+        "target": "Scientific asset verification",
+        "reason": "TYK2 / ESK-001 / envudeucitinib linkage must be source-supported before downstream analysis."
+      },
+      {
+        "id": "VT-007",
+        "target": "Human review target",
+        "reason": "Founder economics, cap table changes, and personal payout claims require human review."
+      },
+      {
+        "id": "VT-008",
+        "target": "Milestone 1 scope boundary",
+        "reason": "Prevent web search, evidence generation, certification, claim graph construction, and report generation."
+      }
+    ],
+    "open_questions": [
+      "What was FronThera's cap table immediately before the 2021 transaction?",
+      "Which sellers received the base and milestone consideration?",
+      "What exact milestones triggered the 2022 and 2024 payments?",
+      "What remaining approval or development milestones were outstanding after 2024?",
+      "What evidence links specific TYK2 patents to the acquired clinical asset?",
+      "What buyer alternatives were available besides acquisition?",
+      "Which source-pack files are sufficient for future evidence extraction without web search?"
+    ]
+  },
+  "source_discovery_profile": {
+    "source_needs": [
+      {
+        "source_need_id": "SN-001",
+        "purpose": "Confirm transaction agreement",
+        "target_fact_or_question": "SEC stock purchase agreement dated March 5, 2021 for FronThera acquisition",
+        "preferred_source_types": ["SEC filings", "signed transaction agreements"],
+        "preferred_source_tier": "Tier 1",
+        "related_workstream_ids": ["WS-001", "WS-005"],
+        "related_evidence_requirement_ids": ["ER-001", "ER-006"],
+        "related_verification_target_ids": ["VT-001", "VT-002", "VT-003"]
+      },
+      {
+        "source_need_id": "SN-002",
+        "purpose": "Confirm consideration structure",
+        "target_fact_or_question": "$60M base initial consideration, up to $120M milestone consideration, and $180M maximum aggregate deal value",
+        "preferred_source_types": ["SEC filings", "signed transaction agreements"],
+        "preferred_source_tier": "Tier 1",
+        "related_workstream_ids": ["WS-005", "WS-006"],
+        "related_evidence_requirement_ids": ["ER-001", "ER-006"],
+        "related_verification_target_ids": ["VT-001", "VT-003"]
+      },
+      {
+        "source_need_id": "SN-003",
+        "purpose": "Confirm later milestone payments",
+        "target_fact_or_question": "Alumis filing support for $37M 2022 milestone and $23M 2024 milestone",
+        "preferred_source_types": ["SEC filings", "annual reports", "prospectus"],
+        "preferred_source_tier": "Tier 1",
+        "related_workstream_ids": ["WS-006"],
+        "related_evidence_requirement_ids": ["ER-002", "ER-006"],
+        "related_verification_target_ids": ["VT-001", "VT-002"]
+      },
+      {
+        "source_need_id": "SN-004",
+        "purpose": "Confirm entity lineage",
+        "target_fact_or_question": "FL2021-001 -> Esker Therapeutics -> Alumis name and entity history",
+        "preferred_source_types": ["SEC filings", "company filings", "company press releases"],
+        "preferred_source_tier": "Tier 1",
+        "related_workstream_ids": ["WS-001", "WS-003"],
+        "related_evidence_requirement_ids": ["ER-002"],
+        "related_verification_target_ids": ["VT-005"]
+      },
+      {
+        "source_need_id": "SN-005",
+        "purpose": "Confirm Bohan Jin role and ownership lead",
+        "target_fact_or_question": "Haisco disclosure on FronThera ownership, Bohan Jin role, director status, and 2017 11.12% shareholding",
+        "preferred_source_types": ["stock exchange announcements", "company filings"],
+        "preferred_source_tier": "Tier 1",
+        "related_workstream_ids": ["WS-004"],
+        "related_evidence_requirement_ids": ["ER-003", "ER-007"],
+        "related_verification_target_ids": ["VT-004", "VT-007"]
+      },
+      {
+        "source_need_id": "SN-006",
+        "purpose": "Confirm patent and asset lineage",
+        "target_fact_or_question": "TYK2 inhibitor patents related to FronThera / Esker / Alumis",
+        "preferred_source_types": ["official patent databases", "regulator filings"],
+        "preferred_source_tier": "Tier 1",
+        "related_workstream_ids": ["WS-002", "WS-003", "WS-004"],
+        "related_evidence_requirement_ids": ["ER-004", "ER-005"],
+        "related_verification_target_ids": ["VT-006"]
+      },
+      {
+        "source_need_id": "SN-007",
+        "purpose": "Confirm official pipeline identity",
+        "target_fact_or_question": "ESK-001 / envudeucitinib official Alumis pipeline or clinical source",
+        "preferred_source_types": ["official company pipeline pages", "clinical trial databases", "regulatory filings"],
+        "preferred_source_tier": "Tier 1",
+        "related_workstream_ids": ["WS-002", "WS-003", "WS-008"],
+        "related_evidence_requirement_ids": ["ER-005"],
+        "related_verification_target_ids": ["VT-006"]
+      },
+      {
+        "source_need_id": "SN-008",
+        "purpose": "Identify source gap",
+        "target_fact_or_question": "Direct evidence for Bohan Jin personal proceeds and FronThera cap table immediately before 2021 transaction",
+        "preferred_source_types": ["SEC filings", "company filings", "stock exchange announcements"],
+        "preferred_source_tier": "Tier 1",
+        "related_workstream_ids": ["WS-004", "WS-009"],
+        "related_evidence_requirement_ids": ["ER-003", "ER-007"],
+        "related_verification_target_ids": ["VT-004", "VT-007"]
+      }
+    ],
+    "search_queries": [
+      {
+        "query_id": "SQ-001",
+        "query_text": "FronThera stock purchase agreement March 5 2021 Exhibit 10.22 SEC",
+        "purpose": "Find Tier 1 agreement exhibit",
+        "expected_source_type": "SEC filing",
+        "source_tier_target": "Tier 1",
+        "related_source_need_ids": ["SN-001", "SN-002"],
+        "related_workstream_ids": ["WS-001", "WS-005"],
+        "related_verification_target_ids": ["VT-001", "VT-003"]
+      },
+      {
+        "query_id": "SQ-002",
+        "query_text": "Alumis FronThera acquisition $60 million $120 million milestone $180 million",
+        "purpose": "Find filing support for consideration structure",
+        "expected_source_type": "SEC filing",
+        "source_tier_target": "Tier 1",
+        "related_source_need_ids": ["SN-002"],
+        "related_workstream_ids": ["WS-005", "WS-006"],
+        "related_verification_target_ids": ["VT-001", "VT-003"]
+      },
+      {
+        "query_id": "SQ-003",
+        "query_text": "Alumis 10-K 2024 FronThera $37 million 2022 $23 million 2024 milestone",
+        "purpose": "Find filing support for paid milestones",
+        "expected_source_type": "SEC filing",
+        "source_tier_target": "Tier 1",
+        "related_source_need_ids": ["SN-003"],
+        "related_workstream_ids": ["WS-006"],
+        "related_verification_target_ids": ["VT-001", "VT-002"]
+      },
+      {
+        "query_id": "SQ-004",
+        "query_text": "FL2021-001 Esker Therapeutics Alumis name history SEC",
+        "purpose": "Find entity/name history",
+        "expected_source_type": "SEC filing",
+        "source_tier_target": "Tier 1",
+        "related_source_need_ids": ["SN-004"],
+        "related_workstream_ids": ["WS-001", "WS-003"],
+        "related_verification_target_ids": ["VT-005"]
+      },
+      {
+        "query_id": "SQ-005",
+        "query_text": "Haisco FronThera Bohan Jin 11.12% VP Chemistry director",
+        "purpose": "Find direct ownership and role disclosure",
+        "expected_source_type": "stock exchange announcement",
+        "source_tier_target": "Tier 1",
+        "related_source_need_ids": ["SN-005", "SN-008"],
+        "related_workstream_ids": ["WS-004"],
+        "related_verification_target_ids": ["VT-004", "VT-007"]
+      },
+      {
+        "query_id": "SQ-006",
+        "query_text": "FronThera Esker Alumis TYK2 inhibitor patent ESK-001 envudeucitinib",
+        "purpose": "Find patent and asset lineage support",
+        "expected_source_type": "patent database",
+        "source_tier_target": "Tier 1",
+        "related_source_need_ids": ["SN-006"],
+        "related_workstream_ids": ["WS-002", "WS-003"],
+        "related_verification_target_ids": ["VT-006"]
+      },
+      {
+        "query_id": "SQ-007",
+        "query_text": "Alumis ESK-001 envudeucitinib pipeline TYK2 official",
+        "purpose": "Find official pipeline evidence",
+        "expected_source_type": "official company pipeline page",
+        "source_tier_target": "Tier 2",
+        "related_source_need_ids": ["SN-007"],
+        "related_workstream_ids": ["WS-002", "WS-003", "WS-008"],
+        "related_verification_target_ids": ["VT-006"]
+      }
+    ],
+    "retrieval_targets": [
+      {
+        "target_id": "RT-001",
+        "target_description": "SEC filing or exhibit containing FronThera stock purchase agreement Exhibit 10.22",
+        "likely_source_owner": "SEC / Alumis",
+        "expected_source_type": "SEC filing",
+        "priority": "high",
+        "related_source_need_ids": ["SN-001", "SN-002"]
+      },
+      {
+        "target_id": "RT-002",
+        "target_description": "Alumis annual report, S-1, prospectus, or 10-K showing milestone payments",
+        "likely_source_owner": "SEC / Alumis",
+        "expected_source_type": "SEC filing",
+        "priority": "high",
+        "related_source_need_ids": ["SN-003"]
+      },
+      {
+        "target_id": "RT-003",
+        "target_description": "SEC or company filing showing FL2021-001 to Esker Therapeutics to Alumis history",
+        "likely_source_owner": "SEC / Alumis",
+        "expected_source_type": "SEC filing",
+        "priority": "high",
+        "related_source_need_ids": ["SN-004"]
+      },
+      {
+        "target_id": "RT-004",
+        "target_description": "Haisco disclosure for FronThera ownership and Bohan Jin role / 11.12% shareholding",
+        "likely_source_owner": "Haisco / stock exchange",
+        "expected_source_type": "stock exchange announcement",
+        "priority": "high",
+        "related_source_need_ids": ["SN-005", "SN-008"]
+      },
+      {
+        "target_id": "RT-005",
+        "target_description": "Official patent database records for TYK2 inhibitor chemistry related to FronThera / Esker / Alumis",
+        "likely_source_owner": "Official patent database",
+        "expected_source_type": "patent database",
+        "priority": "medium",
+        "related_source_need_ids": ["SN-006"]
+      },
+      {
+        "target_id": "RT-006",
+        "target_description": "Official Alumis pipeline page or clinical database entry for ESK-001 / envudeucitinib",
+        "likely_source_owner": "Alumis / clinical trial database",
+        "expected_source_type": "official pipeline or clinical database",
+        "priority": "medium",
+        "related_source_need_ids": ["SN-007"]
+      }
+    ],
+    "source_priority_rules": [
+      "Tier 1 sources are preferred for transaction economics, signed agreements, regulatory filings, patent, clinical, and stock-exchange evidence.",
+      "Tier 2 official company sources may support pipeline and company identity facts when Tier 1 is unavailable.",
+      "Tier 3 reputable secondary sources may provide leads or context but should not replace official sources for deal economics.",
+      "Tier 4 case briefs can generate leads but cannot alone support high-confidence transaction economics.",
+      "Personal proceeds require direct evidence or remain unverified."
+    ],
+    "forbidden_source_uses": [
+      "Do not use model memory as evidence.",
+      "Do not use case_seed facts as source-backed evidence.",
+      "Do not cite web search results unless the retrieved source is logged in retrieved_sources_manifest.json.",
+      "Do not resolve source conflicts in M2; record them for later certification."
+    ]
+  }
+}
