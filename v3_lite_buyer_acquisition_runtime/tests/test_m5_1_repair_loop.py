@@ -5,11 +5,17 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from v3_lite_buyer_acquisition_runtime.runtime.mandate_intake import load_mandate
+from v3_lite_buyer_acquisition_runtime.runtime.research_planning import build_research_plan
 from v3_lite_buyer_acquisition_runtime.runtime.repair_loop_executor import (
     MUST_NOT_USE_SOURCES,
     validate_repair_attempt_log,
     validate_targeted_source_discovery_plan,
 )
+from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m2 import run_m2_pipeline
+from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m3 import run_m3_pipeline
+from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m4 import run_m4_pipeline
+from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m5 import run_m5_pipeline
 from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m5_1 import M51FailClosed, run_m5_1_pipeline
 
 
@@ -20,9 +26,29 @@ class V3LiteM51RepairLoopTest(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
         self.root = Path(self.temp_dir.name)
-        self.certification_result_path = RUNTIME_ROOT / "outputs" / "fronthera_esker_alumis_m5" / "certification_result.json"
-        self.research_gaps_path = RUNTIME_ROOT / "outputs" / "fronthera_esker_alumis_m5" / "research_gaps.json"
-        self.repair_plan_path = RUNTIME_ROOT / "outputs" / "fronthera_esker_alumis_m5" / "repair_plan.json"
+        mandate_path = RUNTIME_ROOT / "examples" / "synthetic_acquisition_mandate.json"
+        case_seed_path = RUNTIME_ROOT / "case_seeds" / "synthetic_acquisition_case_seed.json"
+        research_plan_path = self.root / "research_plan.json"
+        research_plan = build_research_plan(load_mandate(mandate_path))
+        research_plan_path.write_text(json.dumps(research_plan, indent=2), encoding="utf-8")
+        m2_artifacts = run_m2_pipeline(
+            mandate_path=mandate_path,
+            research_plan_path=research_plan_path,
+            case_seed_path=case_seed_path,
+            output_dir=self.root / "m2",
+            retrieval_mode="manual_retrieved_sources",
+            retrieved_sources_manifest_path=RUNTIME_ROOT / "retrieved_sources" / "synthetic_acquisition" / "retrieved_sources_manifest.json",
+        )
+        m3_artifacts = run_m3_pipeline(
+            raw_evidence_path=m2_artifacts["raw_evidence"],
+            retrieved_sources_manifest_path=m2_artifacts["retrieved_sources_manifest"],
+            output_dir=self.root / "m3",
+        )
+        m4_artifacts = run_m4_pipeline(evidence_repository_path=m3_artifacts["evidence_repository"], output_dir=self.root / "m4")
+        m5_artifacts = run_m5_pipeline(m4_artifacts["claim_evidence_graph"], m3_artifacts["evidence_repository"], self.root / "m5")
+        self.certification_result_path = m5_artifacts["certification_result"]
+        self.research_gaps_path = m5_artifacts["research_gaps"]
+        self.repair_plan_path = m5_artifacts["repair_plan"]
 
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
@@ -44,8 +70,8 @@ class V3LiteM51RepairLoopTest(unittest.TestCase):
         self.assertEqual(targeted_plan["generated_artifact"], "targeted_source_discovery_plan.json")
         self.assertEqual(targeted_plan["target_state"], "M2_source_retrieval")
         self.assertEqual(attempt_log["generated_artifact"], "repair_attempt_log.json")
-        self.assertEqual(len(targeted_plan["targeted_source_needs"]), 5)
-        self.assertEqual(len(attempt_log["repair_attempts"]), 5)
+        self.assertEqual(len(targeted_plan["targeted_source_needs"]), 4)
+        self.assertEqual(len(attempt_log["repair_attempts"]), 4)
 
     def test_invalid_repair_plan_fails_closed(self) -> None:
         repair_plan = self._load(self.repair_plan_path)
@@ -70,12 +96,11 @@ class V3LiteM51RepairLoopTest(unittest.TestCase):
         targeted_plan = self._run_targeted_plan("m5_1_ids")
         by_gap = {need["original_research_gap_id"]: need for need in targeted_plan["targeted_source_needs"]}
 
-        self.assertEqual(by_gap["RG-001"]["related_claim_ids"], ["CL-012"])
+        self.assertEqual(by_gap["RG-001"]["related_claim_ids"], ["CL-005"])
         self.assertEqual(by_gap["RG-001"]["missing_source_need_ids"], ["SN-005"])
-        self.assertEqual(by_gap["RG-002"]["related_claim_ids"], ["CL-013"])
-        self.assertEqual(by_gap["RG-003"]["related_claim_ids"], ["CL-014"])
-        self.assertEqual(by_gap["RG-004"]["related_claim_ids"], ["CL-015"])
-        self.assertEqual(by_gap["RG-005"]["related_claim_ids"], ["CL-011"])
+        self.assertEqual(by_gap["RG-002"]["related_claim_ids"], ["CL-006"])
+        self.assertEqual(by_gap["RG-003"]["related_claim_ids"], ["CL-007"])
+        self.assertEqual(by_gap["RG-004"]["related_claim_ids"], ["CL-008"])
 
     def test_must_not_use_sources_are_present_on_every_query(self) -> None:
         targeted_plan = self._run_targeted_plan("m5_1_forbidden_sources")
@@ -91,7 +116,7 @@ class V3LiteM51RepairLoopTest(unittest.TestCase):
         self.assertIn("buyer target acquisition", query_text)
         self.assertIn("authoritative", query_text)
         self.assertIn("official filing source", query_text)
-        for marker in ("FronThera", "Bohan", "TYK2", "Alumis", "Esker", "$180", "11.12"):
+        for marker in ("ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget"):
             self.assertNotIn(marker, query_text)
         self.assertTrue(all(need["target_fact_or_question"] for need in targeted_plan["targeted_source_needs"]))
 
@@ -107,7 +132,7 @@ class V3LiteM51RepairLoopTest(unittest.TestCase):
         self.assertEqual(attempt_log["next_action"], "supply_manual_authoritative_sources_or_configure_retrieval_provider_before_running_M2_repair")
         self.assertTrue(all(attempt["status"] in {"planned", "deferred_provider_unavailable"} for attempt in attempt_log["repair_attempts"]))
         self.assertTrue(all(attempt["output_artifact_generated"] is False for attempt in attempt_log["repair_attempts"]))
-        self.assertEqual(len(attempt_log["unresolved_repairs"]), 5)
+        self.assertEqual(len(attempt_log["unresolved_repairs"]), 4)
 
     def test_no_evidence_or_report_artifacts_are_generated(self) -> None:
         output_dir = self.root / "m5_1_forbidden_outputs"

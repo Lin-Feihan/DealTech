@@ -1,3 +1,0 @@
-Haisco stock exchange announcement fixture excerpt. This local test fixture represents an authoritative stock exchange announcement or company filing excerpt; it is not the Bohan Jin / FronThera case PDF.
-
-Haisco disclosure describes Bohan Jin as a FronThera co-founder, VP Chemistry, and director. The same disclosure identifies Bohan Jin as holder of 11.12% in 2017. Direct personal realized proceeds from the 2021 FronThera sale are not verified. Pre-sale cap table source gap remains open for the period immediately before 2021.

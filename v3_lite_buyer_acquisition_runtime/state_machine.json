@@ -285,9 +285,9 @@
   ],
   "known_limitations": [
     "Current runtime is a prototype, not production-ready.",
-    "Some FronThera-specific planning, canonicalization, claim mapping, numeric verification, and analysis behavior still exists and must be generalized in later fixes.",
+    "Some prototype-specific planning, canonicalization, claim mapping, numeric verification, and analysis behavior still exists and must be generalized in later fixes.",
     "Citation verification currently checks provenance and forbidden-source markers; it is not yet a full semantic claim-evidence verifier.",
-    "Numeric verification currently supports a narrow FronThera-derived arithmetic case and must become formula-driven later.",
+    "Numeric verification currently supports narrow prototype arithmetic cases and must become formula-driven later.",
     "Report renderer is template-based and not yet a professional LLM report writer.",
     "External Deep Research ingestion validates structured packages but does not independently re-fetch and verify every source quote."
   ],
@@ -295,7 +295,7 @@
     "not_production_ready",
     "openai_deep_research_live_api_not_configured",
     "generic_ma_case_generalization_not_solved",
-    "fronthera_specific_code_not_removed",
+    "prototype_specific_code_not_removed",
     "v1_v2_runtime_unchanged"
   ]
 }

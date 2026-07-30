@@ -1,3 +1,0 @@
-Official patent database fixture excerpt. This local test fixture represents an authoritative patent database record excerpt; it is not the Bohan Jin / FronThera case PDF.
-
-Patent record summary: FronThera / Esker / Alumis materials describe TYK2 inhibitor chemistry. The patent record is relevant to asset and IP lineage diligence for TYK2 inhibitor compounds later associated with ESK-001 and envudeucitinib.

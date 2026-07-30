@@ -1,0 +1,56 @@
+{
+  "case_id": "synthetic_buyer_acquisition_m1",
+  "buyer": {
+    "name": "AcquirerCo",
+    "description": "Synthetic buyer evaluating a private acquisition target for V3-Lite package examples."
+  },
+  "target": {
+    "name": "TargetCo",
+    "description": "Synthetic technology-enabled business with ProductX and service-line expansion potential."
+  },
+  "transaction_context": {
+    "transaction_type": "buyer-side acquisition evaluation",
+    "stage": "pre-deal research planning",
+    "decision_need": "Define the buyer-side research plan needed to evaluate whether acquiring TargetCo creates strategic, operational, and economic value."
+  },
+  "decision_date": "2026-01-15",
+  "requested_scope": [
+    "transaction background and buyer-side deal rationale",
+    "target company and management background",
+    "ProductX quality, customer adoption, and competitive position",
+    "strategic fit for AcquirerCo",
+    "deal structure: upfront, contingent, and maximum consideration distinction",
+    "valuation and acceptable purchase price planning",
+    "contingent-payment economics and value realization risks",
+    "diligence priorities around intellectual property, commercial proof, ownership, liabilities, and approvals",
+    "key risks and red flags",
+    "final decision recommendation planning"
+  ],
+  "source_pack_reference": {
+    "reference_id": "SYNTHETIC-ACQUISITION-SOURCE-PACK",
+    "description": "Synthetic user-provided case lead pack for package testing. Milestone 1 may reference this source pack but must not extract evidence or generate evidence_repository."
+  },
+  "constraints": {
+    "no_web_search": true,
+    "no_evidence_generation": true,
+    "no_report_generation": true,
+    "notes": [
+      "Case positioning: synthetic buyer-side acquisition planning case.",
+      "Target: TargetCo.",
+      "Buyer: AcquirerCo.",
+      "Transaction timing lead: January 2026; agreement date lead: January 15, 2026.",
+      "Transaction structure lead: $42 million base initial consideration plus up to $18 million contingent consideration; maximum aggregate headline value: $60 million.",
+      "Later synthetic filings show $7 million contingent payment paid in a later period.",
+      "ProductX is the illustrative asset or product program for diligence planning.",
+      "Do not state founder personal proceeds as fact; ownership and payout implications are future diligence questions because no authoritative source disclosed realized personal proceeds.",
+      "Milestone 1 stops after mandate.json and research_plan.json."
+    ]
+  },
+  "output_requirements": {
+    "expected_artifacts": [
+      "mandate.json",
+      "research_plan.json"
+    ],
+    "language": "English"
+  }
+}

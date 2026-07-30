@@ -6,10 +6,10 @@ from typing import Any
 FORBIDDEN_SOURCE_MARKERS = (
     "case_seed",
     "mandate",
-    "bohan pdf",
+    "user narrative notes",
     "tests/fixtures",
-    "fixtures/fronthera",
-    "fronthera_authoritative_sources",
+    "fixtures/synthetic_authoritative_sources",
+    "synthetic_authoritative_sources",
 )
 
 

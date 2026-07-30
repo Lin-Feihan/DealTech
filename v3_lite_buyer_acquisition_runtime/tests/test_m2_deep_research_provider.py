@@ -7,10 +7,14 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from v3_lite_buyer_acquisition_runtime.runtime.case_seed_loader import load_case_seed
+from v3_lite_buyer_acquisition_runtime.runtime.mandate_intake import load_mandate
+from v3_lite_buyer_acquisition_runtime.runtime.research_planning import build_research_plan
 from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m2_deep_research import (
     M2DeepResearchFailClosed,
     run_m2_deep_research_pipeline,
 )
+from v3_lite_buyer_acquisition_runtime.runtime.source_discovery import build_source_discovery_plan
 
 
 RUNTIME_ROOT = Path(__file__).resolve().parents[1]
@@ -20,12 +24,16 @@ class V3LiteM2DeepResearchProviderTest(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
         self.root = Path(self.temp_dir.name)
-        self.mandate_path = RUNTIME_ROOT / "outputs" / "fronthera_esker_alumis_m1_5" / "mandate.json"
-        self.research_plan_path = RUNTIME_ROOT / "outputs" / "fronthera_esker_alumis_m1_5" / "research_plan.json"
-        self.case_seed_path = RUNTIME_ROOT / "case_seeds" / "fronthera_esker_alumis_case_seed.json"
-        self.source_discovery_plan_path = (
-            RUNTIME_ROOT / "outputs" / "fronthera_esker_alumis_m2_real_source_partial" / "source_discovery_plan.json"
-        )
+        self.mandate_path = RUNTIME_ROOT / "examples" / "synthetic_acquisition_mandate.json"
+        self.case_seed_path = RUNTIME_ROOT / "case_seeds" / "synthetic_acquisition_case_seed.json"
+        mandate = load_mandate(self.mandate_path)
+        case_seed = load_case_seed(self.case_seed_path)
+        research_plan = build_research_plan(mandate)
+        source_discovery_plan = build_source_discovery_plan(case_seed, research_plan)
+        self.research_plan_path = self.root / "research_plan.json"
+        self.source_discovery_plan_path = self.root / "source_discovery_plan.json"
+        self.research_plan_path.write_text(json.dumps(research_plan, indent=2), encoding="utf-8")
+        self.source_discovery_plan_path.write_text(json.dumps(source_discovery_plan, indent=2), encoding="utf-8")
 
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
@@ -267,7 +275,7 @@ class V3LiteM2DeepResearchProviderTest(unittest.TestCase):
     @staticmethod
     def _valid_replay_response() -> dict:
         return {
-            "case_id": "fronthera_esker_alumis_2021_acquisition_m1",
+            "case_id": "synthetic_buyer_acquisition_m1",
             "provider": "openai_deep_research",
             "model": "o3-deep-research-test",
             "response_id": "resp_test_001",
@@ -299,7 +307,7 @@ class V3LiteM2DeepResearchProviderTest(unittest.TestCase):
                     "url": "https://www.reuters.com/example-future-milestone",
                     "source_type": "reputable financial news",
                     "source_owner": "Reuters",
-                    "source_date_or_period": "2024",
+                    "source_date_or_period": "2027",
                     "source_reliability_rationale": "Reputable financial news with later outcome context.",
                     "source_limitations": "Secondary source and post-decision."
                 },

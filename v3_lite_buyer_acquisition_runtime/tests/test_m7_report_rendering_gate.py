@@ -5,7 +5,14 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from v3_lite_buyer_acquisition_runtime.runtime.mandate_intake import load_mandate
+from v3_lite_buyer_acquisition_runtime.runtime.research_planning import build_research_plan
 from v3_lite_buyer_acquisition_runtime.runtime.report_rendering_gate import validate_report_manifest
+from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m2 import run_m2_pipeline
+from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m3 import run_m3_pipeline
+from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m4 import run_m4_pipeline
+from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m5 import run_m5_pipeline
+from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m6 import run_m6_pipeline
 from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m7 import M7FailClosed, run_m7_pipeline
 
 
@@ -16,9 +23,37 @@ class V3LiteM7ReportRenderingGateTest(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
         self.root = Path(self.temp_dir.name)
-        self.analysis_package_path = RUNTIME_ROOT / "outputs" / "fronthera_esker_alumis_m6" / "analysis_package.json"
-        self.certification_result_path = RUNTIME_ROOT / "outputs" / "fronthera_esker_alumis_m5" / "certification_result.json"
-        self.repair_plan_path = RUNTIME_ROOT / "outputs" / "fronthera_esker_alumis_m5" / "repair_plan.json"
+        mandate_path = RUNTIME_ROOT / "examples" / "synthetic_acquisition_mandate.json"
+        case_seed_path = RUNTIME_ROOT / "case_seeds" / "synthetic_acquisition_case_seed.json"
+        research_plan_path = self.root / "research_plan.json"
+        research_plan = build_research_plan(load_mandate(mandate_path))
+        research_plan_path.write_text(json.dumps(research_plan, indent=2), encoding="utf-8")
+        m2_artifacts = run_m2_pipeline(
+            mandate_path=mandate_path,
+            research_plan_path=research_plan_path,
+            case_seed_path=case_seed_path,
+            output_dir=self.root / "m2",
+            retrieval_mode="manual_retrieved_sources",
+            retrieved_sources_manifest_path=RUNTIME_ROOT / "retrieved_sources" / "synthetic_acquisition" / "retrieved_sources_manifest.json",
+        )
+        m3_artifacts = run_m3_pipeline(
+            raw_evidence_path=m2_artifacts["raw_evidence"],
+            retrieved_sources_manifest_path=m2_artifacts["retrieved_sources_manifest"],
+            output_dir=self.root / "m3",
+        )
+        m4_artifacts = run_m4_pipeline(evidence_repository_path=m3_artifacts["evidence_repository"], output_dir=self.root / "m4")
+        m5_artifacts = run_m5_pipeline(m4_artifacts["claim_evidence_graph"], m3_artifacts["evidence_repository"], self.root / "m5")
+        m6_artifacts = run_m6_pipeline(
+            m5_artifacts["certification_result"],
+            m4_artifacts["claim_evidence_graph"],
+            m3_artifacts["evidence_repository"],
+            m5_artifacts["research_gaps"],
+            m5_artifacts["repair_plan"],
+            self.root / "m6",
+        )
+        self.analysis_package_path = m6_artifacts["analysis_package"]
+        self.certification_result_path = m5_artifacts["certification_result"]
+        self.repair_plan_path = m5_artifacts["repair_plan"]
 
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
@@ -82,8 +117,8 @@ class V3LiteM7ReportRenderingGateTest(unittest.TestCase):
         self.assertIn("repair plan has unresolved steps", blocked)
         self.assertIn("one or more claims are failed, unsupported, source-gap-blocked, or require review", blocked)
         self.assertIn("analysis package contains blocked analysis items", blocked)
-        self.assertNotIn("Bohan", blocked)
-        self.assertNotIn("$180M", blocked)
+        self.assertNotIn("ForbiddenTarget", blocked)
+        self.assertNotIn("ForbiddenTarget", blocked)
 
     def test_allowed_and_excluded_sections_are_gate_metadata_only(self) -> None:
         manifest = self._run_manifest(self.root / "m7_sections")
@@ -111,10 +146,10 @@ class V3LiteM7ReportRenderingGateTest(unittest.TestCase):
         manifest = self._run_manifest(self.root / "m7_repairs")
         repairs_by_id = {repair["repair_step_id"]: repair for repair in manifest["required_repairs_before_report"]}
 
-        self.assertEqual(set(repairs_by_id), {"RP-001", "RP-002", "RP-003", "RP-004", "RP-005"})
+        self.assertEqual(set(repairs_by_id), {"RP-001", "RP-002", "RP-003", "RP-004"})
         self.assertTrue(all("complete source-bounded repair" in repair["reason"] for repair in repairs_by_id.values()))
         repair_text = json.dumps(manifest["required_repairs_before_report"])
-        for marker in ("FronThera", "Bohan", "TYK2", "Alumis", "Esker", "$180M", "11.12"):
+        for marker in ("ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget"):
             self.assertNotIn(marker, repair_text)
 
     def test_no_final_report_or_recommendation_or_valuation_artifacts_are_generated(self) -> None:

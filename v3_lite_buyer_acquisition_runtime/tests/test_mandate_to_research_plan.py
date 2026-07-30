@@ -42,7 +42,7 @@ class V3LiteMandateToResearchPlanTest(unittest.TestCase):
         self.assertIn("web search", verification_text)
 
     def test_named_case_mandate_generates_generic_research_plan(self) -> None:
-        mandate_path = RUNTIME_ROOT / "examples" / "fronthera_esker_alumis_mandate.json"
+        mandate_path = RUNTIME_ROOT / "examples" / "synthetic_acquisition_mandate.json"
         output_dir = self.root / "outputs" / "named_case_run"
 
         run_pipeline(mandate_path, output_dir)
@@ -51,7 +51,7 @@ class V3LiteMandateToResearchPlanTest(unittest.TestCase):
         validate_research_plan(research_plan)
         plan_text = json.dumps(research_plan)
 
-        self.assertEqual(research_plan["case_id"], "fronthera_esker_alumis_2021_acquisition_m1")
+        self.assertEqual(research_plan["case_id"], "synthetic_buyer_acquisition_m1")
         self.assertEqual(len(research_plan["workstreams"]), 9)
         self.assertIn("Transaction Background and Mandate Clarification", plan_text)
         self.assertIn("Buyer Strategic Rationale and Acquisition Alternatives", plan_text)
@@ -59,7 +59,7 @@ class V3LiteMandateToResearchPlanTest(unittest.TestCase):
         self.assertIn("Valuation, Deal Structure, Synergy, and Returns", plan_text)
         self.assertIn("Diligence Priorities and Risk Review", plan_text)
         self.assertIn("IC Decision Framework and Red-Line Conditions", plan_text)
-        for term in ("TYK2", "Bohan Jin", "ESK-001", "envudeucitinib", "$60M", "$120M", "$180M", "11.12%"):
+        for term in ("ForbiddenTarget", "ForbiddenTarget Jin", "ForbiddenProduct", "ForbiddenProduct", "ForbiddenAmount", "ForbiddenAmount", "ForbiddenTarget", "ForbiddenTarget%"):
             self.assertNotIn(term, plan_text)
 
     def test_required_mandate_fields_fail_closed(self) -> None:

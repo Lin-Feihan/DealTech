@@ -5,7 +5,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from v3_lite_buyer_acquisition_runtime.runtime.mandate_intake import load_mandate
+from v3_lite_buyer_acquisition_runtime.runtime.research_planning import build_research_plan
 from v3_lite_buyer_acquisition_runtime.runtime.deal_analysis_builder import validate_analysis_package
+from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m2 import run_m2_pipeline
+from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m3 import run_m3_pipeline
+from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m4 import run_m4_pipeline
+from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m5 import run_m5_pipeline
 from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m6 import M6FailClosed, run_m6_pipeline
 
 
@@ -16,11 +22,31 @@ class V3LiteM6AnalysisPackageTest(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
         self.root = Path(self.temp_dir.name)
-        self.certification_result_path = RUNTIME_ROOT / "outputs" / "fronthera_esker_alumis_m5" / "certification_result.json"
-        self.claim_evidence_graph_path = RUNTIME_ROOT / "outputs" / "fronthera_esker_alumis_m4" / "claim_evidence_graph.json"
-        self.evidence_repository_path = RUNTIME_ROOT / "outputs" / "fronthera_esker_alumis_m3" / "evidence_repository.json"
-        self.research_gaps_path = RUNTIME_ROOT / "outputs" / "fronthera_esker_alumis_m5" / "research_gaps.json"
-        self.repair_plan_path = RUNTIME_ROOT / "outputs" / "fronthera_esker_alumis_m5" / "repair_plan.json"
+        mandate_path = RUNTIME_ROOT / "examples" / "synthetic_acquisition_mandate.json"
+        case_seed_path = RUNTIME_ROOT / "case_seeds" / "synthetic_acquisition_case_seed.json"
+        research_plan_path = self.root / "research_plan.json"
+        research_plan = build_research_plan(load_mandate(mandate_path))
+        research_plan_path.write_text(json.dumps(research_plan, indent=2), encoding="utf-8")
+        m2_artifacts = run_m2_pipeline(
+            mandate_path=mandate_path,
+            research_plan_path=research_plan_path,
+            case_seed_path=case_seed_path,
+            output_dir=self.root / "m2",
+            retrieval_mode="manual_retrieved_sources",
+            retrieved_sources_manifest_path=RUNTIME_ROOT / "retrieved_sources" / "synthetic_acquisition" / "retrieved_sources_manifest.json",
+        )
+        m3_artifacts = run_m3_pipeline(
+            raw_evidence_path=m2_artifacts["raw_evidence"],
+            retrieved_sources_manifest_path=m2_artifacts["retrieved_sources_manifest"],
+            output_dir=self.root / "m3",
+        )
+        m4_artifacts = run_m4_pipeline(evidence_repository_path=m3_artifacts["evidence_repository"], output_dir=self.root / "m4")
+        m5_artifacts = run_m5_pipeline(m4_artifacts["claim_evidence_graph"], m3_artifacts["evidence_repository"], self.root / "m5")
+        self.certification_result_path = m5_artifacts["certification_result"]
+        self.claim_evidence_graph_path = m4_artifacts["claim_evidence_graph"]
+        self.evidence_repository_path = m3_artifacts["evidence_repository"]
+        self.research_gaps_path = m5_artifacts["research_gaps"]
+        self.repair_plan_path = m5_artifacts["repair_plan"]
 
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
@@ -100,19 +126,19 @@ class V3LiteM6AnalysisPackageTest(unittest.TestCase):
             for claim_id in finding["related_claim_ids"]
         }
 
-        self.assertFalse({"CL-012", "CL-013", "CL-014", "CL-015"} & fact_claim_ids)
+        self.assertFalse({"CL-005", "CL-006", "CL-007", "CL-008"} & fact_claim_ids)
         gap_section = self._section(analysis_package, "source_gaps_and_human_review")
         self.assertEqual(gap_section["section_status"], "gap_tracking_only")
-        self.assertTrue({"CL-012", "CL-013", "CL-014", "CL-015"}.issubset(set(gap_section["excluded_claim_ids"])))
+        self.assertTrue({"CL-005", "CL-006", "CL-007", "CL-008"}.issubset(set(gap_section["excluded_claim_ids"])))
 
     def test_numeric_claims_are_blocked_without_explicit_verified_support(self) -> None:
         analysis_package = self._run_package("m6_numeric_generic")
         text = json.dumps(analysis_package)
 
-        self.assertIn("derived_numeric_candidate claim", text)
-        self.assertNotIn("$180M", text)
-        self.assertFalse(any("$180M" in finding["finding_text"] for section in analysis_package["analysis_sections"] for finding in section["findings"]))
-        self.assertTrue(any(caveat["caveat_type"] == "derived_numeric_result" for caveat in analysis_package["caveats"]))
+        self.assertIn("numeric_or_transaction_terms_source_gap unresolved", text)
+        self.assertNotIn("ForbiddenTarget", text)
+        self.assertFalse(any("ForbiddenTarget" in finding["finding_text"] for section in analysis_package["analysis_sections"] for finding in section["findings"]))
+        self.assertFalse(any(caveat["caveat_type"] == "derived_numeric_result" for caveat in analysis_package["caveats"]))
 
     def test_post_decision_and_retrospective_evidence_remains_caveated(self) -> None:
         analysis_package = self._run_package("m6_temporal")
@@ -121,7 +147,7 @@ class V3LiteM6AnalysisPackageTest(unittest.TestCase):
 
         self.assertIn("post_decision_or_retrospective_sources", caveat_text)
         self.assertIn("retrospective validation only", caveat_text)
-        self.assertIn("post_decision evidence", section_caveats)
+        self.assertIn("retrospective/source-limit caveat", section_caveats)
 
     def test_blocked_analysis_items_are_present(self) -> None:
         analysis_package = self._run_package("m6_blocked_items")
@@ -138,7 +164,7 @@ class V3LiteM6AnalysisPackageTest(unittest.TestCase):
         certification_result = self._load(self.certification_result_path)
 
         self.assertEqual(analysis_package["human_review_items"], certification_result["human_review_items"])
-        self.assertEqual(len(analysis_package["human_review_items"]), 14)
+        self.assertEqual(len(analysis_package["human_review_items"]), 6)
 
     def test_no_recommendation_decision_or_final_report_generated(self) -> None:
         output_dir = self.root / "m6_forbidden_outputs"
