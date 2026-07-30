@@ -13,23 +13,43 @@ class ClaimEvidenceGraphError(ValueError):
     pass
 
 
-CLAIM_TYPES = {
+GENERIC_FACT_TYPES = {
+    "transaction_background",
     "transaction_terms",
+    "transaction_timing",
+    "transaction_document_date",
+    "transaction_parties",
+    "transaction_consideration",
+    "contingent_consideration",
     "milestone_economics",
+    "milestone_payment",
+    "financing_or_payment_mechanics",
+    "entity_identity",
     "entity_lineage",
+    "asset_or_product_identity",
     "scientific_asset",
     "asset_lineage",
-    "derived_numeric_candidate",
-    "ownership_or_founder_background",
-    "personal_proceeds",
-    "cap_table",
+    "ownership_or_governance",
+    "management_or_key_person",
+    "intellectual_property",
+    "regulatory_or_clinical",
+    "financial_performance",
+    "valuation_input",
+    "synergy_or_value_creation",
+    "market_or_competitive_position",
+    "legal_or_regulatory_risk",
+    "integration_or_operational_risk",
     "source_gap_claim",
+    "generic_fact",
+    "derived_numeric_candidate",
 }
+CLAIM_TYPES = GENERIC_FACT_TYPES
 SUPPORT_LEVELS = {"source_supported", "partially_supported", "gap_only", "unsupported", "conflicting", "requires_numeric_verification"}
 CERTIFICATION_STATUSES = {"uncertified", "pending_verification", "failed_precheck", "not_applicable"}
 EDGE_TYPES = {"supports", "partially_supports", "contextualizes", "contradicts", "requires_verification", "blocked_by_source_gap"}
 EVIDENCE_RECORD_REQUIRED_FIELDS = {
     "canonical_fact_key",
+    "canonical_fact_type",
     "source_ids",
     "support_status",
     "evidence_time_relation_to_decision_date",
@@ -96,24 +116,15 @@ def validate_evidence_repository_for_m4(evidence_repository: Any) -> None:
 def build_claim_evidence_graph(evidence_repository: dict[str, Any]) -> dict[str, Any]:
     validate_evidence_repository_for_m4(evidence_repository)
     case_id = evidence_repository["case_id"]
-    evidence_records_by_key = {record["canonical_fact_key"]: record for record in evidence_repository["evidence_records"]}
     claim_nodes: list[dict[str, Any]] = []
     evidence_edges: list[dict[str, Any]] = []
 
     for record in evidence_repository["evidence_records"]:
-        claim_spec = _claim_spec_for_evidence_record(record)
-        if claim_spec is None:
+        if record["support_status"] not in {"source_supported", "partially_supported", "conflicting"}:
             continue
-        claim = _build_claim_node_from_record(case_id, len(claim_nodes) + 1, record, claim_spec)
+        claim = _build_claim_node_from_record(case_id, len(claim_nodes) + 1, record)
         claim_nodes.append(claim)
         evidence_edges.append(_build_evidence_edge(len(evidence_edges) + 1, claim, record))
-
-    derived_claim = _build_derived_180m_candidate(case_id, len(claim_nodes) + 1, evidence_records_by_key)
-    if derived_claim is not None:
-        claim_nodes.append(derived_claim)
-        for evidence_record_id in derived_claim["supporting_evidence_record_ids"]:
-            record = next(record for record in evidence_repository["evidence_records"] if record["evidence_record_id"] == evidence_record_id)
-            evidence_edges.append(_build_evidence_edge(len(evidence_edges) + 1, derived_claim, record, edge_type="requires_verification"))
 
     gap_nodes = _build_gap_nodes(evidence_repository["source_gaps"])
     for gap_node in gap_nodes:
@@ -176,73 +187,18 @@ def validate_claim_evidence_graph(graph: Any) -> None:
     _validate_graph_quality_summary(graph["graph_quality_summary"])
 
 
-def _claim_spec_for_evidence_record(record: dict[str, Any]) -> dict[str, str] | None:
-    key = record["canonical_fact_key"]
-    specs = {
-        "acquisition_timing_march_2021": {
-            "claim_type": "transaction_terms",
-            "claim_statement": "The FronThera transaction was linked to March 2021 timing.",
-            "claim_scope": "candidate_transaction_timing_claim",
-        },
-        "stock_purchase_agreement_date_2021_03_05": {
-            "claim_type": "transaction_terms",
-            "claim_statement": "The stock purchase agreement was dated March 5, 2021.",
-            "claim_scope": "candidate_transaction_document_date_claim",
-        },
-        "base_initial_consideration_60m": {
-            "claim_type": "transaction_terms",
-            "claim_statement": "The base initial consideration was $60M.",
-            "claim_scope": "candidate_transaction_terms_claim",
-        },
-        "milestone_consideration_cap_120m": {
-            "claim_type": "milestone_economics",
-            "claim_statement": "The milestone consideration cap was up to $120M.",
-            "claim_scope": "candidate_milestone_terms_claim",
-        },
-        "milestone_payment_2022_37m": {
-            "claim_type": "milestone_economics",
-            "claim_statement": "Alumis made or incurred a $37M milestone payment in 2022.",
-            "claim_scope": "candidate_retrospective_milestone_outcome_claim",
-        },
-        "milestone_payment_2024_23m": {
-            "claim_type": "milestone_economics",
-            "claim_statement": "Alumis made or incurred a $23M milestone payment in 2024.",
-            "claim_scope": "candidate_retrospective_milestone_outcome_claim",
-        },
-        "fl2021_001_to_esker_to_alumis_entity_lineage": {
-            "claim_type": "entity_lineage",
-            "claim_statement": "FL2021-001 changed to Esker Therapeutics and later Alumis.",
-            "claim_scope": "candidate_entity_lineage_claim",
-        },
-        "esk_001_tyk2_inhibitor": {
-            "claim_type": "scientific_asset",
-            "claim_statement": "ESK-001 is associated with TYK2 inhibitor asset lineage.",
-            "claim_scope": "candidate_scientific_asset_claim",
-        },
-        "envudeucitinib_formerly_esk_001": {
-            "claim_type": "asset_lineage",
-            "claim_statement": "Envudeucitinib is associated with the formerly named ESK-001 asset lineage.",
-            "claim_scope": "candidate_asset_lineage_claim",
-        },
-        "alumis_pipeline_current_envudeucitinib": {
-            "claim_type": "asset_lineage",
-            "claim_statement": "Current Alumis pipeline context associates envudeucitinib with ESK-001/TYK2 asset status.",
-            "claim_scope": "candidate_current_pipeline_context_claim",
-        },
-    }
-    return specs.get(key)
-
-
-def _build_claim_node_from_record(case_id: str, index: int, record: dict[str, Any], claim_spec: dict[str, str]) -> dict[str, Any]:
-    support_level = _support_level_from_record(record)
+def _build_claim_node_from_record(case_id: str, index: int, record: dict[str, Any]) -> dict[str, Any]:
+    formula = _formula_from_record(record)
+    support_level = "requires_numeric_verification" if formula else _support_level_from_record(record)
+    claim_type = "derived_numeric_candidate" if formula else _claim_type_from_record(record)
     temporal_scope = record["evidence_time_relation_to_decision_date"]
-    requires_human_review = support_level in {"partially_supported", "conflicting"} or temporal_scope in {"post_decision", "retrospective"}
-    return {
+    requires_human_review = support_level in {"partially_supported", "conflicting", "requires_numeric_verification"} or temporal_scope in {"post_decision", "retrospective"}
+    claim = {
         "claim_id": f"CL-{index:03d}",
         "case_id": case_id,
-        "claim_type": claim_spec["claim_type"],
-        "claim_statement": claim_spec["claim_statement"],
-        "claim_scope": claim_spec["claim_scope"],
+        "claim_type": claim_type,
+        "claim_statement": _claim_statement(claim_type, formula),
+        "claim_scope": _claim_scope(claim_type, formula),
         "temporal_scope": temporal_scope,
         "permitted_use": record["permitted_use"],
         "supporting_evidence_record_ids": [record["evidence_record_id"]],
@@ -250,52 +206,36 @@ def _build_claim_node_from_record(case_id: str, index: int, record: dict[str, An
         "related_source_gap_ids": [],
         "support_level": support_level,
         "certification_status": "pending_verification",
-        "requires_numeric_verification": False,
+        "requires_numeric_verification": bool(formula),
         "requires_human_review": requires_human_review,
         "confidence_preliminary": record["confidence_preliminary"],
-        "downstream_use_warning": _claim_downstream_warning(record),
+        "supporting_source_ids": record.get("source_ids", []),
+        "supporting_raw_evidence_ids": record.get("raw_evidence_ids", []),
+        "source_tiers": record.get("source_tiers", []),
+        "evidence_time_relation_to_decision_date": temporal_scope,
+        "evidence_record_support_status": record["support_status"],
+        "canonical_fact_key": record["canonical_fact_key"],
+        "canonical_fact_type": record["canonical_fact_type"],
+        "downstream_use_warning": _claim_downstream_warning(record, formula),
         "hindsight_leakage_warning": record["hindsight_leakage_warning"],
     }
-
-
-def _build_derived_180m_candidate(case_id: str, index: int, records_by_key: dict[str, dict[str, Any]]) -> dict[str, Any] | None:
-    base = records_by_key.get("base_initial_consideration_60m")
-    milestone_cap = records_by_key.get("milestone_consideration_cap_120m")
-    direct_180 = records_by_key.get("headline_maximum_value_180m")
-    if direct_180 is not None or base is None or milestone_cap is None:
-        return None
-    return {
-        "claim_id": f"CL-{index:03d}",
-        "case_id": case_id,
-        "claim_type": "derived_numeric_candidate",
-        "claim_statement": "Potential maximum consideration requires numeric verification from $60M base consideration plus up to $120M milestone consideration.",
-        "claim_scope": "candidate_derived_numeric_claim",
-        "temporal_scope": "at_decision",
-        "permitted_use": "transaction_terms_verification",
-        "supporting_evidence_record_ids": [base["evidence_record_id"], milestone_cap["evidence_record_id"]],
-        "contradicting_evidence_record_ids": [],
-        "related_source_gap_ids": [],
-        "support_level": "requires_numeric_verification",
-        "certification_status": "pending_verification",
-        "requires_numeric_verification": True,
-        "requires_human_review": True,
-        "confidence_preliminary": "medium",
-        "downstream_use_warning": "Derived numeric candidate only. This is not certified and must not be used as final deal value until M5 numeric verification confirms arithmetic, definitions, and source scope.",
-        "hindsight_leakage_warning": "No hindsight leakage warning: derived only from at-decision transaction-term evidence, but still requires numeric verification before certification.",
-    }
+    if formula:
+        claim["numeric_formula"] = formula
+    return claim
 
 
 def _build_gap_nodes(source_gaps: list[dict[str, Any]]) -> list[dict[str, Any]]:
     gap_nodes = []
     for index, source_gap in enumerate(source_gaps, start=1):
+        affected_claim_types = _affected_claim_types_for_gap(source_gap)
         gap_nodes.append(
             {
                 "gap_node_id": f"GN-{index:03d}",
                 "source_gap_id": source_gap["source_gap_id"],
                 "missing_source_need_id": source_gap["missing_source_need_id"],
-                "gap_statement": source_gap["missing_source_description"],
-                "affected_claim_types": _affected_claim_types_for_gap(source_gap),
-                "downstream_risk": source_gap["downstream_risk"],
+                "gap_statement": _generic_gap_statement(source_gap, affected_claim_types),
+                "affected_claim_types": affected_claim_types,
+                "downstream_risk": "Downstream use remains blocked until the missing source need is repaired with source-bounded evidence.",
                 "recommended_repair_target": source_gap["recommended_repair_target"],
             }
         )
@@ -303,24 +243,30 @@ def _build_gap_nodes(source_gaps: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def _build_gap_claim_node(case_id: str, index: int, gap_node: dict[str, Any]) -> dict[str, Any]:
-    claim_type, claim_statement, support_level = _gap_claim_spec(gap_node)
+    claim_type = gap_node["affected_claim_types"][0] if gap_node["affected_claim_types"] else "source_gap_claim"
+    if claim_type not in CLAIM_TYPES:
+        claim_type = "source_gap_claim"
     return {
         "claim_id": f"CL-{index:03d}",
         "case_id": case_id,
         "claim_type": claim_type,
-        "claim_statement": claim_statement,
+        "claim_statement": f"Source gap blocks support for a {claim_type} claim area in this buyer-side acquisition case.",
         "claim_scope": "candidate_source_gap_claim",
         "temporal_scope": "source_gap",
         "permitted_use": "gap_tracking",
         "supporting_evidence_record_ids": [],
         "contradicting_evidence_record_ids": [],
         "related_source_gap_ids": [gap_node["source_gap_id"]],
-        "support_level": support_level,
+        "support_level": "gap_only",
         "certification_status": "failed_precheck",
         "requires_numeric_verification": False,
         "requires_human_review": True,
         "confidence_preliminary": "low",
-        "downstream_use_warning": "Gap-only candidate claim. Do not use as a report assertion until M2 source retrieval repair supplies authoritative evidence and later stages verify it.",
+        "supporting_source_ids": [],
+        "supporting_raw_evidence_ids": [],
+        "source_tiers": [],
+        "evidence_time_relation_to_decision_date": "source_gap",
+        "downstream_use_warning": "Gap-only candidate claim. Do not use as a report assertion until source retrieval repair supplies authoritative evidence and later stages verify it.",
         "hindsight_leakage_warning": "Source gap only: no evidence timing is available; do not treat this as source-supported evidence.",
     }
 
@@ -355,9 +301,37 @@ def _build_graph_quality_summary(claim_nodes: list[dict[str, Any]], evidence_edg
         "notes_for_next_stage": [
             "All M4 claim nodes are uncertified, pending verification, failed precheck, or not applicable; M4 does not certify claims.",
             "M5 must carry forward temporal and hindsight controls before any certification or report use.",
-            "Gap-only claims must remain blocked until M2_source_retrieval repairs the missing authoritative sources.",
+            "Gap-only claims must remain blocked until source retrieval repairs the missing authoritative sources.",
+            "Numeric verification is only required when an evidence record supplies an explicit formula.",
         ],
     }
+
+
+def _claim_type_from_record(record: dict[str, Any]) -> str:
+    claim_type = _safe_key(str(record.get("canonical_fact_type") or record.get("evidence_category") or "generic_fact"))
+    return claim_type if claim_type in CLAIM_TYPES else "generic_fact"
+
+
+def _claim_statement(claim_type: str, formula: dict[str, Any] | None) -> str:
+    if formula:
+        return "Source-bounded evidence provides an explicit numeric formula requiring arithmetic verification for this buyer-side acquisition case."
+    return f"Source-bounded evidence supports a {claim_type} fact for this buyer-side acquisition case."
+
+
+def _claim_scope(claim_type: str, formula: dict[str, Any] | None) -> str:
+    if formula:
+        return "candidate_numeric_formula_claim"
+    return f"candidate_{claim_type}_claim"
+
+
+def _formula_from_record(record: dict[str, Any]) -> dict[str, Any] | None:
+    attributes = record.get("structured_attributes") or {}
+    formula = attributes.get("numeric_formula") or attributes.get("calculation_formula") or attributes.get("formula")
+    if isinstance(formula, str) and formula.strip():
+        return {"expression": formula.strip()}
+    if isinstance(formula, dict) and isinstance(formula.get("expression"), str) and formula["expression"].strip():
+        return formula
+    return None
 
 
 def _support_level_from_record(record: dict[str, Any]) -> str:
@@ -372,40 +346,42 @@ def _support_level_from_record(record: dict[str, Any]) -> str:
     return "unsupported"
 
 
-def _claim_downstream_warning(record: dict[str, Any]) -> str:
+def _claim_downstream_warning(record: dict[str, Any], formula: dict[str, Any] | None) -> str:
     base = "Candidate claim only. M4 maps evidence but does not certify, recommend, value, or generate report assertions."
+    if formula:
+        base = f"{base} Numeric formula must be replayed by M5 before certification."
     return f"{base} {record['downstream_use_warning']} {record['hindsight_leakage_warning']}"
 
 
 def _affected_claim_types_for_gap(source_gap: dict[str, Any]) -> list[str]:
-    affected_fact_types = set(source_gap.get("affected_fact_types", []))
-    if "pre_sale_cap_table_gap" in affected_fact_types:
-        return ["cap_table"]
-    if {"founder_role", "vp_chemistry_role", "director_status", "shareholding_2017"}.intersection(affected_fact_types):
-        return ["ownership_or_founder_background"]
-    if "personal_proceeds_not_verified" in affected_fact_types:
-        return ["personal_proceeds"]
-    if "patent_record" in affected_fact_types:
-        return ["source_gap_claim", "scientific_asset", "asset_lineage"]
-    return ["source_gap_claim"]
+    claim_types = []
+    for fact_type in source_gap.get("affected_fact_types", []):
+        mapped = _claim_type_from_gap_fact(str(fact_type))
+        if mapped not in claim_types:
+            claim_types.append(mapped)
+    return claim_types or ["source_gap_claim"]
 
 
-def _gap_claim_spec(gap_node: dict[str, Any]) -> tuple[str, str, str]:
-    statement = gap_node["gap_statement"]
-    affected_claim_types = gap_node["affected_claim_types"]
-    if "ownership_or_founder_background" in affected_claim_types:
-        return (
-            "ownership_or_founder_background",
-            "Bohan Jin role and 2017 11.12% shareholding remain source-gap dependent.",
-            "gap_only",
-        )
-    if "personal_proceeds" in affected_claim_types:
-        return "personal_proceeds", "Bohan Jin personal realized proceeds remain unsupported.", "unsupported"
-    if "cap_table" in affected_claim_types:
-        return "cap_table", "Immediate pre-sale cap table remains unsupported.", "unsupported"
-    if "patent" in statement.lower() or "scientific_asset" in affected_claim_types:
-        return "source_gap_claim", "Official patent-office verification remains source-gap dependent.", "gap_only"
-    return "source_gap_claim", f"Source gap remains unresolved: {statement}", "gap_only"
+def _claim_type_from_gap_fact(fact_type: str) -> str:
+    normalized = _safe_key(fact_type)
+    text = normalized.replace("_", " ")
+    if normalized in CLAIM_TYPES:
+        return normalized
+    if any(term in text for term in ("ownership", "shareholding", "governance", "founder", "director", "proceeds", "cap table")):
+        return "ownership_or_governance"
+    if any(term in text for term in ("patent", "intellectual", "ip", "asset", "chemistry")):
+        return "intellectual_property"
+    if any(term in text for term in ("clinical", "regulatory", "approval", "trial")):
+        return "regulatory_or_clinical"
+    if any(term in text for term in ("consideration", "payment", "value", "price")):
+        return "transaction_consideration"
+    return "source_gap_claim"
+
+
+def _generic_gap_statement(source_gap: dict[str, Any], affected_claim_types: list[str]) -> str:
+    need_id = source_gap.get("missing_source_need_id", "unknown_source_need")
+    affected = ", ".join(affected_claim_types) if affected_claim_types else "source_gap_claim"
+    return f"Unresolved source gap for {need_id}; affected generic claim area(s): {affected}."
 
 
 def _edge_type_from_claim(claim: dict[str, Any]) -> str:
@@ -447,7 +423,7 @@ def _temporal_alignment(record: dict[str, Any]) -> str:
 
 def _edge_notes(claim: dict[str, Any], record: dict[str, Any], edge_type: str) -> str:
     if edge_type == "requires_verification":
-        return "Evidence record contributes to a derived numeric candidate only; later numeric verification is required."
+        return "Evidence record provides an explicit numeric formula; later numeric verification is required."
     return f"Maps candidate claim to evidence record {record['canonical_fact_key']} with temporal scope {claim['temporal_scope']}."
 
 
@@ -535,6 +511,19 @@ def _validate_graph_quality_summary(summary: dict[str, Any]) -> None:
     missing = sorted(field for field in required_fields if field not in summary)
     if missing:
         raise ClaimEvidenceGraphError(f"Missing graph_quality_summary field(s): {', '.join(missing)}")
+
+
+def _safe_key(value: str) -> str:
+    normalized = []
+    previous_was_separator = False
+    for character in value.lower():
+        if character.isalnum():
+            normalized.append(character)
+            previous_was_separator = False
+        elif not previous_was_separator:
+            normalized.append("_")
+            previous_was_separator = True
+    return "".join(normalized).strip("_") or "generic_fact"
 
 
 def _now_utc_iso() -> str:

@@ -55,11 +55,11 @@ class V3LiteM4ClaimEvidenceGraphTest(unittest.TestCase):
         graph = self._run_graph("m4_gap_nodes")
         gap_statements = {gap["gap_statement"] for gap in graph["gap_nodes"]}
 
-        self.assertEqual(len(graph["gap_nodes"]), 4)
-        self.assertIn("Haisco / CNINFO / SZSE disclosure for Bohan Jin role and 2017 11.12% shareholding", gap_statements)
-        self.assertIn("Official patent-office records for TYK2 inhibitor chemistry", gap_statements)
-        self.assertIn("Direct source on Bohan Jin personal realized proceeds", gap_statements)
-        self.assertIn("Immediately pre-2021 FronThera cap table source", gap_statements)
+        self.assertTrue(graph["gap_nodes"])
+        self.assertTrue(all("Unresolved source gap" in statement for statement in gap_statements))
+        self.assertTrue(all("affected generic claim area" in statement for statement in gap_statements))
+        forbidden_markers = ("FronThera", "Bohan", "TYK2", "Alumis", "Esker", "11.12", "$60M", "$120M", "$180M")
+        self.assertFalse(any(marker in json.dumps(graph["gap_nodes"]) for marker in forbidden_markers))
 
     def test_gap_only_claims_do_not_get_supporting_evidence(self) -> None:
         graph = self._run_graph("m4_gap_claims")
@@ -80,37 +80,33 @@ class V3LiteM4ClaimEvidenceGraphTest(unittest.TestCase):
             self.assertIn(edge["claim_id"], claim_ids)
             self.assertIn(edge["evidence_record_id"], evidence_record_ids)
 
-    def test_180m_derived_candidate_requires_numeric_verification(self) -> None:
-        graph = self._run_graph("m4_180")
+    def test_numeric_claims_are_not_inferred_without_explicit_formula(self) -> None:
+        graph = self._run_graph("m4_numeric_not_inferred")
         derived_claims = [claim for claim in graph["claim_nodes"] if claim["claim_type"] == "derived_numeric_candidate"]
 
-        self.assertEqual(len(derived_claims), 1)
-        claim = derived_claims[0]
-        self.assertIn("$60M", claim["claim_statement"])
-        self.assertIn("$120M", claim["claim_statement"])
-        self.assertEqual(claim["support_level"], "requires_numeric_verification")
-        self.assertTrue(claim["requires_numeric_verification"])
-        self.assertEqual(claim["certification_status"], "pending_verification")
-        self.assertNotEqual(claim["support_level"], "source_supported")
-        self.assertIn("not certified", claim["downstream_use_warning"])
-        self.assertIn("M5 numeric verification", claim["downstream_use_warning"])
+        self.assertEqual(derived_claims, [])
+        self.assertTrue(all(not claim["requires_numeric_verification"] for claim in graph["claim_nodes"]))
 
-    def test_bohan_jin_personal_proceeds_remains_unsupported(self) -> None:
-        graph = self._run_graph("m4_personal_proceeds")
-        personal_claims = [claim for claim in graph["claim_nodes"] if claim["claim_type"] == "personal_proceeds"]
+    def test_source_gap_claims_are_generic_and_unsupported_by_evidence(self) -> None:
+        graph = self._run_graph("m4_generic_gap_claims")
+        gap_claims = [claim for claim in graph["claim_nodes"] if claim["related_source_gap_ids"]]
 
-        self.assertEqual(len(personal_claims), 1)
-        self.assertEqual(personal_claims[0]["support_level"], "unsupported")
-        self.assertFalse(personal_claims[0]["supporting_evidence_record_ids"])
+        self.assertTrue(gap_claims)
+        self.assertTrue(all(claim["support_level"] == "gap_only" for claim in gap_claims))
+        self.assertTrue(all(not claim["supporting_evidence_record_ids"] for claim in gap_claims))
+        self.assertTrue(all("Source gap blocks support" in claim["claim_statement"] for claim in gap_claims))
 
-    def test_pre_sale_cap_table_remains_unsupported(self) -> None:
-        graph = self._run_graph("m4_cap_table")
-        cap_table_claims = [claim for claim in graph["claim_nodes"] if claim["claim_type"] == "cap_table"]
+    def test_claim_text_is_generic_and_lineage_is_preserved(self) -> None:
+        graph = self._run_graph("m4_generic_claim_text")
+        source_supported_claims = [claim for claim in graph["claim_nodes"] if claim["supporting_evidence_record_ids"]]
+        forbidden_markers = ("FronThera", "Bohan", "TYK2", "Alumis", "Esker", "11.12", "$60M", "$120M", "$180M")
 
-        self.assertEqual(len(cap_table_claims), 1)
-        self.assertEqual(cap_table_claims[0]["claim_statement"], "Immediate pre-sale cap table remains unsupported.")
-        self.assertEqual(cap_table_claims[0]["support_level"], "unsupported")
-        self.assertFalse(cap_table_claims[0]["supporting_evidence_record_ids"])
+        self.assertTrue(source_supported_claims)
+        self.assertTrue(all(claim["canonical_fact_type"] for claim in source_supported_claims))
+        self.assertTrue(all(claim["claim_type"] in {claim["canonical_fact_type"], "generic_fact"} for claim in source_supported_claims))
+        self.assertTrue(all(claim["supporting_source_ids"] for claim in source_supported_claims))
+        self.assertTrue(all(claim["supporting_raw_evidence_ids"] for claim in source_supported_claims))
+        self.assertFalse(any(marker in json.dumps(graph["claim_nodes"]) for marker in forbidden_markers))
 
     def test_post_decision_and_retrospective_claims_are_not_ex_ante(self) -> None:
         graph = self._run_graph("m4_temporal")
