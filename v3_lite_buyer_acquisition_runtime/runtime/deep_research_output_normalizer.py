@@ -21,7 +21,7 @@ PERMITTED_USES = {
     "source_lead_only",
     "gap_tracking",
 }
-FORBIDDEN_EVIDENCE_MARKERS = ("case_seed", "mandate notes", "bohan pdf", "model memory")
+FORBIDDEN_EVIDENCE_MARKERS = ("case_seed", "mandate notes", "user-provided notes", "model memory")
 TIER_4_NON_AUTHORITATIVE_MARKERS = (
     "model-generated research summary",
     "deep research summary",
@@ -91,7 +91,7 @@ def normalize_deep_research_output(
                 _failed_entries_from_unresolved_item(
                     evidence_item,
                     source_discovery_plan,
-                    "Deep Research evidence referenced forbidden non-source material such as case_seed, mandate notes, Bohan PDF, or model memory.",
+                    "Deep Research evidence referenced forbidden non-source material such as case_seed, mandate notes, user-provided notes, or model memory.",
                 )
             )
             continue
@@ -318,9 +318,6 @@ def _normalize_related_ids(
     )
     if mapped:
         return mapped
-    fact_target_need_ids = _fact_target_ids(fact_type, "need_ids")
-    if fact_target_need_ids:
-        return fact_target_need_ids
     return _infer_source_need_ids_from_text(_source_context_text(source_or_item), source_discovery_plan)
 
 
@@ -349,26 +346,77 @@ def _fact_target_value(fact_type: str, field: str) -> str | None:
 
 def _infer_source_need_ids_from_text(text: str, source_discovery_plan: dict[str, Any]) -> list[str]:
     normalized_text = text.lower()
-    matches: list[str] = []
+    scored_matches: list[tuple[int, str]] = []
     for need in source_discovery_plan["source_needs"]:
-        target_text = need["target_fact_or_question"].lower()
-        if any(token in normalized_text for token in _keywords_for_need(need["source_need_id"], target_text)):
-            matches.append(need["source_need_id"])
-    return sorted(set(matches))
+        tokens = _keywords_for_need(need)
+        score = sum(1 for token in tokens if token in normalized_text)
+        if score:
+            scored_matches.append((score, need["source_need_id"]))
+    if not scored_matches:
+        return []
+    best_score = max(score for score, _ in scored_matches)
+    return sorted({need_id for score, need_id in scored_matches if score == best_score})
 
 
-def _keywords_for_need(source_need_id: str, target_text: str) -> tuple[str, ...]:
-    presets = {
-        "SN-001": ("agreement", "march 5, 2021", "stock purchase agreement", "transaction"),
-        "SN-002": ("$60", "$120", "$180", "consideration", "milestone", "headline value"),
-        "SN-003": ("2022", "2024", "$37", "$23", "milestone payment"),
-        "SN-004": ("fl2021-001", "esker", "alumis", "entity history", "name history"),
-        "SN-005": ("bohan jin", "11.12%", "director", "vp chemistry", "haisco"),
-        "SN-006": ("patent", "tyk2", "patent-office", "chemistry"),
-        "SN-007": ("esk-001", "envudeucitinib", "pipeline", "clinical"),
-        "SN-008": ("personal proceeds", "cap table", "pre-sale", "founder economics"),
+def _keywords_for_need(need: dict[str, Any]) -> tuple[str, ...]:
+    target_text = " ".join(
+        str(part)
+        for part in (
+            need.get("purpose", ""),
+            need.get("target_fact_or_question", ""),
+            " ".join(need.get("preferred_source_types", [])),
+        )
+        if part
+    )
+    return tuple(_generic_tokens(target_text))
+
+
+def _generic_tokens(text: str) -> list[str]:
+    stopwords = {
+        "about",
+        "against",
+        "authoritative",
+        "before",
+        "buyer",
+        "candidate",
+        "company",
+        "direct",
+        "evidence",
+        "fact",
+        "filing",
+        "known",
+        "locate",
+        "official",
+        "question",
+        "source",
+        "sources",
+        "target",
+        "transaction",
+        "without",
     }
-    return presets.get(source_need_id, tuple(token for token in target_text.split() if len(token) > 4))
+    tokens = []
+    current = ""
+    for character in text.lower():
+        if character.isalnum() or character in {"-", "_", "$", "%"}:
+            current += character
+        else:
+            if len(current) >= 5 and current not in stopwords:
+                tokens.append(current)
+            current = ""
+    if len(current) >= 5 and current not in stopwords:
+        tokens.append(current)
+    return _ordered_unique(tokens)[:16]
+
+
+def _ordered_unique(values: list[str]) -> list[str]:
+    seen = set()
+    ordered = []
+    for value in values:
+        if value in seen:
+            continue
+        seen.add(value)
+        ordered.append(value)
+    return ordered
 
 
 def _classify_source_tier(source: dict[str, Any]) -> str:

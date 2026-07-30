@@ -12,25 +12,60 @@ class RawEvidenceExtractionError(ValueError):
 
 
 EVIDENCE_TARGETS = [
-    {"category": "transaction_terms", "fact_type": "sale_timing", "anchors": ["march 2021", "fronthera"], "need_ids": ["SN-001"], "workstream_ids": ["WS-001"], "requirement_ids": ["ER-001"], "verification_ids": ["VT-001", "VT-002"]},
-    {"category": "transaction_terms", "fact_type": "stock_purchase_agreement_date", "anchors": ["stock purchase agreement", "march 5, 2021"], "need_ids": ["SN-001"], "workstream_ids": ["WS-001", "WS-005"], "requirement_ids": ["ER-001", "ER-006"], "verification_ids": ["VT-001", "VT-002", "VT-003"]},
-    {"category": "transaction_economics", "fact_type": "base_initial_consideration", "anchors": ["$60", "base initial consideration"], "need_ids": ["SN-002"], "workstream_ids": ["WS-005", "WS-006"], "requirement_ids": ["ER-001", "ER-006"], "verification_ids": ["VT-001", "VT-003"]},
-    {"category": "transaction_economics", "fact_type": "milestone_consideration_cap", "anchors": ["$120", "milestone consideration"], "anchor_groups": [["$120m", "milestone consideration"], ["$120,000,000", "total milestone payment amount"], ["up to an aggregate of $120", "contingent consideration"]], "need_ids": ["SN-002"], "workstream_ids": ["WS-005", "WS-006"], "requirement_ids": ["ER-001", "ER-006"], "verification_ids": ["VT-001", "VT-003"]},
-    {"category": "transaction_economics", "fact_type": "headline_maximum_value", "anchors": ["$180", "maximum aggregate"], "need_ids": ["SN-002"], "workstream_ids": ["WS-005", "WS-006"], "requirement_ids": ["ER-001", "ER-006"], "verification_ids": ["VT-001", "VT-003"]},
-    {"category": "milestone_economics", "fact_type": "milestone_payment_2022", "anchors": ["$37", "2022", "milestone"], "need_ids": ["SN-003"], "workstream_ids": ["WS-006"], "requirement_ids": ["ER-002", "ER-006"], "verification_ids": ["VT-001", "VT-002"]},
-    {"category": "milestone_economics", "fact_type": "milestone_payment_2024", "anchors": ["$23", "2024", "milestone"], "anchor_groups": [["$23.0 million", "2024", "milestone"], ["$23 million", "2024", "milestone"]], "need_ids": ["SN-003"], "workstream_ids": ["WS-006"], "requirement_ids": ["ER-002", "ER-006"], "verification_ids": ["VT-001", "VT-002"]},
-    {"category": "buyer_identity", "fact_type": "entity_lineage", "anchors": ["fl2021-001", "esker", "alumis"], "need_ids": ["SN-004"], "workstream_ids": ["WS-001", "WS-003"], "requirement_ids": ["ER-002"], "verification_ids": ["VT-005"]},
-    {"category": "founder_background", "fact_type": "founder_role", "anchors": ["bohan jin", "co-founder"], "need_ids": ["SN-005"], "workstream_ids": ["WS-004"], "requirement_ids": ["ER-003", "ER-007"], "verification_ids": ["VT-004", "VT-007"]},
-    {"category": "founder_background", "fact_type": "vp_chemistry_role", "anchors": ["bohan jin", "vp chemistry"], "need_ids": ["SN-005"], "workstream_ids": ["WS-004"], "requirement_ids": ["ER-003", "ER-007"], "verification_ids": ["VT-004", "VT-007"]},
-    {"category": "founder_background", "fact_type": "director_status", "anchors": ["bohan jin", "director"], "need_ids": ["SN-005"], "workstream_ids": ["WS-004"], "requirement_ids": ["ER-003", "ER-007"], "verification_ids": ["VT-004", "VT-007"]},
-    {"category": "ownership_governance", "fact_type": "shareholding_2017", "anchors": ["bohan jin", "11.12%", "2017"], "need_ids": ["SN-005", "SN-008"], "workstream_ids": ["WS-004"], "requirement_ids": ["ER-003", "ER-007"], "verification_ids": ["VT-004", "VT-007"]},
-    {"category": "source_uncertainty", "fact_type": "personal_proceeds_not_verified", "anchors": ["personal realized proceeds", "not verified"], "need_ids": ["SN-008"], "workstream_ids": ["WS-004", "WS-009"], "requirement_ids": ["ER-007"], "verification_ids": ["VT-004", "VT-007"]},
-    {"category": "source_uncertainty", "fact_type": "pre_sale_cap_table_gap", "anchors": ["cap table", "source gap"], "need_ids": ["SN-008"], "workstream_ids": ["WS-004", "WS-009"], "requirement_ids": ["ER-003", "ER-007"], "verification_ids": ["VT-004", "VT-007"]},
-    {"category": "scientific_asset", "fact_type": "tyk2_inhibitor_chemistry", "anchors": ["tyk2", "inhibitor"], "need_ids": ["SN-006", "SN-007"], "workstream_ids": ["WS-002", "WS-003"], "requirement_ids": ["ER-004", "ER-005"], "verification_ids": ["VT-006"]},
-    {"category": "asset_lineage", "fact_type": "esk_001_asset_lineage", "anchors": ["esk-001"], "need_ids": ["SN-006", "SN-007"], "workstream_ids": ["WS-003"], "requirement_ids": ["ER-005"], "verification_ids": ["VT-006"]},
-    {"category": "asset_lineage", "fact_type": "envudeucitinib_asset_lineage", "anchors": ["envudeucitinib"], "need_ids": ["SN-006", "SN-007"], "workstream_ids": ["WS-003"], "requirement_ids": ["ER-005"], "verification_ids": ["VT-006"]},
-    {"category": "ip_evidence", "fact_type": "patent_record", "anchors": ["patent", "tyk2"], "need_ids": ["SN-006"], "workstream_ids": ["WS-002", "WS-003", "WS-004"], "requirement_ids": ["ER-004", "ER-005"], "verification_ids": ["VT-006"], "required_source_type_markers": ["patent"]},
+    {"category": "transaction", "fact_type": "transaction_background"},
+    {"category": "transaction", "fact_type": "transaction_timing"},
+    {"category": "transaction", "fact_type": "transaction_document_date"},
+    {"category": "transaction", "fact_type": "transaction_parties"},
+    {"category": "transaction", "fact_type": "transaction_consideration"},
+    {"category": "transaction", "fact_type": "contingent_consideration"},
+    {"category": "transaction", "fact_type": "milestone_payment"},
+    {"category": "transaction", "fact_type": "financing_or_payment_mechanics"},
+    {"category": "identity", "fact_type": "entity_identity"},
+    {"category": "identity", "fact_type": "entity_lineage"},
+    {"category": "identity", "fact_type": "asset_or_product_identity"},
+    {"category": "governance", "fact_type": "ownership_or_governance"},
+    {"category": "governance", "fact_type": "management_or_key_person"},
+    {"category": "diligence", "fact_type": "intellectual_property"},
+    {"category": "diligence", "fact_type": "regulatory_or_clinical"},
+    {"category": "financial", "fact_type": "financial_performance"},
+    {"category": "financial", "fact_type": "valuation_input"},
+    {"category": "strategy", "fact_type": "synergy_or_value_creation"},
+    {"category": "market", "fact_type": "market_or_competitive_position"},
+    {"category": "risk", "fact_type": "legal_or_regulatory_risk"},
+    {"category": "risk", "fact_type": "integration_or_operational_risk"},
+    {"category": "source_uncertainty", "fact_type": "source_gap"},
+    {"category": "generic", "fact_type": "generic_fact"},
 ]
+
+STOPWORDS = {
+    "about",
+    "against",
+    "and",
+    "authoritative",
+    "before",
+    "buyer",
+    "case",
+    "company",
+    "direct",
+    "evidence",
+    "fact",
+    "filing",
+    "from",
+    "into",
+    "lead",
+    "materials",
+    "needed",
+    "official",
+    "only",
+    "source",
+    "sources",
+    "supporting",
+    "target",
+    "that",
+    "this",
+    "transaction",
+    "with",
+}
 
 
 def extract_raw_evidence(source_discovery_plan: dict[str, Any], retrieved_sources_manifest: dict[str, Any], manifest_path: Path | None = None) -> dict[str, Any]:
@@ -43,7 +78,7 @@ def extract_raw_evidence(source_discovery_plan: dict[str, Any], retrieved_source
         except SourceRetrievalError as exc:
             raise RawEvidenceExtractionError(str(exc)) from exc
         text = source_path.read_text(encoding="utf-8")
-        items.extend(_extract_items_from_text(text, source, source_path, source_discovery_plan["case_id"], source_ids))
+        items.extend(_extract_items_from_text(text, source, source_path, source_discovery_plan))
 
     raw_evidence = {
         "case_id": source_discovery_plan["case_id"],
@@ -140,63 +175,208 @@ def validate_raw_evidence(raw_evidence: Any, retrieved_sources_manifest: dict[st
                 raise RawEvidenceExtractionError(f"Post-decision evidence cannot be labeled ex_ante_deal_evaluation without a hindsight caveat: {item['evidence_id']}")
 
 
-def _extract_items_from_text(text: str, source: dict[str, Any], source_path: Path, case_id: str, source_ids: set[str]) -> list[dict[str, Any]]:
+def _extract_items_from_text(text: str, source: dict[str, Any], source_path: Path, source_discovery_plan: dict[str, Any]) -> list[dict[str, Any]]:
     lower = text.lower()
     items = []
-    for target in EVIDENCE_TARGETS:
-        if not _source_type_allowed_for_target(source, target):
+    for target in _derived_evidence_targets(source_discovery_plan, source):
+        anchor = _best_anchor(lower, target["keywords"])
+        if anchor is None:
             continue
-        anchors = _matching_anchors(lower, target)
-        if anchors is None:
-            continue
-        if all(anchor.lower() in lower for anchor in anchors):
-            snippet, location = _bounded_snippet(text, anchors[0], source_path)
-            items.append(
-                {
-                    "evidence_id": f"RE-{len(items) + 1:03d}-{source['source_id']}",
-                    "case_id": case_id,
-                    "source_id": source["source_id"],
-                    "source_title": source["title"],
-                    "source_url_or_file": source["url_or_file"],
-                    "source_type": source["source_type"],
-                    "source_tier": source["source_tier"],
-                    "retrieval_date": source["retrieval_date"],
-                    "extraction_location": location,
-                    "extracted_text_or_summary": snippet,
-                    "extraction_mode": _extraction_mode(snippet, anchors),
-                    "related_source_need_ids": target["need_ids"],
-                    "related_workstream_ids": target["workstream_ids"],
-                    "related_evidence_requirement_ids": target["requirement_ids"],
-                    "related_verification_target_ids": target["verification_ids"],
-                    "evidence_category": target["category"],
-                    "raw_fact_type": target["fact_type"],
-                    "confidence_preliminary": "medium" if source["source_tier"] in {"Tier 1", "Tier 2"} else "low",
-                    "source_is_authoritative": source["source_tier"] in {"Tier 1", "Tier 2"},
-                    "case_seed_only": False,
-                    "extraction_notes": "Deterministic bounded extraction from retrieved source manifest source; not normalized, certified, or analyzed.",
-                    "downstream_use_warning": "Raw evidence only. Do not use as a certified claim, valuation conclusion, recommendation, or final-report assertion until later validation and certification stages.",
-                    "evidence_time_relation_to_decision_date": source["source_time_relation_to_decision_date"],
-                    "permitted_use": source["permitted_use"],
-                    "hindsight_leakage_warning": _hindsight_leakage_warning(source),
-                }
-            )
+        snippet, location = _bounded_snippet(text, anchor, source_path)
+        items.append(
+            {
+                "evidence_id": f"RE-{len(items) + 1:03d}-{source['source_id']}",
+                "case_id": source_discovery_plan["case_id"],
+                "source_id": source["source_id"],
+                "source_title": source["title"],
+                "source_url_or_file": source["url_or_file"],
+                "source_type": source["source_type"],
+                "source_tier": source["source_tier"],
+                "retrieval_date": source["retrieval_date"],
+                "extraction_location": location,
+                "extracted_text_or_summary": snippet,
+                "extraction_mode": _extraction_mode(snippet, [anchor]),
+                "related_source_need_ids": target["need_ids"],
+                "related_workstream_ids": target["workstream_ids"],
+                "related_evidence_requirement_ids": target["requirement_ids"],
+                "related_verification_target_ids": target["verification_ids"],
+                "evidence_category": target["category"],
+                "raw_fact_type": target["fact_type"],
+                "confidence_preliminary": "medium" if source["source_tier"] in {"Tier 1", "Tier 2"} else "low",
+                "source_is_authoritative": source["source_tier"] in {"Tier 1", "Tier 2"},
+                "case_seed_only": False,
+                "extraction_notes": "Deterministic bounded extraction from retrieved source manifest source and generic source-discovery target; not normalized, certified, or analyzed.",
+                "downstream_use_warning": "Raw evidence only. Do not use as a certified claim, valuation conclusion, recommendation, or final-report assertion until later validation and certification stages.",
+                "evidence_time_relation_to_decision_date": source["source_time_relation_to_decision_date"],
+                "permitted_use": source["permitted_use"],
+                "hindsight_leakage_warning": _hindsight_leakage_warning(source),
+            }
+        )
     return items
 
 
-def _matching_anchors(lower_text: str, target: dict[str, Any]) -> list[str] | None:
-    anchor_groups = target.get("anchor_groups") or [target["anchors"]]
-    for anchors in anchor_groups:
-        if all(anchor.lower() in lower_text for anchor in anchors):
-            return anchors
+def _derived_evidence_targets(source_discovery_plan: dict[str, Any], source: dict[str, Any]) -> list[dict[str, Any]]:
+    related_need_ids = set(source.get("related_source_need_ids", []))
+    needs = [need for need in source_discovery_plan["source_needs"] if not related_need_ids or need["source_need_id"] in related_need_ids]
+    targets = []
+    for need in needs:
+        context = _target_context(need, source)
+        fact_type = _classify_fact_type(_need_context(need))
+        category = _category_for_fact_type(fact_type)
+        keywords = _keywords_from_context(context)
+        if not keywords:
+            keywords = _keywords_from_context(_source_context(source))
+        if not keywords:
+            continue
+        targets.append(
+            {
+                "category": category,
+                "fact_type": fact_type,
+                "keywords": keywords,
+                "need_ids": [need["source_need_id"]],
+                "workstream_ids": need.get("related_workstream_ids", []),
+                "requirement_ids": need.get("related_evidence_requirement_ids", []),
+                "verification_ids": need.get("related_verification_target_ids", []),
+            }
+        )
+    return _dedupe_targets(targets)
+
+
+def _target_context(need: dict[str, Any], source: dict[str, Any]) -> str:
+    return " ".join(
+        str(part)
+        for part in (
+            need.get("purpose", ""),
+            need.get("target_fact_or_question", ""),
+            " ".join(need.get("preferred_source_types", [])),
+            _source_context(source),
+        )
+        if part
+    )
+
+
+def _need_context(need: dict[str, Any]) -> str:
+    return " ".join(
+        str(part)
+        for part in (
+            need.get("purpose", ""),
+            need.get("target_fact_or_question", ""),
+            " ".join(need.get("preferred_source_types", [])),
+        )
+        if part
+    )
+
+
+def _source_context(source: dict[str, Any]) -> str:
+    return " ".join(
+        str(source.get(field, ""))
+        for field in ("title", "source_type", "source_owner", "source_date_or_period", "reliability_reason", "use_limitations")
+    )
+
+
+def _classify_fact_type(context: str) -> str:
+    text = context.lower()
+    if any(term in text for term in ("cap table", "seller economics", "ownership", "governance", "shareholder", "shareholding")):
+        return "ownership_or_governance"
+    if any(term in text for term in ("management", "director", "officer", "key person", "founder", "executive")):
+        return "management_or_key_person"
+    if any(term in text for term in ("milestone payment", "earnout payment", "contingent payment")):
+        return "milestone_payment"
+    if any(term in text for term in ("contingent", "earnout", "milestone consideration")):
+        return "contingent_consideration"
+    if any(term in text for term in ("consideration", "purchase price", "deal value", "transaction value", "payment")):
+        return "transaction_consideration"
+    if any(term in text for term in ("financing", "payment mechanics", "funding")):
+        return "financing_or_payment_mechanics"
+    if any(term in text for term in ("agreement date", "document date", "signing date", "effective date")):
+        return "transaction_document_date"
+    if any(term in text for term in ("timing", "closing", "signing", "announcement date", "transaction date")):
+        return "transaction_timing"
+    if any(term in text for term in ("party", "parties", "buyer", "seller", "target company", "acquirer")):
+        return "transaction_parties"
+    if any(term in text for term in ("entity history", "name history", "lineage", "successor", "predecessor")):
+        return "entity_lineage"
+    if any(term in text for term in ("entity identity", "company identity", "corporate identity")):
+        return "entity_identity"
+    if any(term in text for term in ("asset", "product", "pipeline", "program", "drug", "platform")):
+        return "asset_or_product_identity"
+    if any(term in text for term in ("patent", "intellectual property", "ip ", "inventor", "assignee")):
+        return "intellectual_property"
+    if any(term in text for term in ("regulatory", "clinical", "approval", "trial", "compliance")):
+        return "regulatory_or_clinical"
+    if any(term in text for term in ("financial performance", "revenue", "margin", "profit", "ebitda")):
+        return "financial_performance"
+    if any(term in text for term in ("valuation", "return", "multiple", "discount rate")):
+        return "valuation_input"
+    if any(term in text for term in ("synergy", "value creation", "strategic rationale")):
+        return "synergy_or_value_creation"
+    if any(term in text for term in ("market", "competitive", "competitor", "customer")):
+        return "market_or_competitive_position"
+    if any(term in text for term in ("legal", "liability", "lawsuit", "consent", "regulatory risk")):
+        return "legal_or_regulatory_risk"
+    if any(term in text for term in ("integration", "operational", "systems", "transition")):
+        return "integration_or_operational_risk"
+    if any(term in text for term in ("gap", "missing", "unresolved", "not verified")):
+        return "source_gap"
+    if "transaction" in text:
+        return "transaction_background"
+    return "generic_fact"
+
+
+def _category_for_fact_type(fact_type: str) -> str:
+    for target in EVIDENCE_TARGETS:
+        if target["fact_type"] == fact_type:
+            return target["category"]
+    return "generic"
+
+
+def _keywords_from_context(context: str) -> list[str]:
+    tokens = []
+    current = ""
+    for character in context.lower():
+        if character.isalnum() or character in {"$", "%", "-", "_"}:
+            current += character
+        else:
+            if _keyword_is_useful(current):
+                tokens.append(current)
+            current = ""
+    if _keyword_is_useful(current):
+        tokens.append(current)
+    return _ordered_unique(tokens)[:12]
+
+
+def _keyword_is_useful(token: str) -> bool:
+    return len(token) >= 5 and token not in STOPWORDS and not token.startswith(("ws-", "er-", "vt-", "sn-"))
+
+
+def _best_anchor(lower_text: str, keywords: list[str]) -> str | None:
+    for keyword in keywords:
+        if keyword.lower() in lower_text:
+            return keyword
     return None
 
 
-def _source_type_allowed_for_target(source: dict[str, Any], target: dict[str, Any]) -> bool:
-    markers = target.get("required_source_type_markers")
-    if not markers:
-        return True
-    source_text = f"{source['source_type']} {source['source_owner']} {source['title']}".lower()
-    return any(marker.lower() in source_text for marker in markers)
+def _dedupe_targets(targets: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    deduped = []
+    seen = set()
+    for target in targets:
+        key = (tuple(target["need_ids"]), target["fact_type"])
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(target)
+    return deduped
+
+
+def _ordered_unique(values: list[str]) -> list[str]:
+    seen = set()
+    ordered = []
+    for value in values:
+        if value in seen:
+            continue
+        seen.add(value)
+        ordered.append(value)
+    return ordered
 
 
 def _bounded_snippet(text: str, anchor: str, source_path: Path) -> tuple[str, dict[str, Any]]:
