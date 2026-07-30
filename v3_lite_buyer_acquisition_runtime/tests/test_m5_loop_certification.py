@@ -76,19 +76,12 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
         self.assertFalse(personal["supporting_evidence_record_ids"])
         self.assertTrue(personal["requires_human_review"])
 
-    def test_180m_runs_numeric_verification_but_is_not_direct_source_quote(self) -> None:
+    def test_numeric_verification_is_not_inferred_without_explicit_formula(self) -> None:
         certification = self._run_certification("m5_numeric")
         numeric_results = certification["numeric_verification_results"]
-        derived = self._claim_certification(certification, "CL-011")
 
-        self.assertEqual(len(numeric_results), 1)
-        numeric = numeric_results[0]
-        self.assertEqual(numeric["related_claim_id"], "CL-011")
-        self.assertEqual(numeric["computed_result"], 180_000_000)
-        self.assertEqual(numeric["verification_status"], "passed_with_caveat")
-        self.assertIn("not a direct source quote", numeric["caveat"])
-        self.assertEqual(derived["certification_status"], "certified_with_caveat")
-        self.assertIn("Arithmetic relationship", derived["certification_basis"])
+        self.assertEqual(numeric_results, [])
+        self.assertTrue(all(cert["numeric_check_status"] == "not_applicable" for cert in certification["claim_certifications"]))
 
     def test_post_decision_evidence_does_not_support_ex_ante_claims(self) -> None:
         certification = self._run_certification("m5_temporal")
