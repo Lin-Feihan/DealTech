@@ -5,8 +5,14 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from v3_lite_buyer_acquisition_runtime.runtime.case_seed_loader import load_case_seed
+from v3_lite_buyer_acquisition_runtime.runtime.mandate_intake import load_mandate
+from v3_lite_buyer_acquisition_runtime.runtime.research_planning import build_research_plan
 from v3_lite_buyer_acquisition_runtime.runtime.claim_certifier import validate_certification_result
 from v3_lite_buyer_acquisition_runtime.runtime.repair_plan_builder import validate_repair_plan, validate_research_gaps
+from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m2 import run_m2_pipeline
+from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m3 import run_m3_pipeline
+from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m4 import run_m4_pipeline
 from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m5 import M5FailClosed, run_m5_pipeline
 
 
@@ -17,8 +23,27 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
         self.root = Path(self.temp_dir.name)
-        self.graph_path = RUNTIME_ROOT / "outputs" / "fronthera_esker_alumis_m4" / "claim_evidence_graph.json"
-        self.repository_path = RUNTIME_ROOT / "outputs" / "fronthera_esker_alumis_m3" / "evidence_repository.json"
+        mandate_path = RUNTIME_ROOT / "examples" / "synthetic_acquisition_mandate.json"
+        case_seed_path = RUNTIME_ROOT / "case_seeds" / "synthetic_acquisition_case_seed.json"
+        research_plan_path = self.root / "research_plan.json"
+        research_plan = build_research_plan(load_mandate(mandate_path))
+        research_plan_path.write_text(json.dumps(research_plan, indent=2), encoding="utf-8")
+        m2_artifacts = run_m2_pipeline(
+            mandate_path=mandate_path,
+            research_plan_path=research_plan_path,
+            case_seed_path=case_seed_path,
+            output_dir=self.root / "m2",
+            retrieval_mode="manual_retrieved_sources",
+            retrieved_sources_manifest_path=RUNTIME_ROOT / "retrieved_sources" / "synthetic_acquisition" / "retrieved_sources_manifest.json",
+        )
+        m3_artifacts = run_m3_pipeline(
+            raw_evidence_path=m2_artifacts["raw_evidence"],
+            retrieved_sources_manifest_path=m2_artifacts["retrieved_sources_manifest"],
+            output_dir=self.root / "m3",
+        )
+        m4_artifacts = run_m4_pipeline(evidence_repository_path=m3_artifacts["evidence_repository"], output_dir=self.root / "m4")
+        self.graph_path = m4_artifacts["claim_evidence_graph"]
+        self.repository_path = m3_artifacts["evidence_repository"]
 
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
@@ -63,14 +88,14 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
         certification = self._run_certification("m5_gap_claims")
         blocked = {claim["claim_id"]: claim for claim in certification["claim_certifications"] if claim["related_source_gap_ids"]}
 
-        self.assertEqual(blocked["CL-012"]["certification_status"], "blocked_by_source_gap")
-        self.assertEqual(blocked["CL-013"]["certification_status"], "blocked_by_source_gap")
-        self.assertEqual(blocked["CL-015"]["certification_status"], "blocked_by_source_gap")
-        self.assertNotIn(blocked["CL-012"]["certification_status"], {"certified", "certified_with_caveat"})
+        self.assertEqual(blocked["CL-005"]["certification_status"], "blocked_by_source_gap")
+        self.assertEqual(blocked["CL-006"]["certification_status"], "blocked_by_source_gap")
+        self.assertEqual(blocked["CL-008"]["certification_status"], "blocked_by_source_gap")
+        self.assertNotIn(blocked["CL-005"]["certification_status"], {"certified", "certified_with_caveat"})
 
-    def test_bohan_jin_personal_proceeds_remains_unsupported_or_blocked(self) -> None:
+    def test_personal_proceeds_remains_unsupported_or_blocked(self) -> None:
         certification = self._run_certification("m5_personal_proceeds")
-        personal = self._claim_certification(certification, "CL-014")
+        personal = self._claim_certification(certification, "CL-005")
 
         self.assertIn(personal["certification_status"], {"unsupported", "blocked_by_source_gap"})
         self.assertFalse(personal["supporting_evidence_record_ids"])
@@ -87,9 +112,9 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
         certification = self._run_certification("m5_temporal")
 
         temporal_by_claim = {result["claim_id"]: result for result in certification["temporal_verification_results"]}
-        self.assertEqual(temporal_by_claim["CL-008"]["verification_status"], "passed_with_caveat")
-        self.assertEqual(temporal_by_claim["CL-009"]["verification_status"], "passed_with_caveat")
-        self.assertIn("retrospective validation only", temporal_by_claim["CL-008"]["caveat"])
+        self.assertEqual(temporal_by_claim["CL-001"]["verification_status"], "passed_with_caveat")
+        self.assertEqual(temporal_by_claim["CL-003"]["verification_status"], "passed_with_caveat")
+        self.assertIn("retrospective validation only", temporal_by_claim["CL-003"]["caveat"])
 
     def test_source_gaps_become_research_gaps(self) -> None:
         artifacts = run_m5_pipeline(self.graph_path, self.repository_path, self.root / "m5_gaps")
@@ -99,7 +124,7 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
         self.assertTrue(research_gaps["research_gaps"])
         self.assertTrue(all("Unresolved" in gap["gap_description"] or "not certified" in gap["gap_description"] for gap in research_gaps["research_gaps"]))
         self.assertTrue(all(gap["suggested_source_types"] for gap in research_gaps["research_gaps"]))
-        for marker in ("FronThera", "Bohan", "TYK2", "Alumis", "Esker", "$180M", "11.12"):
+        for marker in ("ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget"):
             self.assertNotIn(marker, descriptions)
 
     def test_repair_plan_points_source_gaps_to_m2_source_retrieval(self) -> None:

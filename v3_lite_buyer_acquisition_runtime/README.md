@@ -8,7 +8,7 @@ Current external Deep Research direction:
 
 - OpenClaw / GPT-5.5 or human-assisted research can act as an external Deep Research executor by saving a structured `deep_research_response.json` package.
 - OpenAI Deep Research API support remains future-ready, but it is not required for current runs and is fail-closed unless explicitly configured.
-- The runtime is not production-ready and still has known limitations, including FronThera-specific planning, claim mapping, numeric verification, and analysis behavior that must be generalized later.
+- The runtime is not production-ready and still has known limitations, including prototype-specific planning, claim mapping, numeric verification, and analysis behavior that must be generalized later.
 
 Current artifact chain:
 
@@ -210,11 +210,11 @@ M5 responsibilities:
 - keep gap-only and unsupported claims uncertified
 - emit research gaps and repair targets for source retrieval or later verification loops
 
-M5 numeric verification confirms arithmetic only. For example, `$60M + $120M = $180M` can be recorded as a derived relationship, but it is not a direct source quote or final deal-value conclusion unless later source repair supplies direct authoritative support or wording preserves the caveat.
+M5 numeric verification confirms arithmetic only. For example, a base consideration amount plus a contingent consideration cap can be recorded as a derived relationship, but it is not a direct source quote or final deal-value conclusion unless later source repair supplies direct authoritative support or wording preserves the caveat.
 
 ## Known Limitations / Next Fixes
 
-1. Remove FronThera-specific hard-code from runtime.
+1. Remove prototype-specific hard-code from runtime.
 2. Generalize canonical facts and claim mapping.
 3. Make numeric verifier formula-driven.
 4. Strengthen citation verifier from provenance check to semantic claim-evidence alignment.

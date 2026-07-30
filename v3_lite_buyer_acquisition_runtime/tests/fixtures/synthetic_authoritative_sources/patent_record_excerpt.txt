@@ -1,0 +1,3 @@
+Official patent database fixture excerpt. This local test fixture represents an authoritative patent database record excerpt; it is not a user narrative note.
+
+Patent record summary: AcquirerCo and TargetCo materials describe ProductX platform intellectual property. The patent record is relevant to asset and IP lineage diligence for ProductX features, inventor records, and assignee continuity.

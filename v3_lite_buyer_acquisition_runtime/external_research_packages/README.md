@@ -16,14 +16,14 @@ The JSON file must follow `../schemas/deep_research_response.schema.json` and in
 
 - `case_id`: must match the mandate, research plan, case seed, and source discovery plan.
 - `provider`, `model`, `response_id`, `completed_at`: provenance for the external executor.
-- `sources[]`: original cited sources only. Do not list case seeds, mandate notes, Bohan PDF notes, model memory, or provider narrative summaries as authoritative evidence sources.
+- `sources[]`: original cited sources only. Do not list case seeds, mandate notes, user narrative notes, model memory, or provider narrative summaries as authoritative evidence sources.
 - `evidence_items[]`: source-bounded evidence only. Every item must reference a known `provider_source_id` from `sources[]`.
 - `unresolved_gaps[]`: source needs the external executor could not resolve.
 - `provider_notes[]`: non-evidentiary notes about method, scope, or limitations.
 
 ## Ingestion Contract
 
-V3-Lite replay mode validates `deep_research_response.json`, rejects source-less evidence, rejects case seed / mandate notes / Bohan PDF / model-memory material as evidence, then writes only:
+V3-Lite replay mode validates `deep_research_response.json`, rejects source-less evidence, rejects case seed / mandate notes / user narrative notes / model-memory material as evidence, then writes only:
 
 ```text
 retrieved_sources_manifest.json
@@ -44,4 +44,3 @@ python3 v3_lite_buyer_acquisition_runtime/runtime/run_v3_lite_m2_deep_research.p
   --mode replay_deep_research_response \
   --replay-response v3_lite_buyer_acquisition_runtime/external_research_packages/<case_id>/deep_research_response.json
 ```
-

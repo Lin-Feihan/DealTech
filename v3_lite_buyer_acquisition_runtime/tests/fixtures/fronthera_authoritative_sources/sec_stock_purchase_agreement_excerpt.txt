@@ -1,3 +1,0 @@
-SEC filing / transaction agreement fixture excerpt. This local test fixture represents an authoritative SEC filing or signed stock purchase agreement excerpt; it is not the Bohan Jin / FronThera case PDF and is not model memory.
-
-The stock purchase agreement dated March 5, 2021 describes the March 2021 sale of FronThera to the acquiring vehicle. The agreement identifies FronThera as the acquired company and FL2021-001 / Esker Therapeutics / Alumis as the buyer-side lineage relevant to the acquisition. The transaction economics include $60M base initial consideration, up to $120M milestone consideration, and $180M maximum aggregate headline value.

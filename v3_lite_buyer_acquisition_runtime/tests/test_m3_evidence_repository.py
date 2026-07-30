@@ -20,9 +20,9 @@ class V3LiteM3EvidenceRepositoryTest(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
         self.root = Path(self.temp_dir.name)
-        self.mandate_path = RUNTIME_ROOT / "examples" / "fronthera_esker_alumis_mandate.json"
-        self.case_seed_path = RUNTIME_ROOT / "case_seeds" / "fronthera_esker_alumis_case_seed.json"
-        self.real_manifest_path = RUNTIME_ROOT / "retrieved_sources" / "fronthera" / "retrieved_sources_manifest.json"
+        self.mandate_path = RUNTIME_ROOT / "examples" / "synthetic_acquisition_mandate.json"
+        self.case_seed_path = RUNTIME_ROOT / "case_seeds" / "synthetic_acquisition_case_seed.json"
+        self.real_manifest_path = RUNTIME_ROOT / "retrieved_sources" / "synthetic_acquisition" / "retrieved_sources_manifest.json"
         self.mandate = load_mandate(self.mandate_path)
         self.case_seed = load_case_seed(self.case_seed_path)
         self.research_plan = build_research_plan(self.mandate)
@@ -72,7 +72,7 @@ class V3LiteM3EvidenceRepositoryTest(unittest.TestCase):
 
         self.assertLess(repository["repository_quality_summary"]["evidence_record_count"], repository["repository_quality_summary"]["raw_evidence_item_count"])
         self.assertGreater(repository["repository_quality_summary"]["duplicate_groups_count"], 0)
-        forbidden_key_markers = ("base_initial", "milestone_consideration_cap", "headline_maximum", "fl2021", "esker", "alumis", "180m")
+        forbidden_key_markers = ("base_initial", "milestone_consideration_cap", "headline_maximum", "180m")
         self.assertFalse(any(any(marker in key for marker in forbidden_key_markers) for key in records_by_key))
         self.assertTrue(any(record["source_count"] > 1 for record in repository["evidence_records"]))
         self.assertTrue(all("structured_attributes" in record for record in repository["evidence_records"]))
@@ -85,7 +85,8 @@ class V3LiteM3EvidenceRepositoryTest(unittest.TestCase):
 
         self.assertEqual(len(repository["source_gaps"]), 4)
         self.assertIn("Missing ownership, governance, cap table, or seller-economics evidence", descriptions)
-        self.assertIn("Missing intellectual-property evidence", descriptions)
+        self.assertIn("Missing clinical, regulatory, or approval evidence", descriptions)
+        self.assertIn("Missing valuation or financial-support evidence", descriptions)
         self.assertNotIn("personal_proceeds_not_verified", record_keys)
         self.assertNotIn("pre_sale_cap_table_gap", record_keys)
         self.assertTrue(all(record["support_status"] != "source_gap" for record in repository["evidence_records"]))
@@ -111,7 +112,7 @@ class V3LiteM3EvidenceRepositoryTest(unittest.TestCase):
             if record["evidence_time_relation_to_decision_date"] in {"post_decision", "retrospective"}:
                 self.assertNotEqual(record["permitted_use"], "ex_ante_deal_evaluation")
 
-    def test_no_180m_fact_is_inferred_without_direct_raw_evidence(self) -> None:
+    def test_no_headline_value_fact_is_inferred_without_direct_raw_evidence(self) -> None:
         m2_artifacts = self._run_real_source_m2("m2_for_m3_no_180")
         raw_evidence = json.loads(m2_artifacts["raw_evidence"].read_text(encoding="utf-8"))
         repository = self._run_m3_from_artifacts(m2_artifacts, "m3_no_180")

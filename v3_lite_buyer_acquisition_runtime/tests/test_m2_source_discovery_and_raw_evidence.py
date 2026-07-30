@@ -21,15 +21,15 @@ class V3LiteM2SourceDiscoveryAndRawEvidenceTest(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
         self.root = Path(self.temp_dir.name)
-        self.mandate_path = RUNTIME_ROOT / "examples" / "fronthera_esker_alumis_mandate.json"
-        self.case_seed_path = RUNTIME_ROOT / "case_seeds" / "fronthera_esker_alumis_case_seed.json"
+        self.mandate_path = RUNTIME_ROOT / "examples" / "synthetic_acquisition_mandate.json"
+        self.case_seed_path = RUNTIME_ROOT / "case_seeds" / "synthetic_acquisition_case_seed.json"
         self.mandate = load_mandate(self.mandate_path)
         self.case_seed = load_case_seed(self.case_seed_path)
         self.research_plan = build_research_plan(self.mandate)
         self.research_plan_path = self.root / "research_plan.json"
         self.research_plan_path.write_text(json.dumps(self.research_plan, indent=2), encoding="utf-8")
         self.source_discovery_plan = build_source_discovery_plan(self.case_seed, self.research_plan)
-        self.fixture_manifest_path = RUNTIME_ROOT / "tests" / "fixtures" / "fronthera_retrieved_sources_manifest.json"
+        self.fixture_manifest_path = RUNTIME_ROOT / "tests" / "fixtures" / "synthetic_retrieved_sources_manifest.json"
 
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
@@ -120,8 +120,8 @@ class V3LiteM2SourceDiscoveryAndRawEvidenceTest(unittest.TestCase):
     def test_manual_manifest_can_preserve_original_url_when_local_cache_is_present(self) -> None:
         manifest = json.loads(self.fixture_manifest_path.read_text(encoding="utf-8"))
         manifest["retrieved_sources"][0]["url_or_file"] = "https://www.sec.gov/example-authoritative-source"
-        fixture_source_dir = RUNTIME_ROOT / "tests" / "fixtures" / "fronthera_authoritative_sources"
-        fixture_cache_dir = self.root / "fronthera_authoritative_sources"
+        fixture_source_dir = RUNTIME_ROOT / "tests" / "fixtures" / "synthetic_authoritative_sources"
+        fixture_cache_dir = self.root / "synthetic_authoritative_sources"
         fixture_cache_dir.mkdir()
         for original_fixture in fixture_source_dir.glob("*.txt"):
             (fixture_cache_dir / original_fixture.name).write_text(original_fixture.read_text(encoding="utf-8"), encoding="utf-8")
@@ -139,7 +139,7 @@ class V3LiteM2SourceDiscoveryAndRawEvidenceTest(unittest.TestCase):
 
         retrieved_manifest = json.loads(artifacts["retrieved_sources_manifest"].read_text(encoding="utf-8"))
         self.assertEqual(retrieved_manifest["retrieved_sources"][0]["url_or_file"], "https://www.sec.gov/example-authoritative-source")
-        self.assertTrue((output_dir / "cache" / "SRC-SEC-SPA-001.txt").exists())
+        self.assertTrue((output_dir / "cache" / "SRC-AGREEMENT-001.txt").exists())
 
     def test_raw_evidence_rejects_unlisted_source_id(self) -> None:
         manifest = load_retrieved_sources_manifest(self.fixture_manifest_path, self.source_discovery_plan)
@@ -178,11 +178,11 @@ class V3LiteM2SourceDiscoveryAndRawEvidenceTest(unittest.TestCase):
         self.assertFalse((output_dir / "evidence_repository.json").exists())
         self.assertFalse((output_dir / "claim_evidence_graph.json").exists())
         self.assertFalse((output_dir / "certification_result.json").exists())
-        self.assertTrue((output_dir / "cache" / "SRC-SEC-SPA-001.txt").exists())
-        self.assertTrue((output_dir / "cache" / "SRC-ALUMIS-10K-001.txt").exists())
-        self.assertTrue((output_dir / "cache" / "SRC-HAISCO-001.txt").exists())
-        self.assertTrue((output_dir / "cache" / "SRC-PATENT-TYK2-001.txt").exists())
-        self.assertTrue((output_dir / "cache" / "SRC-ALUMIS-PIPELINE-001.txt").exists())
+        self.assertTrue((output_dir / "cache" / "SRC-AGREEMENT-001.txt").exists())
+        self.assertTrue((output_dir / "cache" / "SRC-ANNUAL-REPORT-001.txt").exists())
+        self.assertTrue((output_dir / "cache" / "SRC-GOVERNANCE-001.txt").exists())
+        self.assertTrue((output_dir / "cache" / "SRC-PATENT-IP-001.txt").exists())
+        self.assertTrue((output_dir / "cache" / "SRC-PIPELINE-001.txt").exists())
 
         raw_evidence = json.loads(artifacts["raw_evidence"].read_text(encoding="utf-8"))
         raw_fact_types = {item["raw_fact_type"] for item in raw_evidence["raw_evidence_items"]}
@@ -227,10 +227,10 @@ class V3LiteM2SourceDiscoveryAndRawEvidenceTest(unittest.TestCase):
             self.assertTrue(source["source_date_or_period"])
             self.assertIn(source["source_time_relation_to_decision_date"], {"pre_decision", "at_decision", "post_decision", "retrospective", "unknown"})
             self.assertIn(source["permitted_use"], {"ex_ante_deal_evaluation", "transaction_terms_verification", "retrospective_outcome_validation", "source_lead_only", "gap_tracking"})
-        self.assertEqual(manifest_sources_by_id["SRC-SEC-SPA-001"]["source_time_relation_to_decision_date"], "at_decision")
-        self.assertEqual(manifest_sources_by_id["SRC-SEC-SPA-001"]["permitted_use"], "transaction_terms_verification")
-        self.assertEqual(manifest_sources_by_id["SRC-ALUMIS-PIPELINE-001"]["source_time_relation_to_decision_date"], "retrospective")
-        self.assertEqual(manifest_sources_by_id["SRC-ALUMIS-PIPELINE-001"]["permitted_use"], "retrospective_outcome_validation")
+        self.assertEqual(manifest_sources_by_id["SRC-AGREEMENT-001"]["source_time_relation_to_decision_date"], "at_decision")
+        self.assertEqual(manifest_sources_by_id["SRC-AGREEMENT-001"]["permitted_use"], "transaction_terms_verification")
+        self.assertEqual(manifest_sources_by_id["SRC-PIPELINE-001"]["source_time_relation_to_decision_date"], "retrospective")
+        self.assertEqual(manifest_sources_by_id["SRC-PIPELINE-001"]["permitted_use"], "retrospective_outcome_validation")
 
         for item in raw_evidence["raw_evidence_items"]:
             self.assertTrue(item["source_id"])
@@ -251,7 +251,7 @@ class V3LiteM2SourceDiscoveryAndRawEvidenceTest(unittest.TestCase):
                 self.assertNotEqual(item["permitted_use"], "ex_ante_deal_evaluation")
                 self.assertIn("Hindsight leakage warning", item["hindsight_leakage_warning"])
 
-        pipeline_items = [item for item in raw_evidence["raw_evidence_items"] if item["source_id"] == "SRC-ALUMIS-PIPELINE-001"]
+        pipeline_items = [item for item in raw_evidence["raw_evidence_items"] if item["source_id"] == "SRC-PIPELINE-001"]
         self.assertTrue(pipeline_items)
         self.assertTrue(all(item["evidence_time_relation_to_decision_date"] == "retrospective" for item in pipeline_items))
 
@@ -260,7 +260,7 @@ class V3LiteM2SourceDiscoveryAndRawEvidenceTest(unittest.TestCase):
         manifest["retrieved_sources"] = [
             source
             for source in manifest["retrieved_sources"]
-            if source["source_id"] in {"SRC-SEC-SPA-001", "SRC-ALUMIS-PIPELINE-001"}
+            if source["source_id"] in {"SRC-AGREEMENT-001", "SRC-PIPELINE-001"}
         ]
         manifest["failed_source_needs"] = [
             {"source_need_id": "SN-005", "reason": "Ownership and governance source unavailable; do not verify role or shareholding."},
@@ -269,8 +269,8 @@ class V3LiteM2SourceDiscoveryAndRawEvidenceTest(unittest.TestCase):
         ]
         manifest["evidence_coverage_status"] = "partial"
         manifest_path = self._write_manifest(manifest)
-        fixture_source_dir = RUNTIME_ROOT / "tests" / "fixtures" / "fronthera_authoritative_sources"
-        fixture_cache_dir = self.root / "fronthera_authoritative_sources"
+        fixture_source_dir = RUNTIME_ROOT / "tests" / "fixtures" / "synthetic_authoritative_sources"
+        fixture_cache_dir = self.root / "synthetic_authoritative_sources"
         fixture_cache_dir.mkdir()
         for original_fixture in fixture_source_dir.glob("*.txt"):
             (fixture_cache_dir / original_fixture.name).write_text(original_fixture.read_text(encoding="utf-8"), encoding="utf-8")
@@ -318,7 +318,7 @@ class V3LiteM2SourceDiscoveryAndRawEvidenceTest(unittest.TestCase):
         self.assertNotIn("founder_role", fact_types)
         self.assertNotIn("shareholding_2017", fact_types)
         self.assertNotIn("patent_record", fact_types)
-        self.assertFalse(any(item["source_id"] == "SRC-HAISCO-001" for item in raw_evidence["raw_evidence_items"]))
+        self.assertFalse(any(item["source_id"] == "SRC-GOVERNANCE-001" for item in raw_evidence["raw_evidence_items"]))
         self.assertFalse((output_dir / "evidence_repository.json").exists())
         self.assertFalse((output_dir / "claim_evidence_graph.json").exists())
         self.assertFalse((output_dir / "certification_result.json").exists())
@@ -326,7 +326,7 @@ class V3LiteM2SourceDiscoveryAndRawEvidenceTest(unittest.TestCase):
 
     def test_post_decision_raw_evidence_cannot_override_source_permitted_use_to_ex_ante(self) -> None:
         manifest = load_retrieved_sources_manifest(self.fixture_manifest_path, self.source_discovery_plan)
-        item = self._raw_evidence_item(source_id="SRC-ALUMIS-10K-001")
+        item = self._raw_evidence_item(source_id="SRC-ANNUAL-REPORT-001")
         item["evidence_time_relation_to_decision_date"] = "post_decision"
         item["permitted_use"] = "ex_ante_deal_evaluation"
         item["hindsight_leakage_warning"] = "test warning without caveat"

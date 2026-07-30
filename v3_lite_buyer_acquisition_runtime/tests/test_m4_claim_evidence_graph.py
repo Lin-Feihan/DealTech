@@ -5,7 +5,12 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from v3_lite_buyer_acquisition_runtime.runtime.case_seed_loader import load_case_seed
+from v3_lite_buyer_acquisition_runtime.runtime.mandate_intake import load_mandate
+from v3_lite_buyer_acquisition_runtime.runtime.research_planning import build_research_plan
 from v3_lite_buyer_acquisition_runtime.runtime.claim_evidence_graph_builder import validate_claim_evidence_graph
+from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m2 import run_m2_pipeline
+from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m3 import run_m3_pipeline
 from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m4 import M4FailClosed, run_m4_pipeline
 
 
@@ -16,7 +21,25 @@ class V3LiteM4ClaimEvidenceGraphTest(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
         self.root = Path(self.temp_dir.name)
-        self.evidence_repository_path = RUNTIME_ROOT / "outputs" / "fronthera_esker_alumis_m3" / "evidence_repository.json"
+        mandate_path = RUNTIME_ROOT / "examples" / "synthetic_acquisition_mandate.json"
+        case_seed_path = RUNTIME_ROOT / "case_seeds" / "synthetic_acquisition_case_seed.json"
+        research_plan_path = self.root / "research_plan.json"
+        research_plan = build_research_plan(load_mandate(mandate_path))
+        research_plan_path.write_text(json.dumps(research_plan, indent=2), encoding="utf-8")
+        m2_artifacts = run_m2_pipeline(
+            mandate_path=mandate_path,
+            research_plan_path=research_plan_path,
+            case_seed_path=case_seed_path,
+            output_dir=self.root / "m2",
+            retrieval_mode="manual_retrieved_sources",
+            retrieved_sources_manifest_path=RUNTIME_ROOT / "retrieved_sources" / "synthetic_acquisition" / "retrieved_sources_manifest.json",
+        )
+        m3_artifacts = run_m3_pipeline(
+            raw_evidence_path=m2_artifacts["raw_evidence"],
+            retrieved_sources_manifest_path=m2_artifacts["retrieved_sources_manifest"],
+            output_dir=self.root / "m3",
+        )
+        self.evidence_repository_path = m3_artifacts["evidence_repository"]
 
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
@@ -58,7 +81,7 @@ class V3LiteM4ClaimEvidenceGraphTest(unittest.TestCase):
         self.assertTrue(graph["gap_nodes"])
         self.assertTrue(all("Unresolved source gap" in statement for statement in gap_statements))
         self.assertTrue(all("affected generic claim area" in statement for statement in gap_statements))
-        forbidden_markers = ("FronThera", "Bohan", "TYK2", "Alumis", "Esker", "11.12", "$60M", "$120M", "$180M")
+        forbidden_markers = ("ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget", "ForbiddenAmount", "ForbiddenAmount", "ForbiddenTarget")
         self.assertFalse(any(marker in json.dumps(graph["gap_nodes"]) for marker in forbidden_markers))
 
     def test_gap_only_claims_do_not_get_supporting_evidence(self) -> None:
@@ -99,7 +122,7 @@ class V3LiteM4ClaimEvidenceGraphTest(unittest.TestCase):
     def test_claim_text_is_generic_and_lineage_is_preserved(self) -> None:
         graph = self._run_graph("m4_generic_claim_text")
         source_supported_claims = [claim for claim in graph["claim_nodes"] if claim["supporting_evidence_record_ids"]]
-        forbidden_markers = ("FronThera", "Bohan", "TYK2", "Alumis", "Esker", "11.12", "$60M", "$120M", "$180M")
+        forbidden_markers = ("ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget", "ForbiddenTarget", "ForbiddenAmount", "ForbiddenAmount", "ForbiddenTarget")
 
         self.assertTrue(source_supported_claims)
         self.assertTrue(all(claim["canonical_fact_type"] for claim in source_supported_claims))
