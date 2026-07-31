@@ -63,6 +63,13 @@ class V3LiteM6AnalysisPackageTest(unittest.TestCase):
         self.assertEqual(analysis_package["generated_artifact"], "analysis_package.json")
         self.assertEqual(analysis_package["stage"], "M6_evidence_bounded_deal_analysis")
         self.assertTrue(analysis_package["source_bounded"])
+        self.assertIn("consumed_certified_claim_ids", analysis_package)
+        self.assertIn("consumed_caveated_claim_ids", analysis_package)
+        self.assertIn("excluded_claim_ids", analysis_package)
+        self.assertIn("exclusion_reasons", analysis_package)
+        self.assertIn("preserved_caveats", analysis_package)
+        self.assertIn("recommendation_gate_status", analysis_package)
+        self.assertIn("report_gate_status", analysis_package)
 
     def test_invalid_input_fails_closed(self) -> None:
         certification_result = self._load(self.certification_result_path)
@@ -82,10 +89,15 @@ class V3LiteM6AnalysisPackageTest(unittest.TestCase):
 
     def test_repair_required_disallows_recommendation_and_final_report(self) -> None:
         analysis_package = self._run_package("m6_gate")
+        certification_result = self._load(self.certification_result_path)
 
         self.assertEqual(analysis_package["analysis_readiness_status"], "limited_by_repair_required")
         self.assertFalse(analysis_package["recommendation_allowed"])
         self.assertFalse(analysis_package["final_report_allowed"])
+        self.assertEqual(analysis_package["recommendation_allowed"], certification_result["recommendation_gate_summary"]["recommendation_allowed"])
+        self.assertEqual(analysis_package["final_report_allowed"], not bool(certification_result["report_gate_summary"]["report_blocked_claim_ids"]))
+        self.assertEqual(analysis_package["recommendation_gate_status"], "blocked")
+        self.assertEqual(analysis_package["report_gate_status"], "blocked")
         self.assertEqual(analysis_package["next_action"], "run_targeted_source_repair_or_human_review_before_recommendation_or_final_report")
 
     def test_analysis_sections_are_present(self) -> None:
@@ -114,6 +126,7 @@ class V3LiteM6AnalysisPackageTest(unittest.TestCase):
 
     def test_unsupported_and_blocked_claims_are_not_used_as_facts(self) -> None:
         analysis_package = self._run_package("m6_no_blocked_facts")
+        certification_result = self._load(self.certification_result_path)
         fact_sections = [
             section
             for section in analysis_package["analysis_sections"]
@@ -127,9 +140,38 @@ class V3LiteM6AnalysisPackageTest(unittest.TestCase):
         }
 
         self.assertFalse({"CL-005", "CL-006", "CL-007", "CL-008"} & fact_claim_ids)
+        self.assertFalse(set(analysis_package["supporting_claim_ids"]).intersection(certification_result["analysis_gate_summary"]["analysis_blocked_claim_ids"]))
+        for section in fact_sections:
+            self.assertFalse(set(section["supporting_claim_ids"]).intersection(certification_result["analysis_gate_summary"]["analysis_blocked_claim_ids"]))
         gap_section = self._section(analysis_package, "source_gaps_and_human_review")
         self.assertEqual(gap_section["section_status"], "gap_tracking_only")
         self.assertTrue({"CL-005", "CL-006", "CL-007", "CL-008"}.issubset(set(gap_section["excluded_claim_ids"])))
+
+    def test_caveated_claims_preserve_caveats(self) -> None:
+        analysis_package = self._run_package("m6_preserved_caveats")
+        certification_result = self._load(self.certification_result_path)
+        claim_certs = {claim["claim_id"]: claim for claim in certification_result["claim_certifications"]}
+
+        self.assertTrue(analysis_package["consumed_caveated_claim_ids"])
+        preserved_by_claim = {item["claim_id"]: item["caveats"] for item in analysis_package["preserved_caveats"]}
+        for claim_id in analysis_package["consumed_caveated_claim_ids"]:
+            expected = []
+            for field in ("required_caveats", "caveats"):
+                expected.extend(claim_certs[claim_id].get(field, []))
+            self.assertTrue(expected)
+            self.assertEqual(preserved_by_claim[claim_id], list(dict.fromkeys(expected)))
+        fact_sections = [
+            section
+            for section in analysis_package["analysis_sections"]
+            if section["section_id"] not in {"source_gaps_and_human_review", "decision_readiness"}
+        ]
+        found_preserved_finding = False
+        for section in fact_sections:
+            for finding in section["findings"]:
+                if finding["related_claim_ids"][0] in analysis_package["consumed_caveated_claim_ids"]:
+                    self.assertTrue(finding["preserved_caveats"])
+                    found_preserved_finding = True
+        self.assertTrue(found_preserved_finding)
 
     def test_numeric_claims_are_blocked_without_explicit_verified_support(self) -> None:
         analysis_package = self._run_package("m6_numeric_generic")
@@ -173,6 +215,13 @@ class V3LiteM6AnalysisPackageTest(unittest.TestCase):
 
         self.assertFalse((output_dir / "recommendation_decision.json").exists())
         self.assertFalse((output_dir / "final_report.md").exists())
+
+    def test_no_final_transaction_recommendation_terms_are_generated(self) -> None:
+        analysis_package = self._run_package("m6_no_final_recommendation_terms")
+        text = json.dumps(analysis_package)
+
+        for forbidden in ("Proceed", "Walk Away", "Renegotiate", "Defer", "Acquire", "Invest"):
+            self.assertNotIn(forbidden, text)
 
     def _run_package(self, label: str) -> dict:
         artifacts = self._run_m6(self.root / label)

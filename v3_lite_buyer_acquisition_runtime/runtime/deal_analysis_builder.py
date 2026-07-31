@@ -70,7 +70,12 @@ def build_analysis_package(
         for gap_id in step["related_research_gap_ids"]
     }
     analysis_readiness_status = _analysis_readiness_status(certification_result)
-    gate_allows_analysis = certification_result["overall_certification_status"] != "repair_required" and analysis_readiness_status == "ready_for_limited_analysis"
+    analysis_gate = certification_result["analysis_gate_summary"]
+    report_gate = certification_result["report_gate_summary"]
+    recommendation_gate = certification_result["recommendation_gate_summary"]
+    consumed_certified_claim_ids = list(analysis_gate["analysis_allowed_claim_ids"])
+    consumed_caveated_claim_ids = list(analysis_gate["analysis_caveated_claim_ids"])
+    excluded_claim_ids = list(analysis_gate["analysis_blocked_claim_ids"])
     package = {
         "case_id": certification_result["case_id"],
         "generated_artifact": "analysis_package.json",
@@ -82,9 +87,17 @@ def build_analysis_package(
         "created_from_evidence_repository_id": evidence_repository_source_id(evidence_repository),
         "created_at": _now_utc_iso(),
         "analysis_readiness_status": analysis_readiness_status,
-        "recommendation_allowed": gate_allows_analysis,
-        "final_report_allowed": gate_allows_analysis,
-        "analysis_sections": _analysis_sections(claim_certs_by_id, claims_by_id, records_by_id, research_gaps, repair_plan),
+        "recommendation_allowed": recommendation_gate["recommendation_allowed"],
+        "final_report_allowed": not bool(report_gate["report_blocked_claim_ids"]),
+        "supporting_claim_ids": consumed_certified_claim_ids + consumed_caveated_claim_ids,
+        "consumed_certified_claim_ids": consumed_certified_claim_ids,
+        "consumed_caveated_claim_ids": consumed_caveated_claim_ids,
+        "excluded_claim_ids": excluded_claim_ids,
+        "exclusion_reasons": _exclusion_reasons(certification_result),
+        "preserved_caveats": _preserved_caveats(claim_certs_by_id, consumed_caveated_claim_ids),
+        "recommendation_gate_status": _recommendation_gate_status(recommendation_gate),
+        "report_gate_status": _report_gate_status(report_gate),
+        "analysis_sections": _analysis_sections(claim_certs_by_id, claims_by_id, records_by_id, research_gaps, repair_plan, analysis_gate),
         "blocked_analysis_items": _blocked_analysis_items(claim_certs_by_id, claims_by_id, research_gaps_by_id, repair_steps_by_gap_id),
         "caveats": _package_caveats(certification_result),
         "human_review_items": certification_result["human_review_items"],
@@ -135,6 +148,10 @@ def validate_m6_inputs(
         raise DealAnalysisError("M6 input case_id values must match.")
     if not isinstance(certification_result.get("claim_certifications"), list):
         raise DealAnalysisError("certification_result must include claim_certifications array.")
+    for field in ("analysis_gate_summary", "report_gate_summary", "recommendation_gate_summary"):
+        if not isinstance(certification_result.get(field), dict):
+            raise DealAnalysisError(f"certification_result must include {field} object.")
+    _validate_m5_gate_summaries(certification_result)
     if not isinstance(certification_result.get("human_review_items"), list):
         raise DealAnalysisError("certification_result must include human_review_items array.")
     if not isinstance(certification_result.get("numeric_verification_results"), list):
@@ -162,6 +179,14 @@ def validate_analysis_package(package: Any, certification_result: dict[str, Any]
         "analysis_readiness_status",
         "recommendation_allowed",
         "final_report_allowed",
+        "supporting_claim_ids",
+        "consumed_certified_claim_ids",
+        "consumed_caveated_claim_ids",
+        "excluded_claim_ids",
+        "exclusion_reasons",
+        "preserved_caveats",
+        "recommendation_gate_status",
+        "report_gate_status",
         "analysis_sections",
         "blocked_analysis_items",
         "caveats",
@@ -182,8 +207,16 @@ def validate_analysis_package(package: Any, certification_result: dict[str, Any]
     if certification_result and certification_result["overall_certification_status"] == "repair_required":
         if package["analysis_readiness_status"] != "limited_by_repair_required":
             raise DealAnalysisError("repair_required certification must produce limited_by_repair_required analysis readiness.")
-        if package["recommendation_allowed"] is not False or package["final_report_allowed"] is not False:
-            raise DealAnalysisError("repair_required certification cannot allow recommendation or final report.")
+    if certification_result:
+        if package["recommendation_allowed"] != certification_result["recommendation_gate_summary"]["recommendation_allowed"]:
+            raise DealAnalysisError("recommendation_allowed must match M5 recommendation_gate_summary.")
+        expected_final_report_allowed = not bool(certification_result["report_gate_summary"]["report_blocked_claim_ids"])
+        if package["final_report_allowed"] != expected_final_report_allowed:
+            raise DealAnalysisError("final_report_allowed must match M5 report_gate_summary.")
+        if set(package["supporting_claim_ids"]) != set(certification_result["analysis_gate_summary"]["analysis_allowed_claim_ids"] + certification_result["analysis_gate_summary"]["analysis_caveated_claim_ids"]):
+            raise DealAnalysisError("supporting_claim_ids must consume only M5 analysis gate allowed and caveated claims.")
+        if set(package["supporting_claim_ids"]).intersection(certification_result["analysis_gate_summary"]["analysis_blocked_claim_ids"]):
+            raise DealAnalysisError("analysis_blocked_claim_ids cannot appear in supporting_claim_ids.")
     section_ids = {section.get("section_id") for section in package["analysis_sections"]}
     if section_ids != ANALYSIS_SECTION_IDS:
         raise DealAnalysisError("analysis_sections must include exactly the required generic M6 sections.")
@@ -203,10 +236,13 @@ def _analysis_sections(
     records_by_id: dict[str, dict[str, Any]],
     research_gaps: dict[str, Any],
     repair_plan: dict[str, Any],
+    analysis_gate: dict[str, Any],
 ) -> list[dict[str, Any]]:
     sections = []
+    supporting_claim_ids = set(analysis_gate["analysis_allowed_claim_ids"] + analysis_gate["analysis_caveated_claim_ids"])
+    blocked_claim_ids = set(analysis_gate["analysis_blocked_claim_ids"])
     for section_id in [section for section in ANALYSIS_SECTION_IDS if section not in {"source_gaps_and_human_review", "decision_readiness"}]:
-        sections.append(_claim_based_section(section_id, claim_certs_by_id, claims_by_id, records_by_id))
+        sections.append(_claim_based_section(section_id, claim_certs_by_id, claims_by_id, records_by_id, supporting_claim_ids, blocked_claim_ids))
     sections.append(_gap_section(research_gaps, repair_plan))
     sections.append(_decision_readiness_section(claim_certs_by_id))
     return sorted(sections, key=lambda section: _section_order(section["section_id"]))
@@ -217,6 +253,8 @@ def _claim_based_section(
     claim_certs_by_id: dict[str, dict[str, Any]],
     claims_by_id: dict[str, dict[str, Any]],
     records_by_id: dict[str, dict[str, Any]],
+    supporting_claim_ids: set[str],
+    blocked_claim_ids: set[str],
 ) -> dict[str, Any]:
     included_claims = []
     excluded_claims = []
@@ -227,7 +265,7 @@ def _claim_based_section(
         claim = claims_by_id.get(claim_id, {})
         if _section_for_claim(cert, claim) != section_id:
             continue
-        if cert["certification_status"] not in ALLOWED_FACT_STATUSES:
+        if claim_id in blocked_claim_ids or claim_id not in supporting_claim_ids:
             excluded_claims.append(claim_id)
             continue
         evidence_record_ids.extend(cert["supporting_evidence_record_ids"])
@@ -239,6 +277,7 @@ def _claim_based_section(
                 "certification_status": cert["certification_status"],
                 "supporting_evidence_record_ids": cert["supporting_evidence_record_ids"],
                 "caveated": cert["certification_status"] == "certified_with_caveat" or bool(cert.get("caveats")),
+                "preserved_caveats": _claim_caveats(cert),
             }
         )
         included_claims.append(claim_id)
@@ -253,6 +292,7 @@ def _claim_based_section(
         "section_status": "limited_analysis" if findings else "no_certified_claims",
         "summary": f"Generic source-bounded analysis section for {section_id}; no recommendation or case conclusion is generated.",
         "included_claim_ids": included_claims,
+        "supporting_claim_ids": included_claims,
         "excluded_claim_ids": excluded_claims,
         "supporting_evidence_record_ids": sorted(set(evidence_record_ids)),
         "findings": findings,
@@ -286,6 +326,7 @@ def _gap_section(research_gaps: dict[str, Any], repair_plan: dict[str, Any]) -> 
         "section_status": "gap_tracking_only",
         "summary": "Research gaps, unsupported claims, and human-review requirements are tracked as limits, not as factual findings.",
         "included_claim_ids": [],
+        "supporting_claim_ids": [],
         "excluded_claim_ids": sorted({claim_id for gap in research_gaps["research_gaps"] for claim_id in gap["related_claim_ids"]}),
         "supporting_evidence_record_ids": [],
         "findings": findings,
@@ -305,6 +346,7 @@ def _decision_readiness_section(claim_certs_by_id: dict[str, dict[str, Any]]) ->
         "section_status": "limited_by_repair_required" if blocked_claim_ids else "ready_for_limited_analysis",
         "summary": "Recommendation and final report generation depend on certification status, source gaps, numeric checks, and human review.",
         "included_claim_ids": [],
+        "supporting_claim_ids": [],
         "excluded_claim_ids": blocked_claim_ids,
         "supporting_evidence_record_ids": [],
         "findings": [
@@ -454,12 +496,80 @@ def _finding_text_for_claim(cert: dict[str, Any], claim: dict[str, Any]) -> str:
     return f"Certified source-bounded {claim_type} claim {cert['claim_id']} may be used only with preserved caveats and permitted-use limits."
 
 
-def _excluded_claims_for_section(claim_ids: list[str], claim_certs_by_id: dict[str, dict[str, Any]]) -> list[str]:
-    return [
-        claim_id
-        for claim_id in claim_ids
-        if claim_certs_by_id[claim_id]["certification_status"] not in ALLOWED_FACT_STATUSES
-    ]
+def _validate_m5_gate_summaries(certification_result: dict[str, Any]) -> None:
+    analysis_gate = certification_result["analysis_gate_summary"]
+    report_gate = certification_result["report_gate_summary"]
+    recommendation_gate = certification_result["recommendation_gate_summary"]
+    for field in (
+        "analysis_allowed_claim_ids",
+        "analysis_caveated_claim_ids",
+        "analysis_blocked_claim_ids",
+        "analysis_blocking_reasons",
+    ):
+        if field not in analysis_gate:
+            raise DealAnalysisError(f"analysis_gate_summary missing {field}.")
+    for field in (
+        "report_allowed_claim_ids",
+        "report_caveated_claim_ids",
+        "report_blocked_claim_ids",
+        "report_blocking_reasons",
+    ):
+        if field not in report_gate:
+            raise DealAnalysisError(f"report_gate_summary missing {field}.")
+    for field in (
+        "recommendation_allowed",
+        "recommendation_supporting_claim_ids",
+        "recommendation_blocked_claim_ids",
+        "recommendation_blocking_reasons",
+    ):
+        if field not in recommendation_gate:
+            raise DealAnalysisError(f"recommendation_gate_summary missing {field}.")
+
+
+def _claim_caveats(cert: dict[str, Any]) -> list[str]:
+    caveats = []
+    for field in ("required_caveats", "caveats"):
+        for caveat in cert.get(field, []):
+            if isinstance(caveat, str) and caveat not in caveats:
+                caveats.append(caveat)
+    return caveats
+
+
+def _preserved_caveats(claim_certs_by_id: dict[str, dict[str, Any]], claim_ids: list[str]) -> list[dict[str, Any]]:
+    preserved = []
+    for claim_id in claim_ids:
+        claim_caveats = _claim_caveats(claim_certs_by_id[claim_id])
+        if not claim_caveats:
+            continue
+        preserved.append({"claim_id": claim_id, "caveats": claim_caveats})
+    return preserved
+
+
+def _exclusion_reasons(certification_result: dict[str, Any]) -> list[dict[str, str]]:
+    claim_certs_by_id = {claim["claim_id"]: claim for claim in certification_result["claim_certifications"]}
+    excluded = []
+    for claim_id in certification_result["analysis_gate_summary"]["analysis_blocked_claim_ids"]:
+        cert = claim_certs_by_id[claim_id]
+        reasons = _blocking_reasons_for_claim(cert, "analysis")
+        excluded.append({"claim_id": claim_id, "reason": "; ".join(reasons)})
+    return excluded
+
+
+def _blocking_reasons_for_claim(cert: dict[str, Any], downstream_use: str) -> list[str]:
+    reasons = []
+    for action in cert.get("repair_actions", []):
+        reasons.append(action.get("reason", ""))
+    if not reasons:
+        reasons.append(f"{downstream_use} blocked by {cert['certification_status']} certification status.")
+    return [reason for reason in reasons if reason]
+
+
+def _recommendation_gate_status(recommendation_gate: dict[str, Any]) -> str:
+    return "allowed" if recommendation_gate["recommendation_allowed"] else "blocked"
+
+
+def _report_gate_status(report_gate: dict[str, Any]) -> str:
+    return "allowed" if not report_gate["report_blocked_claim_ids"] else "blocked"
 
 
 def _validate_section(section: dict[str, Any]) -> None:
@@ -469,6 +579,7 @@ def _validate_section(section: dict[str, Any]) -> None:
         "section_status",
         "summary",
         "included_claim_ids",
+        "supporting_claim_ids",
         "excluded_claim_ids",
         "supporting_evidence_record_ids",
         "findings",
