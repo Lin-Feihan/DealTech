@@ -55,43 +55,29 @@ def build_research_gaps(certification_result: dict[str, Any], graph: dict[str, A
 
 def build_repair_plan(certification_result: dict[str, Any], research_gaps: dict[str, Any]) -> dict[str, Any]:
     repair_steps = []
+    seen_step_keys: set[tuple[Any, ...]] = set()
     for gap in research_gaps["research_gaps"]:
         action = _repair_action(gap)
-        repair_steps.append(
-            {
-                "repair_step_id": f"RP-{len(repair_steps) + 1:03d}",
-                "repair_action": action,
-                "target_state": _repair_target_state(action),
-                "target_artifact": _target_artifact(action),
-                "reason": _repair_reason(gap, action),
-                "related_claim_ids": gap["related_claim_ids"],
-                "related_research_gap_ids": [gap["research_gap_id"]],
-                "required_source_types": gap["suggested_source_types"],
-                "priority": "high" if gap["blocks_certification"] else "medium",
-                "expected_output": _expected_output(action),
-            }
+        _append_repair_step(
+            repair_steps,
+            seen_step_keys,
+            action=action,
+            target_state=_repair_target_state(action),
+            target_artifact=_target_artifact(action),
+            reason=_repair_reason(gap, action),
+            related_claim_ids=gap["related_claim_ids"],
+            related_research_gap_ids=[gap["research_gap_id"]],
+            required_source_types=gap["suggested_source_types"],
+            priority="high" if gap["blocks_certification"] else "medium",
+            expected_output=_expected_output(action),
         )
 
-    failed_or_review_claims = [
-        cert["claim_id"]
-        for cert in certification_result["claim_certifications"]
-        if cert["certification_status"] in {"failed", "requires_human_review"}
-    ]
-    if failed_or_review_claims:
-        repair_steps.append(
-            {
-                "repair_step_id": f"RP-{len(repair_steps) + 1:03d}",
-                "repair_action": "add_human_review_item",
-                "target_state": "M4_claim_evidence_graph_update",
-                "target_artifact": "claim_evidence_graph.json",
-                "reason": "Generic human-review or verification failure requires claim framing review before downstream use.",
-                "related_claim_ids": failed_or_review_claims,
-                "related_research_gap_ids": [],
-                "required_source_types": ["source-bounded evidence records or documented human review decision"],
-                "priority": "medium",
-                "expected_output": "Updated claim framing or documented human review disposition before rerunning certification.",
-            }
-        )
+    for cert in certification_result["claim_certifications"]:
+        for repair_action in cert.get("repair_actions", []):
+            if not _should_emit_claim_repair_step(cert, repair_action):
+                continue
+            mapped = _repair_step_from_claim_action(cert, repair_action)
+            _append_repair_step(repair_steps, seen_step_keys, **mapped)
 
     result = {
         "case_id": certification_result["case_id"],
@@ -147,6 +133,65 @@ def validate_repair_plan(payload: dict[str, Any]) -> None:
         ):
             if field not in step:
                 raise ValueError(f"repair_step missing {field}.")
+
+
+def _append_repair_step(
+    repair_steps: list[dict[str, Any]],
+    seen_step_keys: set[tuple[Any, ...]],
+    *,
+    action: str,
+    target_state: str,
+    target_artifact: str,
+    reason: str,
+    related_claim_ids: list[str],
+    related_research_gap_ids: list[str],
+    required_source_types: list[str],
+    priority: str,
+    expected_output: str,
+) -> None:
+    key = (action, target_state, target_artifact, reason, tuple(sorted(related_claim_ids)), tuple(sorted(related_research_gap_ids)))
+    if key in seen_step_keys:
+        return
+    seen_step_keys.add(key)
+    repair_steps.append(
+        {
+            "repair_step_id": f"RP-{len(repair_steps) + 1:03d}",
+            "repair_action": action,
+            "target_state": target_state,
+            "target_artifact": target_artifact,
+            "reason": reason,
+            "related_claim_ids": related_claim_ids,
+            "related_research_gap_ids": related_research_gap_ids,
+            "required_source_types": required_source_types,
+            "priority": priority,
+            "expected_output": expected_output,
+        }
+    )
+
+
+def _repair_step_from_claim_action(cert: dict[str, Any], repair_action: dict[str, Any]) -> dict[str, Any]:
+    target = repair_action.get("target", "block_pipeline_until_structure_repaired")
+    action = str(repair_action.get("action") or _default_action_for_target(target))
+    reason = f"{action} for {cert['claim_id']}; {repair_action.get('reason', cert.get('certification_basis', 'repair required'))}"
+    return {
+        "action": _normalized_action_for_target(target, action),
+        "target_state": _target_state_for_claim_action(target),
+        "target_artifact": _target_artifact_for_claim_action(target),
+        "reason": reason,
+        "related_claim_ids": [cert["claim_id"]],
+        "related_research_gap_ids": [],
+        "required_source_types": _required_source_types_for_claim_action(target),
+        "priority": "high" if target in {"M2_source_retrieval", "M5_numeric_verification"} else "medium",
+        "expected_output": _expected_output_for_claim_action(target),
+    }
+
+
+def _should_emit_claim_repair_step(cert: dict[str, Any], repair_action: dict[str, Any]) -> bool:
+    if cert.get("related_source_gap_ids"):
+        return False
+    if cert.get("certification_status") in {"certified", "certified_with_caveat"}:
+        return False
+    return bool(repair_action.get("target"))
 
 
 def _research_gap_from_source_gap(index: int, gap_node: dict[str, Any], related_claim_ids: list[str]) -> dict[str, Any]:
@@ -284,6 +329,78 @@ def _expected_output(action: str) -> str:
     if action in {"resolve_source_conflict", "add_human_review_item"}:
         return "Updated claim framing, conflict disposition, or documented human review before rerunning M4/M5."
     return "Updated retrieved source manifest enabling M3/M4/M5 rerun with source-bounded evidence."
+
+
+def _default_action_for_target(target: str) -> str:
+    if target == "M2_source_retrieval":
+        return "rerun_m2_source_retrieval"
+    if target == "M4_claim_evidence_graph":
+        return "repair_claim_rewrite_or_mapping"
+    if target == "M5_numeric_verification":
+        return "repair_numeric_formula_or_inputs"
+    if target == "human_review":
+        return "add_human_review_item"
+    return "repair_pipeline_structure"
+
+
+def _normalized_action_for_target(target: str, action: str) -> str:
+    if target == "M2_source_retrieval":
+        return action if action.startswith(("rerun_m2", "retrieve", "repair_source", "repair_evidence")) else "rerun_m2_source_retrieval"
+    if target == "M4_claim_evidence_graph":
+        return action if action.startswith(("repair_claim", "repair_overclaim", "resolve_claim", "add_required", "correct_temporal", "add_hindsight")) else "repair_claim_rewrite_or_mapping"
+    if target == "M5_numeric_verification":
+        return "repair_numeric_formula_or_inputs"
+    if target == "human_review":
+        return "add_human_review_item"
+    return "repair_pipeline_structure"
+
+
+def _target_state_for_claim_action(target: str) -> str:
+    if target == "M2_source_retrieval":
+        return "M2_source_retrieval"
+    if target == "M4_claim_evidence_graph":
+        return "M4_claim_evidence_graph_update"
+    if target == "M5_numeric_verification":
+        return "M2_source_retrieval_or_M5_numeric_verification"
+    if target == "human_review":
+        return "M4_claim_evidence_graph_update"
+    return "M5_loop_certification"
+
+
+def _target_artifact_for_claim_action(target: str) -> str:
+    if target == "M2_source_retrieval":
+        return "retrieved_sources_manifest.json"
+    if target == "M4_claim_evidence_graph":
+        return "claim_evidence_graph.json"
+    if target == "M5_numeric_verification":
+        return "certification_result.json"
+    if target == "human_review":
+        return "human_review_items"
+    return "certification_result.json"
+
+
+def _required_source_types_for_claim_action(target: str) -> list[str]:
+    if target == "M2_source_retrieval":
+        return ["authoritative primary source", "official filing", "signed transaction document"]
+    if target == "M4_claim_evidence_graph":
+        return ["rewritten source-bounded claim statement", "claim-evidence edge review", "overclaim or ambiguity repair"]
+    if target == "M5_numeric_verification":
+        return ["explicit numeric formula", "source-bounded numeric inputs", "calculation support document"]
+    if target == "human_review":
+        return ["documented human review decision", "approved caveat or exclusion from downstream use"]
+    return ["valid certification structure"]
+
+
+def _expected_output_for_claim_action(target: str) -> str:
+    if target == "M2_source_retrieval":
+        return "Updated source retrieval inputs before rerunning M3/M4/M5."
+    if target == "M4_claim_evidence_graph":
+        return "Updated claim wording, support mapping, or caveat metadata before rerunning M5."
+    if target == "M5_numeric_verification":
+        return "Explicit formula inputs or corrected numeric support before rerunning M5 numeric verification."
+    if target == "human_review":
+        return "Documented human review disposition before final recommendation or report assertion use."
+    return "Repaired M5 certification structure before continuing the pipeline."
 
 
 def _recommended_target_for_status(status: str) -> str:

@@ -40,6 +40,17 @@ CLAIM_CERTIFICATION_STATUSES = {
     "not_applicable",
 }
 OVERALL_STATUSES = {"passed_with_caveats", "failed", "repair_required", "human_review_required"}
+REPORT_ASSERTION_USE = "report_assertion"
+RECOMMENDATION_BLOCKING_USES = {"final_recommendation", "ex_ante_recommendation", "recommendation_use"}
+NEXT_WORKFLOW_ACTIONS = {
+    "send_to_M6_analysis",
+    "send_to_M6_with_caveat",
+    "return_to_M2_source_retrieval",
+    "return_to_M4_claim_rewrite",
+    "route_to_M5_numeric_verification",
+    "route_to_human_review",
+    "block_pipeline_until_structure_repaired",
+}
 
 
 def load_json_artifact(path: Path) -> dict[str, Any]:
@@ -97,6 +108,8 @@ def build_certification_result(graph: dict[str, Any], evidence_repository: dict[
 
     verification_checks = _build_verification_checks(citation_results, temporal_results, numeric_results, evidence_check_results, claim_evidence_check_results, usage_check_results)
     overall_status = _overall_certification_status(claim_certifications, human_review_items)
+    report_gate_summary = _build_report_gate_summary(claim_certifications)
+    recommendation_gate_summary = _build_recommendation_gate_summary(claim_certifications)
     result = {
         "case_id": graph["case_id"],
         "generated_artifact": "certification_result.json",
@@ -115,6 +128,8 @@ def build_certification_result(graph: dict[str, Any], evidence_repository: dict[
         "numeric_verification_results": numeric_results,
         "citation_verification_results": citation_results,
         "temporal_verification_results": temporal_results,
+        "report_gate_summary": report_gate_summary,
+        "recommendation_gate_summary": recommendation_gate_summary,
         "human_review_items": _dedupe_human_review_items(human_review_items),
         "next_action": _next_action(overall_status),
     }
@@ -179,6 +194,7 @@ def certify_claim(
 ) -> dict[str, Any]:
     records = [records_by_id[record_id] for record_id in claim["supporting_evidence_record_ids"] if record_id in records_by_id]
     evidence_checks = [evidence_check_by_record[record["evidence_record_id"]] for record in records if record["evidence_record_id"] in evidence_check_by_record]
+    repair_actions = _combine_repair_actions(evidence_checks, claim_evidence_check, usage_check)
     caveats = []
     if temporal_result["verification_status"] == "passed_with_caveat":
         caveats.append(temporal_result["caveat"])
@@ -212,6 +228,7 @@ def certify_claim(
 
     if _requires_human_review(status, claim):
         caveats.append("Human review required before downstream report wording or certification expansion.")
+    next_workflow_action = _next_workflow_action(status, caveats, repair_actions)
     return {
         "claim_certification_id": f"CC-{claim['claim_id'].split('-')[-1]}",
         "claim_id": claim["claim_id"],
@@ -227,6 +244,8 @@ def certify_claim(
         "allowed_downstream_uses": usage_check["allowed_downstream_uses"],
         "blocked_downstream_uses": usage_check["blocked_downstream_uses"],
         "required_caveats": sorted(set(caveats)),
+        "next_workflow_action": next_workflow_action,
+        "repair_actions": repair_actions,
         "citation_check_status": _compat_citation_status(claim, claim_evidence_check),
         "temporal_check_status": temporal_result["verification_status"],
         "numeric_check_status": "not_applicable",
@@ -257,6 +276,8 @@ def validate_certification_result(result: Any) -> None:
         "numeric_verification_results",
         "citation_verification_results",
         "temporal_verification_results",
+        "report_gate_summary",
+        "recommendation_gate_summary",
         "human_review_items",
         "next_action",
     }
@@ -276,9 +297,11 @@ def validate_certification_result(result: Any) -> None:
             raise CertificationError(f"invalid claim certification status: {cert['claim_id']}")
         if "evidence_check_status" not in cert or "claim_evidence_check_status" not in cert:
             raise CertificationError(f"claim certification missing check status: {cert['claim_id']}")
-        for field in ("usage_check_status", "allowed_downstream_uses", "blocked_downstream_uses", "required_caveats"):
+        for field in ("usage_check_status", "allowed_downstream_uses", "blocked_downstream_uses", "required_caveats", "next_workflow_action", "repair_actions"):
             if field not in cert:
                 raise CertificationError(f"claim certification missing usage field {field}: {cert['claim_id']}")
+        if cert["next_workflow_action"] not in NEXT_WORKFLOW_ACTIONS:
+            raise CertificationError(f"invalid next_workflow_action: {cert['claim_id']}")
         if cert["certification_status"] in {"certified", "certified_with_caveat"} and not cert["supporting_evidence_record_ids"]:
             raise CertificationError(f"certified claim lacks supporting evidence: {cert['claim_id']}")
         if cert["certification_status"] == "certified" and cert["related_source_gap_ids"]:
@@ -291,6 +314,126 @@ def _gap_or_unsupported_status(claim: dict[str, Any]) -> tuple[str, str]:
     if claim["related_source_gap_ids"]:
         return "blocked_by_source_gap", "Claim is blocked by unresolved source gap(s)."
     return "unsupported", "Claim lacks supporting evidence."
+
+
+def _combine_repair_actions(
+    evidence_checks: list[dict[str, Any]],
+    claim_evidence_check: dict[str, Any],
+    usage_check: dict[str, Any],
+) -> list[dict[str, str]]:
+    actions: list[dict[str, str]] = []
+    for check in evidence_checks:
+        for action in check.get("repair_actions", []):
+            actions.append(_normalize_repair_action(action, "evidence_check", check.get("evidence_record_id")))
+    for action in claim_evidence_check.get("repair_actions", []):
+        actions.append(_normalize_repair_action(action, "claim_evidence_check", claim_evidence_check.get("claim_id")))
+    for action in usage_check.get("repair_actions", []):
+        actions.append(_normalize_repair_action(action, "usage_check", usage_check.get("claim_id")))
+    return _dedupe_action_dicts(actions)
+
+
+def _normalize_repair_action(action: dict[str, Any], source_check: str, source_id: Any) -> dict[str, str]:
+    return {
+        "target": str(action.get("target") or "block_pipeline_until_structure_repaired"),
+        "action": str(action.get("action") or "repair_structure"),
+        "reason": str(action.get("reason") or "Repair required before downstream use."),
+        "source_check": source_check,
+        "source_id": str(source_id or ""),
+    }
+
+
+def _dedupe_action_dicts(actions: list[dict[str, str]]) -> list[dict[str, str]]:
+    seen = set()
+    deduped = []
+    for action in actions:
+        key = (action["target"], action["action"], action["reason"], action["source_check"], action["source_id"])
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(action)
+    return deduped
+
+
+def _next_workflow_action(status: str, caveats: list[str], repair_actions: list[dict[str, str]]) -> str:
+    targets = {action["target"] for action in repair_actions}
+    if "M5_numeric_verification" in targets:
+        return "route_to_M5_numeric_verification"
+    if "M2_source_retrieval" in targets:
+        return "return_to_M2_source_retrieval"
+    if "M4_claim_evidence_graph" in targets:
+        return "return_to_M4_claim_rewrite"
+    if "human_review" in targets:
+        return "route_to_human_review"
+    if repair_actions:
+        return "block_pipeline_until_structure_repaired"
+    if status == "certified":
+        return "send_to_M6_analysis"
+    if status == "certified_with_caveat" or caveats:
+        return "send_to_M6_with_caveat"
+    if status == "requires_numeric_verification":
+        return "route_to_M5_numeric_verification"
+    if status == "requires_human_review":
+        return "route_to_human_review"
+    return "block_pipeline_until_structure_repaired"
+
+
+def _build_report_gate_summary(claim_certifications: list[dict[str, Any]]) -> dict[str, Any]:
+    allowed_claim_ids = []
+    caveated_claim_ids = []
+    blocked_claim_ids = []
+    blocking_reasons = []
+    for cert in claim_certifications:
+        claim_id = cert["claim_id"]
+        report_allowed = REPORT_ASSERTION_USE in cert.get("allowed_downstream_uses", [])
+        report_blocked = REPORT_ASSERTION_USE in cert.get("blocked_downstream_uses", []) or cert["certification_status"] not in {"certified", "certified_with_caveat"}
+        if report_blocked:
+            blocked_claim_ids.append(claim_id)
+            blocking_reasons.extend(_blocking_reasons_for_claim(cert, REPORT_ASSERTION_USE))
+        elif report_allowed and (cert["certification_status"] == "certified_with_caveat" or cert.get("required_caveats") or cert.get("caveats")):
+            caveated_claim_ids.append(claim_id)
+        elif report_allowed:
+            allowed_claim_ids.append(claim_id)
+    return {
+        "report_allowed_claim_ids": allowed_claim_ids,
+        "report_caveated_claim_ids": caveated_claim_ids,
+        "report_blocked_claim_ids": blocked_claim_ids,
+        "report_blocking_reasons": _ordered_unique(blocking_reasons),
+    }
+
+
+def _build_recommendation_gate_summary(claim_certifications: list[dict[str, Any]]) -> dict[str, Any]:
+    supporting_claim_ids = []
+    blocked_claim_ids = []
+    blocking_reasons = []
+    human_review_required_claim_ids = []
+    for cert in claim_certifications:
+        claim_id = cert["claim_id"]
+        blocked_uses = set(cert.get("blocked_downstream_uses", []))
+        requires_human_review = bool(cert.get("requires_human_review")) or cert.get("next_workflow_action") == "route_to_human_review"
+        recommendation_blocked = bool(blocked_uses.intersection(RECOMMENDATION_BLOCKING_USES)) or requires_human_review or cert["certification_status"] not in {"certified", "certified_with_caveat"}
+        if requires_human_review:
+            human_review_required_claim_ids.append(claim_id)
+        if recommendation_blocked:
+            blocked_claim_ids.append(claim_id)
+            blocking_reasons.extend(_blocking_reasons_for_claim(cert, "recommendation"))
+        else:
+            supporting_claim_ids.append(claim_id)
+    return {
+        "recommendation_allowed": bool(supporting_claim_ids) and not blocked_claim_ids,
+        "recommendation_supporting_claim_ids": supporting_claim_ids,
+        "recommendation_blocked_claim_ids": blocked_claim_ids,
+        "recommendation_blocking_reasons": _ordered_unique(blocking_reasons),
+        "human_review_required_claim_ids": human_review_required_claim_ids,
+    }
+
+
+def _blocking_reasons_for_claim(cert: dict[str, Any], downstream_use: str) -> list[str]:
+    reasons = []
+    for action in cert.get("repair_actions", []):
+        reasons.append(f"{cert['claim_id']}: {action['reason']}")
+    if not reasons:
+        reasons.append(f"{cert['claim_id']}: {downstream_use} blocked by {cert['certification_status']} certification status.")
+    return reasons
 
 
 def _aggregate_check_status(checks: list[dict[str, Any]]) -> str:

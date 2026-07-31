@@ -22,6 +22,8 @@
     "numeric_verification_results",
     "citation_verification_results",
     "temporal_verification_results",
+    "report_gate_summary",
+    "recommendation_gate_summary",
     "human_review_items",
     "next_action"
   ],
@@ -55,6 +57,8 @@
           "allowed_downstream_uses",
           "blocked_downstream_uses",
           "required_caveats",
+          "next_workflow_action",
+          "repair_actions",
           "citation_check_status",
           "temporal_check_status",
           "numeric_check_status",
@@ -80,6 +84,19 @@
           "allowed_downstream_uses": {"type": "array", "items": {"type": "string", "minLength": 1}},
           "blocked_downstream_uses": {"type": "array", "items": {"type": "string", "minLength": 1}},
           "required_caveats": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "next_workflow_action": {
+            "type": "string",
+            "enum": [
+              "send_to_M6_analysis",
+              "send_to_M6_with_caveat",
+              "return_to_M2_source_retrieval",
+              "return_to_M4_claim_rewrite",
+              "route_to_M5_numeric_verification",
+              "route_to_human_review",
+              "block_pipeline_until_structure_repaired"
+            ]
+          },
+          "repair_actions": {"type": "array", "items": {"type": "object"}},
           "citation_check_status": {"type": "string", "minLength": 1},
           "temporal_check_status": {"type": "string", "minLength": 1},
           "numeric_check_status": {"type": "string", "minLength": 1},
@@ -113,6 +130,35 @@
     },
     "citation_verification_results": {"type": "array", "items": {"type": "object"}},
     "temporal_verification_results": {"type": "array", "items": {"type": "object"}},
+    "report_gate_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["report_allowed_claim_ids", "report_caveated_claim_ids", "report_blocked_claim_ids", "report_blocking_reasons"],
+      "properties": {
+        "report_allowed_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "report_caveated_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "report_blocked_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "report_blocking_reasons": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "recommendation_gate_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recommendation_allowed",
+        "recommendation_supporting_claim_ids",
+        "recommendation_blocked_claim_ids",
+        "recommendation_blocking_reasons",
+        "human_review_required_claim_ids"
+      ],
+      "properties": {
+        "recommendation_allowed": {"type": "boolean"},
+        "recommendation_supporting_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "recommendation_blocked_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "recommendation_blocking_reasons": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "human_review_required_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
     "human_review_items": {"type": "array", "items": {"type": "object"}},
     "next_action": {"type": "string", "minLength": 1}
   }

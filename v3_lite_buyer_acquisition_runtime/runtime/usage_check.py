@@ -25,8 +25,16 @@ JUDGMENT_DEPENDENCY_GROUPS = {
 
 def run_usage_check(claim_evidence_graph: dict[str, Any], evidence_repository: dict[str, Any]) -> list[dict[str, Any]]:
     _validate_inputs(claim_evidence_graph, evidence_repository)
-    available_claim_types = {str(claim.get("claim_type", "")).lower() for claim in claim_evidence_graph["claim_nodes"]}
-    available_fact_types = {str(record.get("canonical_fact_type", "")).lower() for record in evidence_repository["evidence_records"]}
+    available_claim_types = {
+        str(claim.get("claim_type", "")).lower()
+        for claim in claim_evidence_graph["claim_nodes"]
+        if claim.get("support_level") not in {"gap_only", "unsupported"}
+    }
+    available_fact_types = {
+        str(record.get("canonical_fact_type", "")).lower()
+        for record in evidence_repository["evidence_records"]
+        if record.get("support_status") != "source_gap"
+    }
     available_context = available_claim_types | available_fact_types
     return [_check_claim_usage(index, claim, available_context) for index, claim in enumerate(claim_evidence_graph["claim_nodes"], start=1)]
 

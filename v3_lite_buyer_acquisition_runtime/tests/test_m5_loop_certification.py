@@ -80,6 +80,9 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
         for claim_cert in certification["claim_certifications"]:
             self.assertIn("evidence_check_status", claim_cert)
             self.assertIn("claim_evidence_check_status", claim_cert)
+            self.assertIn("usage_check_status", claim_cert)
+            self.assertIn("next_workflow_action", claim_cert)
+            self.assertIn("repair_actions", claim_cert)
 
     def test_claim_evidence_gate_blocks_mismatched_supported_claim(self) -> None:
         graph = self._load(self.graph_path)
@@ -96,7 +99,78 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
 
         self.assertEqual(mismatched["certification_status"], "failed")
         self.assertEqual(mismatched["claim_evidence_check_status"], "failed")
+        self.assertEqual(mismatched["next_workflow_action"], "return_to_M4_claim_rewrite")
         self.assertIn("claim-evidence gate failed", mismatched["certification_basis"])
+
+    def test_routing_sends_certified_claim_to_m6_analysis(self) -> None:
+        graph = self._graph_with_clean_claim("CL-004")
+        certification = self._run_certification_for_graph(graph, "m5_certified_route")
+        routed = self._claim_certification(certification, "CL-004")
+
+        self.assertEqual(routed["certification_status"], "certified")
+        self.assertEqual(routed["next_workflow_action"], "send_to_M6_analysis")
+        self.assertEqual(routed["repair_actions"], [])
+
+    def test_routing_sends_caveated_claim_to_m6_with_caveat(self) -> None:
+        graph = self._graph_with_clean_claim("CL-004")
+        for claim in graph["claim_nodes"]:
+            if claim["claim_id"] == "CL-004":
+                claim["support_level"] = "partially_supported"
+                claim["claim_statement"] = "Narrow partially supported transaction timing claim."
+                break
+        certification = self._run_certification_for_graph(graph, "m5_caveated_route")
+        routed = self._claim_certification(certification, "CL-004")
+
+        self.assertEqual(routed["certification_status"], "certified_with_caveat")
+        self.assertEqual(routed["next_workflow_action"], "send_to_M6_with_caveat")
+
+    def test_routing_returns_source_gap_to_m2_source_retrieval(self) -> None:
+        certification = self._run_certification("m5_source_gap_route")
+        routed = self._claim_certification(certification, "CL-005")
+
+        self.assertEqual(routed["certification_status"], "blocked_by_source_gap")
+        self.assertEqual(routed["next_workflow_action"], "return_to_M2_source_retrieval")
+        self.assertTrue(any(action["target"] == "M2_source_retrieval" for action in routed["repair_actions"]))
+
+    def test_routing_returns_overclaim_to_m4_claim_rewrite(self) -> None:
+        graph = self._graph_with_clean_claim("CL-004")
+        for claim in graph["claim_nodes"]:
+            if claim["claim_id"] == "CL-004":
+                claim["claim_statement"] = f"{claim['claim_statement']} The buyer also paid $123 million in unsupported extra consideration."
+                break
+        certification = self._run_certification_for_graph(graph, "m5_overclaim_route")
+        routed = self._claim_certification(certification, "CL-004")
+
+        self.assertEqual(routed["next_workflow_action"], "return_to_M4_claim_rewrite")
+        self.assertTrue(any(action["target"] == "M4_claim_evidence_graph" for action in routed["repair_actions"]))
+
+    def test_routing_sends_numeric_claim_to_m5_numeric_verification(self) -> None:
+        graph = self._graph_with_clean_claim("CL-004")
+        for claim in graph["claim_nodes"]:
+            if claim["claim_id"] == "CL-004":
+                claim["requires_numeric_verification"] = True
+                claim["claim_type"] = "transaction_consideration"
+                claim["claim_statement"] = "Narrow transaction consideration claim requiring numeric verification."
+                break
+        certification = self._run_certification_for_graph(graph, "m5_numeric_route")
+        routed = self._claim_certification(certification, "CL-004")
+
+        self.assertEqual(routed["certification_status"], "requires_numeric_verification")
+        self.assertEqual(routed["next_workflow_action"], "route_to_M5_numeric_verification")
+        self.assertTrue(any(action["target"] == "M5_numeric_verification" for action in routed["repair_actions"]))
+
+    def test_routing_sends_human_review_claim_to_human_review(self) -> None:
+        graph = self._graph_with_clean_claim("CL-004")
+        for claim in graph["claim_nodes"]:
+            if claim["claim_id"] == "CL-004":
+                claim["requires_human_review"] = True
+                claim["claim_statement"] = "Narrow transaction timing claim requiring human review."
+                break
+        certification = self._run_certification_for_graph(graph, "m5_human_route")
+        routed = self._claim_certification(certification, "CL-004")
+
+        self.assertEqual(routed["next_workflow_action"], "route_to_human_review")
+        self.assertTrue(any(action["target"] == "human_review" for action in routed["repair_actions"]))
 
     def test_invalid_graph_fails_closed(self) -> None:
         graph = self._load(self.graph_path)
@@ -168,6 +242,63 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
         self.assertTrue(any(step.get("repair_action") == "repair_numeric_formula_or_inputs" for step in repair_plan["repair_steps"]))
         self.assertTrue(all(step.get("repair_action") for step in repair_plan["repair_steps"]))
 
+    def test_report_gate_summary_lists_allowed_caveated_and_blocked_claims(self) -> None:
+        graph = self._graph_with_clean_claim("CL-001")
+        for claim in graph["claim_nodes"]:
+            if claim["claim_id"] == "CL-001":
+                claim["claim_statement"] = "Financing or payment mechanics fact."
+                break
+        for claim in graph["claim_nodes"]:
+            if claim["claim_id"] == "CL-002":
+                self._make_clean_claim(claim)
+                claim["support_level"] = "partially_supported"
+                claim["claim_statement"] = "Narrow partially supported transaction parties claim."
+                break
+        certification = self._run_certification_for_graph(graph, "m5_report_gate_summary")
+        report_summary = certification["report_gate_summary"]
+
+        self.assertIn("CL-001", report_summary["report_allowed_claim_ids"])
+        self.assertIn("CL-002", report_summary["report_caveated_claim_ids"])
+        self.assertIn("CL-005", report_summary["report_blocked_claim_ids"])
+        self.assertTrue(report_summary["report_blocking_reasons"])
+
+    def test_recommendation_gate_summary_blocks_missing_dependencies_and_human_review(self) -> None:
+        graph = self._graph_with_clean_claim("CL-004")
+        for claim in graph["claim_nodes"]:
+            if claim["claim_id"] == "CL-004":
+                claim["claim_type"] = "strategic_fit"
+                claim["claim_statement"] = "Source-bounded strategic fit recommendation claim."
+                break
+        certification = self._run_certification_for_graph(graph, "m5_recommendation_gate_summary")
+        recommendation_summary = certification["recommendation_gate_summary"]
+
+        self.assertFalse(recommendation_summary["recommendation_allowed"])
+        self.assertIn("CL-004", recommendation_summary["recommendation_blocked_claim_ids"])
+        self.assertTrue(any("dependency coverage" in reason for reason in recommendation_summary["recommendation_blocking_reasons"]))
+        self.assertTrue(recommendation_summary["human_review_required_claim_ids"])
+
+    def test_repair_plan_builder_uses_claim_level_repair_actions(self) -> None:
+        graph = self._graph_with_clean_claim("CL-001")
+        for claim in graph["claim_nodes"]:
+            if claim["claim_id"] == "CL-001":
+                claim["requires_numeric_verification"] = True
+                claim["claim_type"] = "transaction_consideration"
+            if claim["claim_id"] == "CL-002":
+                self._make_clean_claim(claim)
+                claim["requires_human_review"] = True
+                claim["support_level"] = "needs_review"
+            if claim["claim_id"] == "CL-004":
+                self._make_clean_claim(claim)
+                claim["claim_statement"] = f"{claim['claim_statement']} The buyer also paid $123 million in unsupported extra consideration."
+        artifacts = self._run_artifacts_for_graph(graph, "m5_claim_level_repair_actions")
+        repair_plan = self._load(artifacts["repair_plan"])
+        steps = repair_plan["repair_steps"]
+
+        self.assertTrue(any(step["target_state"] == "M2_source_retrieval" and "CL-005" in step["related_claim_ids"] for step in steps))
+        self.assertTrue(any(step["target_state"] == "M4_claim_evidence_graph_update" and "CL-004" in step["related_claim_ids"] for step in steps))
+        self.assertTrue(any(step["repair_action"] == "repair_numeric_formula_or_inputs" and "CL-001" in step["related_claim_ids"] for step in steps))
+        self.assertTrue(any(step["repair_action"] == "add_human_review_item" and "CL-002" in step["related_claim_ids"] for step in steps))
+
     def test_no_final_report_or_analysis_package_generated(self) -> None:
         output_dir = self.root / "m5_forbidden_outputs"
 
@@ -179,6 +310,35 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
     def _run_certification(self, label: str) -> dict:
         artifacts = run_m5_pipeline(self.graph_path, self.repository_path, self.root / label)
         return self._load(artifacts["certification_result"])
+
+    def _run_artifacts_for_graph(self, graph: dict, label: str) -> dict:
+        graph_path = self.root / f"{label}_claim_evidence_graph.json"
+        graph_path.write_text(json.dumps(graph, indent=2), encoding="utf-8")
+        return run_m5_pipeline(graph_path, self.repository_path, self.root / label)
+
+    def _run_certification_for_graph(self, graph: dict, label: str) -> dict:
+        artifacts = self._run_artifacts_for_graph(graph, label)
+        return self._load(artifacts["certification_result"])
+
+    def _graph_with_clean_claim(self, claim_id: str) -> dict:
+        graph = self._load(self.graph_path)
+        for claim in graph["claim_nodes"]:
+            if claim["claim_id"] == claim_id:
+                self._make_clean_claim(claim)
+                break
+        return graph
+
+    def _make_clean_claim(self, claim: dict) -> None:
+        claim["created_from_generic_fallback"] = False
+        claim["support_level"] = "source_supported"
+        claim["requires_human_review"] = False
+        claim["requires_numeric_verification"] = False
+        claim["temporal_scope"] = "at_decision"
+        claim["permitted_use"] = "transaction_terms_verification"
+        claim["evidence_time_relation_to_decision_date"] = "at_decision"
+        claim["hindsight_leakage_warning"] = "No hindsight leakage warning: source is contemporaneous with the decision date."
+        claim["claim_type"] = "transaction_timing"
+        claim["claim_statement"] = "Transaction timing fact."
 
     def _claim_certification(self, certification: dict, claim_id: str) -> dict:
         return next(claim for claim in certification["claim_certifications"] if claim["claim_id"] == claim_id)
