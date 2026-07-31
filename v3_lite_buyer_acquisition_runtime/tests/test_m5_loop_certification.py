@@ -4,12 +4,15 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+from urllib.error import HTTPError
 
 from v3_lite_buyer_acquisition_runtime.runtime.case_seed_loader import load_case_seed
 from v3_lite_buyer_acquisition_runtime.runtime.mandate_intake import load_mandate
 from v3_lite_buyer_acquisition_runtime.runtime.research_planning import build_research_plan
 from v3_lite_buyer_acquisition_runtime.runtime.claim_certifier import validate_certification_result
 from v3_lite_buyer_acquisition_runtime.runtime.repair_plan_builder import validate_repair_plan, validate_research_gaps
+from v3_lite_buyer_acquisition_runtime.runtime.source_refetch_check import run_source_refetch_check
 from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m2 import run_m2_pipeline
 from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m3 import run_m3_pipeline
 from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m4 import run_m4_pipeline
@@ -65,6 +68,7 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
         self.assertEqual(certification["generated_artifact"], "certification_result.json")
         self.assertEqual(certification["overall_certification_status"], "repair_required")
         self.assertTrue(certification["evidence_check_results"])
+        self.assertTrue(certification["source_refetch_check_results"])
         self.assertTrue(certification["claim_evidence_check_results"])
         self.assertTrue(certification["usage_check_results"])
         self.assertIn("analysis_gate_summary", certification)
@@ -76,11 +80,14 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
         verification_by_type = {check["check_type"]: check for check in certification["verification_checks"]}
 
         self.assertIn("evidence", verification_by_type)
+        self.assertIn("source_refetch", verification_by_type)
         self.assertIn("claim_evidence", verification_by_type)
         self.assertEqual(verification_by_type["evidence"]["result_count"], len(certification["evidence_check_results"]))
+        self.assertEqual(verification_by_type["source_refetch"]["result_count"], len(certification["source_refetch_check_results"]))
         self.assertEqual(verification_by_type["claim_evidence"]["result_count"], len(certification["claim_evidence_check_results"]))
         for claim_cert in certification["claim_certifications"]:
             self.assertIn("evidence_check_status", claim_cert)
+            self.assertIn("source_refetch_check_status", claim_cert)
             self.assertIn("claim_evidence_check_status", claim_cert)
             self.assertIn("usage_check_status", claim_cert)
             self.assertIn("next_workflow_action", claim_cert)
@@ -329,6 +336,101 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
         self.assertTrue(any(step["repair_action"] == "repair_numeric_formula_or_inputs" and "CL-001" in step["related_claim_ids"] for step in steps))
         self.assertTrue(any(step["repair_action"] == "add_human_review_item" and "CL-002" in step["related_claim_ids"] for step in steps))
 
+    def test_source_refetch_check_verifies_url_and_quote(self) -> None:
+        repository = self._repository_with_url("https://example.test/source", "Base consideration is $42 million.")
+
+        results = run_source_refetch_check(repository, fetcher=lambda url, timeout: ("text/html", b"The agreement says base consideration is $42 million.", url))
+        result = results[0]
+
+        self.assertEqual(result["refetch_status"], "verified")
+        self.assertIn(result["quote_match_status"], {"matched", "weak_match"})
+        self.assertEqual(result["repair_actions"], [])
+
+    def test_source_refetch_quote_not_matched_blocks_claim_and_routes_to_m4(self) -> None:
+        certification = self._run_certification_with_refetch_result(
+            "source_refetch_not_matched",
+            {
+                "refetch_status": "failed",
+                "quote_match_status": "not_matched",
+                "blocking_reasons": ["Evidence quote, excerpt, or summary was not matched in refetched source text."],
+                "repair_actions": [
+                    {"target": "M4_claim_evidence_graph", "action": "repair_quote_or_evidence_mapping", "reason": "Evidence quote, excerpt, or summary was not matched in refetched source text."}
+                ],
+            },
+        )
+        routed = self._claim_certification(certification, "CL-004")
+
+        self.assertIn("source_refetch_check_results", certification)
+        self.assertEqual(routed["certification_status"], "failed")
+        self.assertEqual(routed["source_refetch_check_status"], "failed")
+        self.assertEqual(routed["next_workflow_action"], "return_to_M4_claim_rewrite")
+        self.assertTrue(any(action["target"] == "M4_claim_evidence_graph" for action in routed["repair_actions"]))
+
+    def test_source_refetch_url_failed_routes_to_m2_source_retrieval(self) -> None:
+        repository = self._repository_with_url("https://example.test/missing", "Base consideration is $42 million.")
+        results = run_source_refetch_check(
+            repository,
+            fetcher=lambda url, timeout: (_ for _ in ()).throw(HTTPError(url, 404, "Not Found", hdrs=None, fp=None)),
+        )
+
+        self.assertEqual(results[0]["refetch_status"], "failed")
+        self.assertEqual(results[0]["quote_match_status"], "not_applicable")
+        self.assertTrue(any(action["target"] == "M2_source_retrieval" for action in results[0]["repair_actions"]))
+
+        certification = self._run_certification_with_refetch_result(
+            "source_refetch_url_failed",
+            {
+                "refetch_status": "failed",
+                "quote_match_status": "not_applicable",
+                "blocking_reasons": ["Source URL returned HTTP error 404."],
+                "repair_actions": [{"target": "M2_source_retrieval", "action": "repair_source_url", "reason": "Source URL returned HTTP error 404."}],
+            },
+        )
+        routed = self._claim_certification(certification, "CL-004")
+
+        self.assertEqual(routed["certification_status"], "failed")
+        self.assertEqual(routed["next_workflow_action"], "return_to_M2_source_retrieval")
+        self.assertTrue(any(action["target"] == "M2_source_retrieval" for action in routed["repair_actions"]))
+
+    def test_source_refetch_provider_unavailable_blocks_pipeline(self) -> None:
+        certification = self._run_certification_with_refetch_result(
+            "source_refetch_provider_unavailable",
+            {
+                "refetch_status": "provider_unavailable",
+                "quote_match_status": "not_applicable",
+                "blocking_reasons": ["Source URL could not be fetched: URLError."],
+                "repair_actions": [
+                    {"target": "block_pipeline_until_structure_repaired", "action": "retry_or_document_provider_unavailable", "reason": "Source URL could not be fetched: URLError."}
+                ],
+            },
+        )
+        routed = self._claim_certification(certification, "CL-004")
+
+        self.assertEqual(routed["certification_status"], "failed")
+        self.assertEqual(routed["next_workflow_action"], "block_pipeline_until_structure_repaired")
+
+    def test_source_refetch_text_unavailable_adds_caveat_without_verification(self) -> None:
+        repository = self._repository_with_url("https://example.test/source.pdf", "Base consideration is $42 million.")
+        results = run_source_refetch_check(repository, fetcher=lambda url, timeout: ("application/pdf", b"%PDF", url))
+
+        self.assertEqual(results[0]["refetch_status"], "text_unavailable")
+        self.assertEqual(results[0]["quote_match_status"], "not_applicable")
+
+        certification = self._run_certification_with_refetch_result(
+            "source_refetch_text_unavailable",
+            {
+                "refetch_status": "text_unavailable",
+                "quote_match_status": "not_applicable",
+                "blocking_reasons": ["Fetched source did not expose plain text for minimal quote check."],
+                "repair_actions": [],
+            },
+        )
+        routed = self._claim_certification(certification, "CL-004")
+
+        self.assertEqual(routed["source_refetch_check_status"], "text_unavailable")
+        self.assertIn("Source refetch text unavailable", " ".join(routed["caveats"]))
+        self.assertNotEqual(routed["source_refetch_check_status"], "verified")
+
     def test_no_final_report_or_analysis_package_generated(self) -> None:
         output_dir = self.root / "m5_forbidden_outputs"
 
@@ -369,6 +471,27 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
         claim["hindsight_leakage_warning"] = "No hindsight leakage warning: source is contemporaneous with the decision date."
         claim["claim_type"] = "transaction_timing"
         claim["claim_statement"] = "Transaction timing fact."
+
+    def _repository_with_url(self, url: str, summary: str) -> dict:
+        repository = self._load(self.repository_path)
+        repository["evidence_records"] = [dict(repository["evidence_records"][0], source_urls=[url], normalized_fact_summary=summary)]
+        return repository
+
+    def _run_certification_with_refetch_result(self, label: str, result_fields: dict) -> dict:
+        graph = self._graph_with_clean_claim("CL-004")
+        for claim in graph["claim_nodes"]:
+            if claim["claim_id"] == "CL-004":
+                claim["supporting_evidence_record_ids"] = ["ER-001"]
+                claim["claim_statement"] = "Transaction timing fact."
+                break
+        refetch_result = {
+            "evidence_record_id": "ER-001",
+            "source_url": "https://example.test/source",
+            "source_ids": ["SRC-001"],
+            **result_fields,
+        }
+        with patch("v3_lite_buyer_acquisition_runtime.runtime.claim_certifier.run_source_refetch_check", return_value=[refetch_result]):
+            return self._run_certification_for_graph(graph, label)
 
     def _claim_certification(self, certification: dict, claim_id: str) -> dict:
         return next(claim for claim in certification["claim_certifications"] if claim["claim_id"] == claim_id)
