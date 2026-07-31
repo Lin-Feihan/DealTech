@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -517,6 +518,59 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
         self.assertNotEqual(routed["xbrl_numeric_check_status"], "verified")
         self.assertEqual(routed["next_workflow_action"], "block_pipeline_until_structure_repaired")
 
+    def test_sec_companyfacts_provider_is_disabled_by_default(self) -> None:
+        graph = self._graph_with_clean_claim("CL-004")
+        repository = self._full_repository_with_xbrl_metadata(expected_value=60900000000)
+
+        with patch.dict(os.environ, {"ENABLE_SEC_COMPANYFACTS_PROVIDER": "", "SEC_USER_AGENT": ""}), patch(
+            "v3_lite_buyer_acquisition_runtime.runtime.claim_certifier.make_sec_companyfacts_provider",
+            side_effect=AssertionError("SEC provider should not be constructed by default."),
+        ):
+            certification = self._run_certification_for_graph_and_repository(graph, repository, "m5_sec_provider_disabled")
+        routed = self._claim_certification(certification, "CL-004")
+
+        self.assertEqual(routed["xbrl_numeric_check_status"], "not_applicable")
+
+    def test_sec_companyfacts_provider_is_used_when_enabled_with_user_agent(self) -> None:
+        graph = self._graph_with_clean_claim("CL-004")
+        for claim in graph["claim_nodes"]:
+            if claim["claim_id"] == "CL-004":
+                claim["claim_type"] = "transaction_consideration"
+                claim["supporting_evidence_record_ids"] = ["ER-001"]
+                break
+        repository = self._full_repository_with_xbrl_metadata(expected_value=60900000000)
+        fake_provider = lambda cik, taxonomy_tag, period, unit: {"observed_value": 60900000000}
+
+        with patch.dict(os.environ, {"ENABLE_SEC_COMPANYFACTS_PROVIDER": "1", "SEC_USER_AGENT": "DealTech test@example.com"}), patch(
+            "v3_lite_buyer_acquisition_runtime.runtime.claim_certifier.make_sec_companyfacts_provider",
+            return_value=fake_provider,
+        ) as provider_factory:
+            certification = self._run_certification_for_graph_and_repository(graph, repository, "m5_sec_provider_enabled")
+        routed = self._claim_certification(certification, "CL-004")
+
+        provider_factory.assert_called_once_with()
+        self.assertEqual(routed["xbrl_numeric_check_status"], "verified")
+
+    def test_sec_companyfacts_provider_missing_user_agent_keeps_fail_closed_default(self) -> None:
+        graph = self._graph_with_clean_claim("CL-004")
+        for claim in graph["claim_nodes"]:
+            if claim["claim_id"] == "CL-004":
+                claim["claim_type"] = "transaction_consideration"
+                claim["supporting_evidence_record_ids"] = ["ER-001"]
+                break
+        repository = self._full_repository_with_xbrl_metadata(expected_value=60900000000)
+
+        with patch.dict(os.environ, {"ENABLE_SEC_COMPANYFACTS_PROVIDER": "1", "SEC_USER_AGENT": ""}), patch(
+            "v3_lite_buyer_acquisition_runtime.runtime.claim_certifier.make_sec_companyfacts_provider",
+            side_effect=AssertionError("SEC provider should not be constructed without SEC_USER_AGENT."),
+        ):
+            certification = self._run_certification_for_graph_and_repository(graph, repository, "m5_sec_provider_missing_ua")
+        routed = self._claim_certification(certification, "CL-004")
+
+        self.assertEqual(routed["xbrl_numeric_check_status"], "provider_unavailable")
+        self.assertNotEqual(routed["xbrl_numeric_check_status"], "verified")
+        self.assertEqual(routed["next_workflow_action"], "block_pipeline_until_structure_repaired")
+
     def test_no_final_report_or_analysis_package_generated(self) -> None:
         output_dir = self.root / "m5_forbidden_outputs"
 
@@ -536,6 +590,14 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
 
     def _run_certification_for_graph(self, graph: dict, label: str) -> dict:
         artifacts = self._run_artifacts_for_graph(graph, label)
+        return self._load(artifacts["certification_result"])
+
+    def _run_certification_for_graph_and_repository(self, graph: dict, repository: dict, label: str) -> dict:
+        graph_path = self.root / f"{label}_claim_evidence_graph.json"
+        repository_path = self.root / f"{label}_evidence_repository.json"
+        graph_path.write_text(json.dumps(graph, indent=2), encoding="utf-8")
+        repository_path.write_text(json.dumps(repository, indent=2), encoding="utf-8")
+        artifacts = run_m5_pipeline(graph_path, repository_path, self.root / label)
         return self._load(artifacts["certification_result"])
 
     def _graph_with_clean_claim(self, claim_id: str) -> dict:
@@ -578,6 +640,28 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
                     }
                 },
             )
+        ]
+        return repository
+
+    def _full_repository_with_xbrl_metadata(self, expected_value: int) -> dict:
+        repository = self._load(self.repository_path)
+        repository["evidence_records"] = [
+            dict(
+                record,
+                structured_attributes={
+                    **record.get("structured_attributes", {}),
+                    "xbrl": {
+                        "cik": "0000320193",
+                        "taxonomy_tag": "Revenues",
+                        "period": "FY2024",
+                        "unit": "USD",
+                        "expected_value": expected_value,
+                    },
+                }
+                if record["evidence_record_id"] == "ER-001"
+                else record,
+            )
+            for record in repository["evidence_records"]
         ]
         return repository
 

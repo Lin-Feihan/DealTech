@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -11,6 +12,7 @@ from v3_lite_buyer_acquisition_runtime.runtime.claim_evidence_check import (
     run_claim_evidence_check,
 )
 from v3_lite_buyer_acquisition_runtime.runtime.evidence_check import evidence_results_by_record_id, run_evidence_check
+from v3_lite_buyer_acquisition_runtime.runtime.sec_companyfacts_provider import SEC_USER_AGENT_ENV, make_sec_companyfacts_provider
 from v3_lite_buyer_acquisition_runtime.runtime.source_refetch_check import run_source_refetch_check, source_refetch_results_by_record_id
 from v3_lite_buyer_acquisition_runtime.runtime.usage_check import run_usage_check, usage_results_by_claim_id
 from v3_lite_buyer_acquisition_runtime.runtime.xbrl_numeric_check import run_xbrl_numeric_check, xbrl_results_by_record_id
@@ -85,7 +87,7 @@ def build_certification_result(graph: dict[str, Any], evidence_repository: dict[
     validate_m5_inputs(graph, evidence_repository)
     evidence_check_results = run_evidence_check(evidence_repository)
     source_refetch_check_results = run_source_refetch_check(evidence_repository)
-    xbrl_numeric_check_results = run_xbrl_numeric_check(evidence_repository)
+    xbrl_numeric_check_results = _run_configured_xbrl_numeric_check(evidence_repository)
     claim_evidence_check_results = run_claim_evidence_check(graph, evidence_repository)
     usage_check_results = run_usage_check(graph, evidence_repository)
     citation_results = _build_compat_citation_results(graph, claim_evidence_check_results)
@@ -157,6 +159,12 @@ def build_certification_result(graph: dict[str, Any], evidence_repository: dict[
     }
     validate_certification_result(result)
     return result
+
+
+def _run_configured_xbrl_numeric_check(evidence_repository: dict[str, Any]) -> list[dict[str, Any]]:
+    if os.environ.get("ENABLE_SEC_COMPANYFACTS_PROVIDER") == "1" and os.environ.get(SEC_USER_AGENT_ENV, "").strip():
+        return run_xbrl_numeric_check(evidence_repository, provider=make_sec_companyfacts_provider())
+    return run_xbrl_numeric_check(evidence_repository)
 
 
 def validate_m5_inputs(graph: Any, evidence_repository: Any) -> None:
