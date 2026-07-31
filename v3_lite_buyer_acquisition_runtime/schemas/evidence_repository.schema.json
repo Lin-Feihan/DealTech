@@ -100,6 +100,7 @@
         ],
         "properties": {
           "source_gap_id": {"type": "string", "minLength": 1},
+          "provider_source_gap_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
           "missing_source_need_id": {"type": "string", "minLength": 1},
           "missing_source_description": {"type": "string", "minLength": 1},
           "reason": {"type": "string", "minLength": 1},
@@ -107,6 +108,62 @@
           "affected_workstreams": {"type": "array", "items": {"type": "string", "minLength": 1}},
           "downstream_risk": {"type": "string", "minLength": 1},
           "recommended_repair_target": {"type": "string", "const": "M2_source_retrieval"}
+        }
+      }
+    },
+    "candidate_claims_from_research": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "candidate_claim_id",
+          "claim_statement",
+          "claim_type",
+          "claim_scope",
+          "temporal_scope",
+          "permitted_use",
+          "supporting_evidence_item_ids",
+          "contradicting_evidence_item_ids",
+          "related_source_gap_ids",
+          "confidence_preliminary",
+          "requires_numeric_verification",
+          "requires_human_review",
+          "downstream_use_warning",
+          "source_bounded_precheck_status"
+        ],
+        "properties": {
+          "candidate_claim_id": {"type": "string", "minLength": 1},
+          "claim_statement": {"type": "string", "minLength": 1},
+          "claim_type": {"type": "string", "minLength": 1},
+          "claim_scope": {"type": "string", "minLength": 1},
+          "temporal_scope": {"type": "string", "minLength": 1},
+          "permitted_use": {"type": "string", "enum": ["ex_ante_deal_evaluation", "transaction_terms_verification", "retrospective_outcome_validation", "source_lead_only", "gap_tracking"]},
+          "supporting_evidence_item_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "contradicting_evidence_item_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "related_source_gap_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "provider_related_source_gap_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "confidence_preliminary": {"type": "string", "enum": ["low", "medium", "high"]},
+          "requires_numeric_verification": {"type": "boolean"},
+          "requires_human_review": {"type": "boolean"},
+          "downstream_use_warning": {"type": "string", "minLength": 1},
+          "source_bounded_precheck_status": {"type": "string", "enum": ["pending_m4_mapping", "gap_reference_requires_repair"]}
+        }
+      }
+    },
+    "candidate_claim_evidence_links_from_research": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["candidate_claim_id", "evidence_item_id", "link_type", "rationale", "mapped_evidence_record_ids", "mapping_status"],
+        "properties": {
+          "candidate_claim_id": {"type": "string", "minLength": 1},
+          "evidence_item_id": {"type": "string", "minLength": 1},
+          "link_type": {"type": "string", "enum": ["supports", "partially_supports", "contextualizes", "contradicts", "requires_verification"]},
+          "rationale": {"type": "string", "minLength": 1},
+          "mapped_evidence_record_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "mapping_status": {"type": "string", "enum": ["mapped_to_evidence_record", "evidence_item_not_in_repository_requires_repair"]}
         }
       }
     },

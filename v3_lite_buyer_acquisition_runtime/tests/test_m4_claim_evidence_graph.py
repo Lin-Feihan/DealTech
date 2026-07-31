@@ -129,7 +129,47 @@ class V3LiteM4ClaimEvidenceGraphTest(unittest.TestCase):
         self.assertTrue(all(claim["claim_type"] in {claim["canonical_fact_type"], "generic_fact"} for claim in source_supported_claims))
         self.assertTrue(all(claim["supporting_source_ids"] for claim in source_supported_claims))
         self.assertTrue(all(claim["supporting_raw_evidence_ids"] for claim in source_supported_claims))
+        self.assertTrue(all("Generic fallback claim:" in claim["claim_statement"] for claim in source_supported_claims))
         self.assertFalse(any(marker in json.dumps(graph["claim_nodes"]) for marker in forbidden_markers))
+
+    def test_m4_builds_claim_nodes_from_candidate_claims_when_available(self) -> None:
+        graph = self._run_candidate_graph("m4_candidate_claim_nodes")
+        candidate_claims = [claim for claim in graph["claim_nodes"] if claim.get("created_from_candidate_claim_id")]
+
+        self.assertTrue(candidate_claims)
+        self.assertEqual(candidate_claims[0]["created_from_candidate_claim_id"], "CC-M4-001")
+        self.assertEqual(
+            candidate_claims[0]["claim_statement"],
+            "The signed source states the buyer agreed to a $100 million closing payment plus contingent milestones.",
+        )
+        self.assertNotIn("Source-bounded evidence supports", candidate_claims[0]["claim_statement"])
+
+    def test_m4_creates_evidence_edges_from_claim_evidence_links(self) -> None:
+        graph = self._run_candidate_graph("m4_candidate_edges")
+        candidate_claim = next(claim for claim in graph["claim_nodes"] if claim.get("created_from_candidate_claim_id") == "CC-M4-001")
+        edges = [edge for edge in graph["evidence_edges"] if edge["claim_id"] == candidate_claim["claim_id"]]
+
+        self.assertTrue(edges)
+        self.assertEqual(edges[0]["edge_type"], "supports")
+        self.assertIn("External candidate link rationale", edges[0]["notes"])
+
+    def test_m4_does_not_certify_candidate_claims(self) -> None:
+        graph = self._run_candidate_graph("m4_candidate_uncertified")
+        candidate_claims = [claim for claim in graph["claim_nodes"] if claim.get("created_from_candidate_claim_id")]
+
+        self.assertTrue(candidate_claims)
+        self.assertTrue(all(claim["certification_status"] in {"pending_verification", "failed_precheck", "not_applicable"} for claim in candidate_claims))
+        self.assertFalse(any(claim["certification_status"] == "certified" for claim in candidate_claims))
+
+    def test_gap_only_candidate_claims_remain_blocked(self) -> None:
+        graph = self._run_candidate_graph("m4_gap_only_candidate")
+        gap_claim = next(claim for claim in graph["claim_nodes"] if claim.get("created_from_candidate_claim_id") == "CC-M4-GAP")
+
+        self.assertEqual(gap_claim["support_level"], "gap_only")
+        self.assertEqual(gap_claim["certification_status"], "failed_precheck")
+        self.assertEqual(gap_claim["permitted_use"], "gap_tracking")
+        self.assertEqual(gap_claim["supporting_evidence_record_ids"], [])
+        self.assertIn("blocked from report use", gap_claim["downstream_use_warning"].lower())
 
     def test_post_decision_and_retrospective_claims_are_not_ex_ante(self) -> None:
         graph = self._run_graph("m4_temporal")
@@ -141,6 +181,58 @@ class V3LiteM4ClaimEvidenceGraphTest(unittest.TestCase):
 
     def _run_graph(self, label: str) -> dict:
         artifacts = run_m4_pipeline(evidence_repository_path=self.evidence_repository_path, output_dir=self.root / label)
+        return json.loads(artifacts["claim_evidence_graph"].read_text(encoding="utf-8"))
+
+    def _run_candidate_graph(self, label: str) -> dict:
+        evidence_repository = json.loads(self.evidence_repository_path.read_text(encoding="utf-8"))
+        evidence_record = evidence_repository["evidence_records"][0]
+        evidence_repository["candidate_claims_from_research"] = [
+            {
+                "candidate_claim_id": "CC-M4-001",
+                "claim_statement": "The signed source states the buyer agreed to a $100 million closing payment plus contingent milestones.",
+                "claim_type": "transaction_consideration",
+                "claim_scope": "Transaction terms only; not valuation or recommendation.",
+                "temporal_scope": evidence_record["evidence_time_relation_to_decision_date"],
+                "permitted_use": evidence_record["permitted_use"],
+                "supporting_evidence_item_ids": ["PE-M4-001"],
+                "contradicting_evidence_item_ids": [],
+                "related_source_gap_ids": [],
+                "confidence_preliminary": "medium",
+                "requires_numeric_verification": False,
+                "requires_human_review": True,
+                "downstream_use_warning": "Candidate claim only. M5 decides certification and report eligibility.",
+                "source_bounded_precheck_status": "pending_m4_mapping",
+            },
+            {
+                "candidate_claim_id": "CC-M4-GAP",
+                "claim_statement": "Seller realized proceeds remain unresolved because direct authoritative support is missing.",
+                "claim_type": "source_gap_claim",
+                "claim_scope": "Source gap tracking only.",
+                "temporal_scope": "source_gap",
+                "permitted_use": "gap_tracking",
+                "supporting_evidence_item_ids": [],
+                "contradicting_evidence_item_ids": [],
+                "related_source_gap_ids": [evidence_repository["source_gaps"][0]["source_gap_id"]],
+                "confidence_preliminary": "low",
+                "requires_numeric_verification": False,
+                "requires_human_review": True,
+                "downstream_use_warning": "Gap-only candidate claim. Block from report assertions until source repair.",
+                "source_bounded_precheck_status": "pending_m4_mapping",
+            },
+        ]
+        evidence_repository["candidate_claim_evidence_links_from_research"] = [
+            {
+                "candidate_claim_id": "CC-M4-001",
+                "evidence_item_id": "PE-M4-001",
+                "link_type": "supports",
+                "rationale": "External candidate link rationale maps the claim to a source-bounded repository record.",
+                "mapped_evidence_record_ids": [evidence_record["evidence_record_id"]],
+                "mapping_status": "mapped_to_evidence_record",
+            }
+        ]
+        candidate_repository_path = self.root / f"{label}_evidence_repository.json"
+        candidate_repository_path.write_text(json.dumps(evidence_repository, indent=2), encoding="utf-8")
+        artifacts = run_m4_pipeline(evidence_repository_path=candidate_repository_path, output_dir=self.root / label)
         return json.loads(artifacts["claim_evidence_graph"].read_text(encoding="utf-8"))
 
 

@@ -116,7 +116,7 @@ GPT, Claude, Deep Research, search APIs, SEC EDGAR APIs, patent APIs, and clinic
 
 V3-Lite does not implement its own Deep Research engine. For current runs, OpenClaw / GPT-5.5 or human-assisted research can act as the external Deep Research executor and save a structured `deep_research_response.json` package. V3-Lite then ingests that package in replay mode.
 
-Deep Research performs multi-source discovery and evidence collection outside the runtime. V3-Lite then validates and normalizes the structured external output into `retrieved_sources_manifest.json` and `raw_evidence.json` with preserved source provenance, source tier, timing labels, permitted use, and fail-closed rejection of source-less or non-authoritative provider claims.
+Deep Research performs multi-source discovery and evidence collection outside the runtime. It does not produce the final acquisition report. The expected output is a structured research package with `sources`, `evidence_items`, `candidate_claims`, `claim_evidence_links`, `source_gaps`, and uncertainties or limitations when applicable. V3-Lite then validates and normalizes the structured external output into `retrieved_sources_manifest.json` and `raw_evidence.json` with preserved source provenance, source tier, timing labels, permitted use, candidate claims, claim-evidence links, source gaps, and fail-closed rejection of source-less or non-authoritative provider claims.
 
 Downstream M3-M7.1 are unchanged: repository building, claim graph construction, verification, repair loop, evidence-bounded analysis, report gating, and gate-controlled rendering still happen inside V3-Lite after normalized M2 artifacts exist.
 
@@ -141,7 +141,7 @@ python3 v3_lite_buyer_acquisition_runtime/runtime/run_v3_lite_m2_deep_research.p
   --replay-response <external_deep_research_response.json>
 ```
 
-Replay mode writes only `retrieved_sources_manifest.json` and `raw_evidence.json`. It does not generate `final_report.md`, `recommendation_decision.json`, or any M3-M7 downstream artifacts, and it does not bypass the M3-M7 gate logic.
+Replay mode writes only `retrieved_sources_manifest.json` and `raw_evidence.json`. It preserves external `candidate_claims` and `claim_evidence_links` for downstream ingestion, but candidate claims are not certified claims. It does not generate `final_report.md`, `recommendation_decision.json`, or any M3-M7 downstream artifacts, and it does not bypass the M3-M7 gate logic.
 
 Fixture-backed extraction exists only under `tests/fixtures/` for contract tests. Fixture output is not certified evidence, analysis, or a final report.
 
@@ -165,6 +165,7 @@ M3 responsibilities:
 
 - validate `raw_evidence.json` fail-closed
 - group duplicate raw evidence into canonical evidence records
+- preserve candidate claims and claim-evidence links from structured Deep Research packages as `candidate_claims_from_research` and `candidate_claim_evidence_links_from_research`
 - preserve temporal controls and hindsight warnings
 - convert `failed_source_needs` into `source_gaps`
 - summarize repository quality for the next stage
@@ -179,12 +180,15 @@ M4 transforms:
 evidence_repository.json -> claim_evidence_graph.json
 ```
 
-M4 builds candidate claim nodes, evidence edges, and gap nodes for future certification. It does not certify claims, make Proceed / Walk Away recommendations, perform valuation analysis, or generate `certification_result.json` or `final_report.md`.
+M4 builds candidate claim nodes, evidence edges, and gap nodes for future certification. When `candidate_claims_from_research` is present, M4 uses those real candidate `claim_statement` values and maps them to evidence records through `candidate_claim_evidence_links_from_research`. When no candidate claims are present, M4 keeps the older evidence-record-to-generic-claim fallback for backward compatibility and labels those statements as generic fallback claims. It does not certify claims, make Proceed / Walk Away recommendations, perform valuation analysis, or generate `certification_result.json` or `final_report.md`.
 
 M4 responsibilities:
 
 - validate `evidence_repository.json` fail-closed
-- map evidence records to uncertified or pending-verification candidate claims
+- normalize structured Deep Research candidate claims into Claim-Evidence Graph `claim_nodes`
+- preserve `created_from_candidate_claim_id` and the real candidate `claim_statement`
+- map supporting, partial, contextualizing, contradictory, and requires-verification evidence links into `evidence_edges`
+- keep all candidate claims uncertified with `pending_verification`, `failed_precheck`, or `not_applicable` status
 - convert M3 source gaps into graph gap nodes and gap-only claims
 - preserve temporal scope, permitted use, and hindsight warnings
 - mark derived numeric candidates as requiring later numeric verification
@@ -199,7 +203,7 @@ M5 transforms:
 claim_evidence_graph.json + evidence_repository.json -> certification_result.json -> research_gaps.json -> repair_plan.json
 ```
 
-M5 verifies candidate claims, classifies certification outcomes, detects research gaps, and produces targeted loop repair instructions. It does not create `final_report.md`, `analysis_package.json`, valuation analysis, investment recommendations, ATL adapters, or report logic changes.
+M5 verifies candidate claims, classifies certification outcomes, detects research gaps, and produces targeted loop repair instructions. M5 decides certification, caveats, repair routing, human review, and report eligibility. It does not create `final_report.md`, `analysis_package.json`, valuation analysis, investment recommendations, ATL adapters, or report logic changes.
 
 M5 responsibilities:
 

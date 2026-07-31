@@ -60,6 +60,7 @@
         ],
         "properties": {
           "evidence_id": {"type": "string", "minLength": 1},
+          "provider_evidence_id": {"type": "string", "minLength": 1},
           "case_id": {"type": "string", "minLength": 1},
           "source_id": {"type": "string", "minLength": 1},
           "source_title": {"type": "string", "minLength": 1},
@@ -92,6 +93,14 @@
           "hindsight_leakage_warning": {"type": "string", "minLength": 1}
         }
       }
+    },
+    "candidate_claims_from_research": {
+      "type": "array",
+      "items": {"type": "object"}
+    },
+    "candidate_claim_evidence_links_from_research": {
+      "type": "array",
+      "items": {"type": "object"}
     }
   }
 }

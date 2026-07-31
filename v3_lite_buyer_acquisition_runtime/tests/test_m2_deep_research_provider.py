@@ -133,6 +133,8 @@ class V3LiteM2DeepResearchProviderTest(unittest.TestCase):
         failed_reasons = "\n".join(entry["reason"] for entry in manifest["failed_source_needs"])
         self.assertIn("Tier 4 material", failed_reasons)
         self.assertIn("forbidden non-source material", failed_reasons)
+        self.assertEqual(raw_evidence["candidate_claims_from_research"][0]["candidate_claim_id"], "CC-001")
+        self.assertEqual(raw_evidence["candidate_claim_evidence_links_from_research"][0]["evidence_item_id"], "PE-001")
 
     def test_external_source_tier_and_temporal_classification_are_preserved(self) -> None:
         output_dir = self.root / "replay_preserve_classification"
@@ -262,6 +264,99 @@ class V3LiteM2DeepResearchProviderTest(unittest.TestCase):
             )
 
         self.assertIn("case_id must match", str(context.exception))
+
+    def test_external_research_package_with_candidate_claims_validates_successfully(self) -> None:
+        output_dir = self.root / "replay_candidate_claims"
+        replay_path = self._write_replay_response(self._valid_replay_response())
+
+        artifacts = run_m2_deep_research_pipeline(
+            mandate_path=self.mandate_path,
+            research_plan_path=self.research_plan_path,
+            case_seed_path=self.case_seed_path,
+            source_discovery_plan_path=self.source_discovery_plan_path,
+            output_dir=output_dir,
+            mode="replay_deep_research_response",
+            replay_response_path=replay_path,
+        )
+
+        raw_evidence = self._load_json(artifacts["raw_evidence"])
+        self.assertEqual(len(raw_evidence["candidate_claims_from_research"]), 3)
+        self.assertEqual(len(raw_evidence["candidate_claim_evidence_links_from_research"]), 2)
+
+    def test_candidate_claim_id_uniqueness_is_enforced(self) -> None:
+        output_dir = self.root / "replay_duplicate_candidate_claim_id"
+        response = self._valid_replay_response()
+        duplicate = dict(response["candidate_claims"][1])
+        duplicate["candidate_claim_id"] = response["candidate_claims"][0]["candidate_claim_id"]
+        response["candidate_claims"].append(duplicate)
+        replay_path = self._write_replay_response(response)
+
+        with self.assertRaises(M2DeepResearchFailClosed) as context:
+            run_m2_deep_research_pipeline(
+                mandate_path=self.mandate_path,
+                research_plan_path=self.research_plan_path,
+                case_seed_path=self.case_seed_path,
+                source_discovery_plan_path=self.source_discovery_plan_path,
+                output_dir=output_dir,
+                mode="replay_deep_research_response",
+                replay_response_path=replay_path,
+            )
+
+        self.assertIn("Duplicate Deep Research candidate_claim_id", str(context.exception))
+
+    def test_claim_evidence_link_missing_evidence_item_fails_closed(self) -> None:
+        response = self._valid_replay_response()
+        response["claim_evidence_links"][0]["evidence_item_id"] = "PE-MISSING"
+        replay_path = self._write_replay_response(response)
+
+        with self.assertRaises(M2DeepResearchFailClosed) as context:
+            run_m2_deep_research_pipeline(
+                mandate_path=self.mandate_path,
+                research_plan_path=self.research_plan_path,
+                case_seed_path=self.case_seed_path,
+                source_discovery_plan_path=self.source_discovery_plan_path,
+                output_dir=self.root / "replay_missing_evidence_link",
+                mode="replay_deep_research_response",
+                replay_response_path=replay_path,
+            )
+
+        self.assertIn("claim_evidence_link references missing evidence_item_id", str(context.exception))
+
+    def test_claim_evidence_link_missing_candidate_claim_fails_closed(self) -> None:
+        response = self._valid_replay_response()
+        response["claim_evidence_links"][0]["candidate_claim_id"] = "CC-MISSING"
+        replay_path = self._write_replay_response(response)
+
+        with self.assertRaises(M2DeepResearchFailClosed) as context:
+            run_m2_deep_research_pipeline(
+                mandate_path=self.mandate_path,
+                research_plan_path=self.research_plan_path,
+                case_seed_path=self.case_seed_path,
+                source_discovery_plan_path=self.source_discovery_plan_path,
+                output_dir=self.root / "replay_missing_claim_link",
+                mode="replay_deep_research_response",
+                replay_response_path=replay_path,
+            )
+
+        self.assertIn("claim_evidence_link references missing candidate_claim_id", str(context.exception))
+
+    def test_final_report_text_is_not_structured_package_substitute(self) -> None:
+        response = self._valid_replay_response()
+        response["final_report"] = "This narrative is not accepted as structured research output."
+        replay_path = self._write_replay_response(response)
+
+        with self.assertRaises(M2DeepResearchFailClosed) as context:
+            run_m2_deep_research_pipeline(
+                mandate_path=self.mandate_path,
+                research_plan_path=self.research_plan_path,
+                case_seed_path=self.case_seed_path,
+                source_discovery_plan_path=self.source_discovery_plan_path,
+                output_dir=self.root / "replay_final_report_substitute",
+                mode="replay_deep_research_response",
+                replay_response_path=replay_path,
+            )
+
+        self.assertIn("final report text is not accepted", str(context.exception))
 
     def _write_replay_response(self, response: dict) -> Path:
         path = self.root / "deep_research_replay_response.json"
@@ -394,9 +489,70 @@ class V3LiteM2DeepResearchProviderTest(unittest.TestCase):
                     "caveats": ["User note only."]
                 }
             ],
-            "unresolved_gaps": [
+            "candidate_claims": [
                 {
-                    "gap_id": "GAP-001",
+                    "candidate_claim_id": "CC-001",
+                    "claim_statement": "The transaction agreement states base consideration and possible contingent consideration tied to future milestones.",
+                    "claim_type": "transaction_consideration",
+                    "claim_scope": "Transaction consideration terms only; not valuation or recommendation.",
+                    "temporal_scope": "at_decision",
+                    "permitted_use": "transaction_terms_verification",
+                    "supporting_evidence_item_ids": ["PE-001"],
+                    "contradicting_evidence_item_ids": [],
+                    "related_source_gap_ids": [],
+                    "confidence_preliminary": "high",
+                    "requires_numeric_verification": True,
+                    "requires_human_review": True,
+                    "downstream_use_warning": "Candidate claim only. M5 must verify citations, arithmetic, caveats, and report eligibility."
+                },
+                {
+                    "candidate_claim_id": "CC-002",
+                    "claim_statement": "The official buyer pipeline page identifies the acquired program under its current product candidate name, but it is retrospective to the transaction decision date.",
+                    "claim_type": "asset_or_product_identity",
+                    "claim_scope": "Asset naming context only.",
+                    "temporal_scope": "retrospective",
+                    "permitted_use": "retrospective_outcome_validation",
+                    "supporting_evidence_item_ids": ["PE-002"],
+                    "contradicting_evidence_item_ids": [],
+                    "related_source_gap_ids": [],
+                    "confidence_preliminary": "medium",
+                    "requires_numeric_verification": False,
+                    "requires_human_review": True,
+                    "downstream_use_warning": "Retrospective candidate claim only; do not use as ex-ante buyer decision support."
+                },
+                {
+                    "candidate_claim_id": "CC-003",
+                    "claim_statement": "Seller realized proceeds remain unresolved because no direct authoritative support was located.",
+                    "claim_type": "source_gap_claim",
+                    "claim_scope": "Source gap tracking only.",
+                    "temporal_scope": "source_gap",
+                    "permitted_use": "gap_tracking",
+                    "supporting_evidence_item_ids": [],
+                    "contradicting_evidence_item_ids": [],
+                    "related_source_gap_ids": ["GAP-001"],
+                    "confidence_preliminary": "low",
+                    "requires_numeric_verification": False,
+                    "requires_human_review": True,
+                    "downstream_use_warning": "Gap-only candidate claim. Block from report assertions until source repair."
+                }
+            ],
+            "claim_evidence_links": [
+                {
+                    "candidate_claim_id": "CC-001",
+                    "evidence_item_id": "PE-001",
+                    "link_type": "requires_verification",
+                    "rationale": "The evidence supports consideration components but requires later numeric and wording verification."
+                },
+                {
+                    "candidate_claim_id": "CC-002",
+                    "evidence_item_id": "PE-002",
+                    "link_type": "contextualizes",
+                    "rationale": "The evidence supports current asset naming but is retrospective."
+                }
+            ],
+            "source_gaps": [
+                {
+                    "source_gap_id": "GAP-001",
                     "gap_description": "Direct authoritative support for seller realized proceeds remains unresolved.",
                     "attempted_source_types": ["stock exchange announcement", "company filing"],
                     "reason_unresolved": "Deep Research did not identify a direct authoritative source.",

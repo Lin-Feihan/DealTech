@@ -143,6 +143,58 @@ class V3LiteM3EvidenceRepositoryTest(unittest.TestCase):
         self.assertNotIn("42", canonical_fact_key)
         self.assertNotIn("9", canonical_fact_key)
 
+    def test_candidate_claims_from_research_are_preserved_and_mapped(self) -> None:
+        m2_artifacts = self._run_real_source_m2("m2_for_m3_candidate_claims")
+        raw_evidence = json.loads(m2_artifacts["raw_evidence"].read_text(encoding="utf-8"))
+        manifest = json.loads(m2_artifacts["retrieved_sources_manifest"].read_text(encoding="utf-8"))
+        raw_evidence["raw_evidence_items"][0]["provider_evidence_id"] = "PE-M3-001"
+        manifest["failed_source_needs"][0]["provider_source_gap_id"] = "GAP-M3-001"
+        raw_evidence["candidate_claims_from_research"] = [
+            {
+                "candidate_claim_id": "CC-M3-001",
+                "claim_statement": "The candidate claim uses a real source-bounded evidence item from the repository.",
+                "claim_type": "transaction_terms",
+                "claim_scope": "Synthetic test claim scope.",
+                "temporal_scope": raw_evidence["raw_evidence_items"][0]["evidence_time_relation_to_decision_date"],
+                "permitted_use": raw_evidence["raw_evidence_items"][0]["permitted_use"],
+                "supporting_evidence_item_ids": ["PE-M3-001"],
+                "contradicting_evidence_item_ids": [],
+                "related_source_gap_ids": ["GAP-M3-001"],
+                "confidence_preliminary": "medium",
+                "requires_numeric_verification": False,
+                "requires_human_review": True,
+                "downstream_use_warning": "Candidate claim only. M5 decides certification and report eligibility.",
+            }
+        ]
+        raw_evidence["candidate_claim_evidence_links_from_research"] = [
+            {
+                "candidate_claim_id": "CC-M3-001",
+                "evidence_item_id": "PE-M3-001",
+                "link_type": "supports",
+                "rationale": "Maps external evidence item to the repository evidence record.",
+            }
+        ]
+        raw_path = self.root / "raw_evidence_with_candidate_claims.json"
+        manifest_path = self.root / "manifest_with_provider_gap.json"
+        raw_path.write_text(json.dumps(raw_evidence, indent=2), encoding="utf-8")
+        manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
+        artifacts = run_m3_pipeline(
+            raw_evidence_path=raw_path,
+            retrieved_sources_manifest_path=manifest_path,
+            output_dir=self.root / "m3_candidate_claims",
+        )
+
+        repository = json.loads(artifacts["evidence_repository"].read_text(encoding="utf-8"))
+        validate_evidence_repository(repository)
+        candidate = repository["candidate_claims_from_research"][0]
+        link = repository["candidate_claim_evidence_links_from_research"][0]
+        self.assertEqual(candidate["candidate_claim_id"], "CC-M3-001")
+        self.assertEqual(candidate["provider_related_source_gap_ids"], ["GAP-M3-001"])
+        self.assertEqual(candidate["related_source_gap_ids"], ["SG-001"])
+        self.assertEqual(link["mapping_status"], "mapped_to_evidence_record")
+        self.assertTrue(link["mapped_evidence_record_ids"])
+
     def _run_real_source_m2(self, label: str) -> dict[str, Path]:
         return run_m2_pipeline(
             mandate_path=self.mandate_path,

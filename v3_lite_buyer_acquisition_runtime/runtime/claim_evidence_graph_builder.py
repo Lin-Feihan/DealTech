@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from collections import Counter
+from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -118,15 +118,26 @@ def build_claim_evidence_graph(evidence_repository: dict[str, Any]) -> dict[str,
     case_id = evidence_repository["case_id"]
     claim_nodes: list[dict[str, Any]] = []
     evidence_edges: list[dict[str, Any]] = []
-
-    for record in evidence_repository["evidence_records"]:
-        if record["support_status"] not in {"source_supported", "partially_supported", "conflicting"}:
-            continue
-        claim = _build_claim_node_from_record(case_id, len(claim_nodes) + 1, record)
-        claim_nodes.append(claim)
-        evidence_edges.append(_build_evidence_edge(len(evidence_edges) + 1, claim, record))
-
     gap_nodes = _build_gap_nodes(evidence_repository["source_gaps"])
+
+    if evidence_repository.get("candidate_claims_from_research"):
+        records_by_id = {record["evidence_record_id"]: record for record in evidence_repository["evidence_records"]}
+        candidate_claim_nodes, candidate_evidence_edges = _build_claim_nodes_from_research_candidates(
+            case_id=case_id,
+            candidate_claims=evidence_repository["candidate_claims_from_research"],
+            claim_evidence_links=evidence_repository.get("candidate_claim_evidence_links_from_research", []),
+            records_by_id=records_by_id,
+        )
+        claim_nodes.extend(candidate_claim_nodes)
+        evidence_edges.extend(candidate_evidence_edges)
+    else:
+        for record in evidence_repository["evidence_records"]:
+            if record["support_status"] not in {"source_supported", "partially_supported", "conflicting"}:
+                continue
+            claim = _build_claim_node_from_record(case_id, len(claim_nodes) + 1, record)
+            claim_nodes.append(claim)
+            evidence_edges.append(_build_evidence_edge(len(evidence_edges) + 1, claim, record))
+
     for gap_node in gap_nodes:
         claim_nodes.append(_build_gap_claim_node(case_id, len(claim_nodes) + 1, gap_node))
 
@@ -196,6 +207,7 @@ def _build_claim_node_from_record(case_id: str, index: int, record: dict[str, An
     claim = {
         "claim_id": f"CL-{index:03d}",
         "case_id": case_id,
+        "created_from_generic_fallback": True,
         "claim_type": claim_type,
         "claim_statement": _claim_statement(claim_type, formula),
         "claim_scope": _claim_scope(claim_type, formula),
@@ -222,6 +234,151 @@ def _build_claim_node_from_record(case_id: str, index: int, record: dict[str, An
     if formula:
         claim["numeric_formula"] = formula
     return claim
+
+
+def _build_claim_nodes_from_research_candidates(
+    case_id: str,
+    candidate_claims: list[dict[str, Any]],
+    claim_evidence_links: list[dict[str, Any]],
+    records_by_id: dict[str, dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    links_by_candidate_id: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for link in claim_evidence_links:
+        links_by_candidate_id[link["candidate_claim_id"]].append(link)
+
+    claim_nodes = []
+    evidence_edges = []
+    for index, candidate_claim in enumerate(candidate_claims, start=1):
+        candidate_links = links_by_candidate_id.get(candidate_claim["candidate_claim_id"], [])
+        claim = _build_claim_node_from_candidate(case_id, index, candidate_claim, candidate_links, records_by_id)
+        claim_nodes.append(claim)
+        for link in candidate_links:
+            for evidence_record_id in link.get("mapped_evidence_record_ids", []):
+                if evidence_record_id not in records_by_id:
+                    raise ClaimEvidenceGraphError(f"candidate claim link maps to unknown evidence_record_id: {evidence_record_id}")
+                record = records_by_id[evidence_record_id]
+                evidence_edges.append(
+                    _build_evidence_edge(
+                        len(evidence_edges) + 1,
+                        claim,
+                        record,
+                        edge_type=link["link_type"],
+                        notes=link["rationale"],
+                    )
+                )
+    return claim_nodes, evidence_edges
+
+
+def _build_claim_node_from_candidate(
+    case_id: str,
+    index: int,
+    candidate_claim: dict[str, Any],
+    claim_evidence_links: list[dict[str, Any]],
+    records_by_id: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    supporting_record_ids = _candidate_supporting_record_ids(claim_evidence_links)
+    contradicting_record_ids = _candidate_contradicting_record_ids(claim_evidence_links)
+    linked_record_ids = _ordered_unique([*supporting_record_ids, *contradicting_record_ids])
+    linked_records = [records_by_id[record_id] for record_id in linked_record_ids if record_id in records_by_id]
+    support_level = _candidate_support_level(candidate_claim, claim_evidence_links, supporting_record_ids, contradicting_record_ids)
+    certification_status = "pending_verification" if linked_record_ids and support_level not in {"gap_only", "unsupported"} else "failed_precheck"
+    if support_level == "gap_only":
+        certification_status = "failed_precheck"
+    requires_human_review = (
+        bool(candidate_claim.get("requires_human_review"))
+        or support_level in {"partially_supported", "conflicting", "requires_numeric_verification", "gap_only", "unsupported"}
+        or candidate_claim.get("temporal_scope") in {"post_decision", "retrospective"}
+    )
+    claim = {
+        "claim_id": f"CL-{index:03d}",
+        "case_id": case_id,
+        "created_from_candidate_claim_id": candidate_claim["candidate_claim_id"],
+        "claim_type": _claim_type_from_candidate(candidate_claim),
+        "claim_statement": candidate_claim["claim_statement"],
+        "claim_scope": candidate_claim["claim_scope"],
+        "temporal_scope": candidate_claim["temporal_scope"],
+        "permitted_use": candidate_claim["permitted_use"],
+        "supporting_evidence_record_ids": supporting_record_ids if support_level not in {"gap_only", "unsupported"} else [],
+        "contradicting_evidence_record_ids": contradicting_record_ids,
+        "related_source_gap_ids": candidate_claim.get("related_source_gap_ids", []),
+        "support_level": support_level,
+        "certification_status": certification_status,
+        "requires_numeric_verification": bool(candidate_claim.get("requires_numeric_verification")) or any(link["link_type"] == "requires_verification" for link in claim_evidence_links),
+        "requires_human_review": requires_human_review,
+        "confidence_preliminary": _confidence(candidate_claim.get("confidence_preliminary", "low")),
+        "supporting_source_ids": _ordered_unique(source_id for record in linked_records for source_id in record.get("source_ids", [])),
+        "supporting_raw_evidence_ids": _ordered_unique(raw_id for record in linked_records for raw_id in record.get("raw_evidence_ids", [])),
+        "source_tiers": _ordered_unique(tier for record in linked_records for tier in record.get("source_tiers", [])),
+        "downstream_use_warning": _candidate_downstream_warning(candidate_claim, support_level, claim_evidence_links),
+        "hindsight_leakage_warning": _candidate_hindsight_warning(candidate_claim, linked_records),
+    }
+    if candidate_claim.get("numeric_formula"):
+        claim["numeric_formula"] = candidate_claim["numeric_formula"]
+    return claim
+
+
+def _candidate_supporting_record_ids(claim_evidence_links: list[dict[str, Any]]) -> list[str]:
+    return _ordered_unique(
+        record_id
+        for link in claim_evidence_links
+        if link["link_type"] in {"supports", "partially_supports", "contextualizes", "requires_verification"}
+        for record_id in link.get("mapped_evidence_record_ids", [])
+    )
+
+
+def _candidate_contradicting_record_ids(claim_evidence_links: list[dict[str, Any]]) -> list[str]:
+    return _ordered_unique(
+        record_id
+        for link in claim_evidence_links
+        if link["link_type"] == "contradicts"
+        for record_id in link.get("mapped_evidence_record_ids", [])
+    )
+
+
+def _candidate_support_level(
+    candidate_claim: dict[str, Any],
+    claim_evidence_links: list[dict[str, Any]],
+    supporting_record_ids: list[str],
+    contradicting_record_ids: list[str],
+) -> str:
+    if not supporting_record_ids and not contradicting_record_ids:
+        return "gap_only" if candidate_claim.get("related_source_gap_ids") else "unsupported"
+    if contradicting_record_ids:
+        return "conflicting"
+    if bool(candidate_claim.get("requires_numeric_verification")) or any(link["link_type"] == "requires_verification" for link in claim_evidence_links):
+        return "requires_numeric_verification"
+    if any(link["link_type"] in {"partially_supports", "contextualizes"} for link in claim_evidence_links):
+        return "partially_supported"
+    return "source_supported"
+
+
+def _claim_type_from_candidate(candidate_claim: dict[str, Any]) -> str:
+    claim_type = _safe_key(str(candidate_claim.get("claim_type") or "generic_fact"))
+    return claim_type if claim_type in CLAIM_TYPES else "generic_fact"
+
+
+def _confidence(value: str) -> str:
+    return value if value in {"low", "medium", "high"} else "low"
+
+
+def _candidate_downstream_warning(candidate_claim: dict[str, Any], support_level: str, claim_evidence_links: list[dict[str, Any]]) -> str:
+    base = "Candidate claim from external research package only. M4 maps evidence but does not certify, recommend, value, or generate report assertions."
+    if support_level in {"gap_only", "unsupported"}:
+        base = f"{base} This claim is blocked from report use until source repair supplies mapped evidence and M5 verifies it."
+    if any(link.get("mapping_status") == "evidence_item_not_in_repository_requires_repair" for link in claim_evidence_links):
+        base = f"{base} One or more cited external evidence items did not survive source-bounded repository ingestion and require repair."
+    warning = str(candidate_claim.get("downstream_use_warning", "")).strip()
+    return f"{base} {warning}".strip()
+
+
+def _candidate_hindsight_warning(candidate_claim: dict[str, Any], linked_records: list[dict[str, Any]]) -> str:
+    temporal_scope = candidate_claim.get("temporal_scope")
+    record_warnings = _ordered_unique(record.get("hindsight_leakage_warning", "") for record in linked_records if record.get("hindsight_leakage_warning"))
+    if temporal_scope in {"post_decision", "retrospective"}:
+        return "Hindsight caveat required: post-decision or retrospective candidate claim must not be treated as ex-ante buyer decision support. " + " ".join(record_warnings)
+    if record_warnings:
+        return " ".join(record_warnings)
+    return "Candidate claim has no detected post-decision hindsight warning, but remains uncertified until M5 verification."
 
 
 def _build_gap_nodes(source_gaps: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -271,7 +428,7 @@ def _build_gap_claim_node(case_id: str, index: int, gap_node: dict[str, Any]) ->
     }
 
 
-def _build_evidence_edge(index: int, claim: dict[str, Any], record: dict[str, Any], edge_type: str | None = None) -> dict[str, Any]:
+def _build_evidence_edge(index: int, claim: dict[str, Any], record: dict[str, Any], edge_type: str | None = None, notes: str | None = None) -> dict[str, Any]:
     resolved_edge_type = edge_type or _edge_type_from_claim(claim)
     return {
         "edge_id": f"EDGE-{index:03d}",
@@ -281,7 +438,7 @@ def _build_evidence_edge(index: int, claim: dict[str, Any], record: dict[str, An
         "support_strength": _support_strength_from_record(record, resolved_edge_type),
         "temporal_alignment": _temporal_alignment(record),
         "source_tier_basis": record["strongest_source_tier"],
-        "notes": _edge_notes(claim, record, resolved_edge_type),
+        "notes": notes or _edge_notes(claim, record, resolved_edge_type),
     }
 
 
@@ -314,8 +471,8 @@ def _claim_type_from_record(record: dict[str, Any]) -> str:
 
 def _claim_statement(claim_type: str, formula: dict[str, Any] | None) -> str:
     if formula:
-        return "Source-bounded evidence provides an explicit numeric formula requiring arithmetic verification for this buyer-side acquisition case."
-    return f"Source-bounded evidence supports a {claim_type} fact for this buyer-side acquisition case."
+        return "Generic fallback claim: source-bounded evidence provides an explicit numeric formula requiring arithmetic verification for this buyer-side acquisition case."
+    return f"Generic fallback claim: source-bounded evidence supports a {claim_type} fact for this buyer-side acquisition case."
 
 
 def _claim_scope(claim_type: str, formula: dict[str, Any] | None) -> str:
@@ -511,6 +668,17 @@ def _validate_graph_quality_summary(summary: dict[str, Any]) -> None:
     missing = sorted(field for field in required_fields if field not in summary)
     if missing:
         raise ClaimEvidenceGraphError(f"Missing graph_quality_summary field(s): {', '.join(missing)}")
+
+
+def _ordered_unique(values: Any) -> list[Any]:
+    seen = set()
+    unique = []
+    for value in values:
+        if value in seen or value in {None, ""}:
+            continue
+        seen.add(value)
+        unique.append(value)
+    return unique
 
 
 def _safe_key(value: str) -> str:

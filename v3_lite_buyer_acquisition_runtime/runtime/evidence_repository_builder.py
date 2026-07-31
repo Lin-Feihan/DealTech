@@ -150,6 +150,11 @@ def build_evidence_repository(raw_evidence: dict[str, Any], retrieved_sources_ma
         )
 
     source_gaps = _build_source_gaps(retrieved_sources_manifest["failed_source_needs"])
+    candidate_claims, candidate_claim_evidence_links = _translate_research_candidates(
+        raw_evidence=raw_evidence,
+        evidence_records=evidence_records,
+        source_gaps=source_gaps,
+    )
     repository = {
         "case_id": raw_evidence["case_id"],
         "generated_artifact": "evidence_repository.json",
@@ -160,6 +165,8 @@ def build_evidence_repository(raw_evidence: dict[str, Any], retrieved_sources_ma
         "created_at": _now_utc_iso(),
         "evidence_records": evidence_records,
         "source_gaps": source_gaps,
+        "candidate_claims_from_research": candidate_claims,
+        "candidate_claim_evidence_links_from_research": candidate_claim_evidence_links,
         "repository_quality_summary": _build_repository_quality_summary(
             raw_evidence=raw_evidence,
             evidence_records=evidence_records,
@@ -205,6 +212,7 @@ def validate_evidence_repository(repository: Any) -> None:
         _validate_evidence_record(record)
     for source_gap in repository["source_gaps"]:
         _validate_source_gap(source_gap)
+    _validate_research_candidates_in_repository(repository)
     _validate_repository_quality_summary(repository["repository_quality_summary"])
 
 
@@ -288,6 +296,7 @@ def _build_source_gaps(failed_source_needs: list[dict[str, Any]]) -> list[dict[s
         source_gaps.append(
             {
                 "source_gap_id": f"SG-{index:03d}",
+                "provider_source_gap_ids": _ordered_unique([failed_need["provider_source_gap_id"]] if failed_need.get("provider_source_gap_id") else []),
                 "missing_source_need_id": failed_need["source_need_id"],
                 "missing_source_description": enrichments["missing_source_description"],
                 "reason": failed_need["reason"],
@@ -298,6 +307,96 @@ def _build_source_gaps(failed_source_needs: list[dict[str, Any]]) -> list[dict[s
             }
         )
     return source_gaps
+
+
+def _translate_research_candidates(
+    raw_evidence: dict[str, Any],
+    evidence_records: list[dict[str, Any]],
+    source_gaps: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    candidate_claims = raw_evidence.get("candidate_claims_from_research") or []
+    claim_evidence_links = raw_evidence.get("candidate_claim_evidence_links_from_research") or []
+    if not candidate_claims and not claim_evidence_links:
+        return [], []
+
+    raw_items_by_id = {item["evidence_id"]: item for item in raw_evidence["raw_evidence_items"]}
+    provider_evidence_to_record_ids: dict[str, list[str]] = defaultdict(list)
+    for record in evidence_records:
+        for raw_evidence_id in record["raw_evidence_ids"]:
+            provider_evidence_id = raw_items_by_id.get(raw_evidence_id, {}).get("provider_evidence_id")
+            if provider_evidence_id:
+                provider_evidence_to_record_ids[provider_evidence_id].append(record["evidence_record_id"])
+
+    source_gap_ids_by_provider_gap_id: dict[str, list[str]] = defaultdict(list)
+    for source_gap in source_gaps:
+        for provider_gap_id in source_gap.get("provider_source_gap_ids", []):
+            source_gap_ids_by_provider_gap_id[provider_gap_id].append(source_gap["source_gap_id"])
+
+    translated_candidates = []
+    for candidate_claim in candidate_claims:
+        provider_gap_ids = list(candidate_claim.get("related_source_gap_ids", []))
+        related_source_gap_ids = _ordered_unique(
+            source_gap_id
+            for provider_gap_id in provider_gap_ids
+            for source_gap_id in source_gap_ids_by_provider_gap_id.get(provider_gap_id, [])
+        )
+        candidate = dict(candidate_claim)
+        candidate["provider_related_source_gap_ids"] = provider_gap_ids
+        candidate["related_source_gap_ids"] = related_source_gap_ids
+        candidate["source_bounded_precheck_status"] = "pending_m4_mapping"
+        if provider_gap_ids and not related_source_gap_ids:
+            candidate["source_bounded_precheck_status"] = "gap_reference_requires_repair"
+        translated_candidates.append(candidate)
+
+    translated_links = []
+    for link in claim_evidence_links:
+        evidence_item_id = link["evidence_item_id"]
+        mapped_record_ids = _ordered_unique(provider_evidence_to_record_ids.get(evidence_item_id, []))
+        translated_link = dict(link)
+        translated_link["mapped_evidence_record_ids"] = mapped_record_ids
+        translated_link["mapping_status"] = "mapped_to_evidence_record" if mapped_record_ids else "evidence_item_not_in_repository_requires_repair"
+        translated_links.append(translated_link)
+    return translated_candidates, translated_links
+
+
+def _validate_research_candidates_in_repository(repository: dict[str, Any]) -> None:
+    candidate_claims = repository.get("candidate_claims_from_research", [])
+    claim_evidence_links = repository.get("candidate_claim_evidence_links_from_research", [])
+    if not isinstance(candidate_claims, list):
+        raise EvidenceRepositoryError("candidate_claims_from_research must be an array when present.")
+    if not isinstance(claim_evidence_links, list):
+        raise EvidenceRepositoryError("candidate_claim_evidence_links_from_research must be an array when present.")
+    candidate_claim_ids: set[str] = set()
+    source_gap_ids = {source_gap["source_gap_id"] for source_gap in repository["source_gaps"]}
+    evidence_record_ids = {record["evidence_record_id"] for record in repository["evidence_records"]}
+    for candidate_claim in candidate_claims:
+        if not isinstance(candidate_claim, dict):
+            raise EvidenceRepositoryError("Each candidate_claims_from_research entry must be an object.")
+        candidate_claim_id = candidate_claim.get("candidate_claim_id")
+        if not isinstance(candidate_claim_id, str) or not candidate_claim_id.strip():
+            raise EvidenceRepositoryError("candidate_claims_from_research entry missing candidate_claim_id.")
+        if candidate_claim_id in candidate_claim_ids:
+            raise EvidenceRepositoryError(f"Duplicate candidate_claim_id in evidence_repository: {candidate_claim_id}")
+        candidate_claim_ids.add(candidate_claim_id)
+        if not isinstance(candidate_claim.get("claim_statement"), str) or not candidate_claim["claim_statement"].strip():
+            raise EvidenceRepositoryError(f"candidate_claim missing non-empty claim_statement: {candidate_claim_id}")
+        if candidate_claim.get("certification_status") == "certified" or candidate_claim.get("is_certified") is True or candidate_claim.get("certified") is True:
+            raise EvidenceRepositoryError(f"candidate_claim must not be certified in evidence_repository: {candidate_claim_id}")
+        unknown_gaps = sorted(set(candidate_claim.get("related_source_gap_ids", [])) - source_gap_ids)
+        if unknown_gaps:
+            raise EvidenceRepositoryError(f"candidate_claim maps to unknown source_gap_id(s): {candidate_claim_id} -> {', '.join(unknown_gaps)}")
+    for link in claim_evidence_links:
+        if not isinstance(link, dict):
+            raise EvidenceRepositoryError("Each candidate_claim_evidence_links_from_research entry must be an object.")
+        candidate_claim_id = link.get("candidate_claim_id")
+        if candidate_claim_id not in candidate_claim_ids:
+            raise EvidenceRepositoryError(f"candidate_claim_evidence_link references unknown candidate_claim_id: {candidate_claim_id}")
+        mapped_record_ids = link.get("mapped_evidence_record_ids", [])
+        if not isinstance(mapped_record_ids, list):
+            raise EvidenceRepositoryError("candidate_claim_evidence_link mapped_evidence_record_ids must be an array.")
+        unknown_records = sorted(set(mapped_record_ids) - evidence_record_ids)
+        if unknown_records:
+            raise EvidenceRepositoryError(f"candidate_claim_evidence_link maps to unknown evidence_record_id(s): {', '.join(unknown_records)}")
 
 
 def _source_gap_enrichments(failed_need: dict[str, Any]) -> dict[str, Any]:

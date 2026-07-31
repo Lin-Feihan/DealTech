@@ -137,6 +137,7 @@ def normalize_deep_research_output(
         raw_evidence_items.append(
             {
                 "evidence_id": evidence_id,
+                "provider_evidence_id": evidence_item["provider_evidence_id"],
                 "case_id": deep_research_response["case_id"],
                 "source_id": _normalized_source_id(provider_source_id),
                 "source_title": source["title"],
@@ -166,8 +167,8 @@ def normalize_deep_research_output(
             }
         )
 
-    for unresolved_gap in deep_research_response["unresolved_gaps"]:
-        failed_source_need_entries.extend(_failed_entries_from_gap(unresolved_gap, source_discovery_plan))
+    for source_gap in _source_gaps_from_response(deep_research_response):
+        failed_source_need_entries.extend(_failed_entries_from_gap(source_gap, source_discovery_plan))
 
     normalized_sources = []
     for provider_source_id, source in sources_by_provider_id.items():
@@ -238,9 +239,17 @@ def normalize_deep_research_output(
         "source_discovery_plan_id": manifest["source_discovery_plan_id"],
         "retrieved_sources_manifest_id": manifest_id(manifest),
         "raw_evidence_items": raw_evidence_items,
+        "candidate_claims_from_research": deep_research_response.get("candidate_claims", []),
+        "candidate_claim_evidence_links_from_research": deep_research_response.get("claim_evidence_links", []),
     }
     validate_raw_evidence(raw_evidence, manifest, source_discovery_plan)
     return manifest, raw_evidence
+
+
+def _source_gaps_from_response(deep_research_response: dict[str, Any]) -> list[dict[str, Any]]:
+    if "source_gaps" in deep_research_response:
+        return deep_research_response["source_gaps"]
+    return deep_research_response.get("unresolved_gaps", [])
 
 
 def _failed_entries_from_unresolved_item(
@@ -275,24 +284,26 @@ def _failed_entries_from_unresolved_item(
     return [{"source_need_id": source_need_id, "reason": reason} for source_need_id in source_need_ids]
 
 
-def _failed_entries_from_gap(unresolved_gap: dict[str, Any], source_discovery_plan: dict[str, Any]) -> list[dict[str, str]]:
+def _failed_entries_from_gap(source_gap: dict[str, Any], source_discovery_plan: dict[str, Any]) -> list[dict[str, str]]:
+    source_gap_id = source_gap.get("source_gap_id") or source_gap.get("gap_id") or "<unknown>"
     source_need_ids = _infer_source_need_ids_from_text(
         " ".join(
             [
-                unresolved_gap["gap_description"],
-                unresolved_gap["reason_unresolved"],
-                unresolved_gap["recommended_next_search"],
-                " ".join(unresolved_gap.get("attempted_source_types", [])),
+                source_gap["gap_description"],
+                source_gap["reason_unresolved"],
+                source_gap["recommended_next_search"],
+                " ".join(source_gap.get("attempted_source_types", [])),
             ]
         ),
         source_discovery_plan,
     )
     if not source_need_ids:
-        raise DeepResearchNormalizationError(f"Could not map unresolved gap {unresolved_gap['gap_id']} to source_need_id.")
+        raise DeepResearchNormalizationError(f"Could not map source gap {source_gap_id} to source_need_id.")
     return [
         {
             "source_need_id": source_need_id,
-            "reason": f"{unresolved_gap['gap_description']} Unresolved because: {unresolved_gap['reason_unresolved']}",
+            "reason": f"{source_gap['gap_description']} Unresolved because: {source_gap['reason_unresolved']}",
+            "provider_source_gap_id": source_gap_id,
         }
         for source_need_id in source_need_ids
     ]

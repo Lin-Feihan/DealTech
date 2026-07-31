@@ -26,8 +26,56 @@ DEEP_RESEARCH_RESPONSE_REQUIRED_FIELDS = {
     "completed_at",
     "sources",
     "evidence_items",
-    "unresolved_gaps",
+    "candidate_claims",
+    "claim_evidence_links",
+    "source_gaps",
     "provider_notes",
+}
+FINAL_REPORT_SUBSTITUTE_FIELDS = {
+    "final_report",
+    "final_report_text",
+    "report",
+    "report_text",
+    "investment_memo",
+    "recommendation",
+    "recommendation_decision",
+}
+ALLOWED_CLAIM_TYPES = {
+    "transaction_background",
+    "transaction_terms",
+    "transaction_timing",
+    "transaction_document_date",
+    "transaction_parties",
+    "transaction_consideration",
+    "contingent_consideration",
+    "milestone_economics",
+    "milestone_payment",
+    "financing_or_payment_mechanics",
+    "entity_identity",
+    "entity_lineage",
+    "asset_or_product_identity",
+    "scientific_asset",
+    "asset_lineage",
+    "ownership_or_governance",
+    "management_or_key_person",
+    "intellectual_property",
+    "regulatory_or_clinical",
+    "financial_performance",
+    "valuation_input",
+    "synergy_or_value_creation",
+    "market_or_competitive_position",
+    "legal_or_regulatory_risk",
+    "integration_or_operational_risk",
+    "source_gap_claim",
+    "generic_fact",
+    "derived_numeric_candidate",
+}
+CLAIM_EVIDENCE_LINK_TYPES = {
+    "supports",
+    "partially_supports",
+    "contextualizes",
+    "contradicts",
+    "requires_verification",
 }
 
 
@@ -79,7 +127,8 @@ def build_deep_research_request(
         "output_requirements": [
             "You are not writing the final acquisition report.",
             "You are acting as a source discovery and evidence collection provider for a downstream M&A agent runtime.",
-            "Return structured JSON with sources, evidence_items, unresolved_gaps, and provider_notes.",
+            "Return structured JSON with sources, evidence_items, candidate_claims, claim_evidence_links, source_gaps, uncertainties or limitations, and provider_notes.",
+            "Candidate claims are not certified claims; M5 decides certification, caveats, repair, human review, and report eligibility.",
             "Prefer primary and official sources over summaries.",
             "For personal proceeds or founder economics, require direct authoritative evidence or mark unresolved.",
         ],
@@ -222,23 +271,36 @@ def extract_normalized_response(raw_payload: dict[str, Any], expected_case_id: s
 def validate_deep_research_response(response: Any) -> None:
     if not isinstance(response, dict):
         raise DeepResearchProviderError("deep_research_response must be an object.")
+    forbidden_report_fields = sorted(FINAL_REPORT_SUBSTITUTE_FIELDS.intersection(response))
+    if forbidden_report_fields:
+        raise DeepResearchProviderError(
+            "Deep Research response must be structured research material; final report text is not accepted as a substitute for sources, evidence_items, candidate_claims, claim_evidence_links, and source_gaps. "
+            f"Forbidden field(s): {', '.join(forbidden_report_fields)}"
+        )
     missing = sorted(field for field in DEEP_RESEARCH_RESPONSE_REQUIRED_FIELDS if field not in response)
     if missing:
         raise DeepResearchProviderError(f"deep_research_response missing field(s): {', '.join(missing)}")
     for field in ("case_id", "provider", "model", "response_id", "completed_at"):
         if not isinstance(response[field], str) or not response[field].strip():
             raise DeepResearchProviderError(f"deep_research_response field {field} must be a non-empty string.")
-    for field in ("sources", "evidence_items", "unresolved_gaps", "provider_notes"):
+    for field in ("sources", "evidence_items", "candidate_claims", "claim_evidence_links", "source_gaps", "provider_notes"):
         if not isinstance(response[field], list):
             raise DeepResearchProviderError(f"deep_research_response field {field} must be an array.")
 
     for source in response["sources"]:
         _validate_source(source)
     known_provider_source_ids = {source["provider_source_id"] for source in response["sources"]}
+    known_evidence_item_ids: set[str] = set()
     for evidence_item in response["evidence_items"]:
-        _validate_evidence_item(evidence_item, known_provider_source_ids)
-    for unresolved_gap in response["unresolved_gaps"]:
-        _validate_unresolved_gap(unresolved_gap)
+        _validate_evidence_item(evidence_item, known_provider_source_ids, known_evidence_item_ids)
+    known_source_gap_ids: set[str] = set()
+    for source_gap in response["source_gaps"]:
+        _validate_source_gap(source_gap, known_source_gap_ids)
+    known_candidate_claim_ids: set[str] = set()
+    for candidate_claim in response["candidate_claims"]:
+        _validate_candidate_claim(candidate_claim, known_evidence_item_ids, known_source_gap_ids, known_candidate_claim_ids)
+    for link in response["claim_evidence_links"]:
+        _validate_claim_evidence_link(link, known_candidate_claim_ids, known_evidence_item_ids)
 
 
 def _validate_source(source: Any) -> None:
@@ -280,7 +342,7 @@ def _validate_source(source: Any) -> None:
         raise DeepResearchProviderError("Deep Research source permitted_use is invalid.")
 
 
-def _validate_evidence_item(evidence_item: Any, known_provider_source_ids: set[str]) -> None:
+def _validate_evidence_item(evidence_item: Any, known_provider_source_ids: set[str], seen_evidence_item_ids: set[str]) -> None:
     required = {
         "provider_evidence_id",
         "provider_source_id",
@@ -305,6 +367,9 @@ def _validate_evidence_item(evidence_item: Any, known_provider_source_ids: set[s
         raise DeepResearchProviderError(
             f"Deep Research evidence_item references unknown provider_source_id: {evidence_item['provider_source_id']}"
         )
+    if evidence_item["provider_evidence_id"] in seen_evidence_item_ids:
+        raise DeepResearchProviderError(f"Duplicate Deep Research provider_evidence_id: {evidence_item['provider_evidence_id']}")
+    seen_evidence_item_ids.add(evidence_item["provider_evidence_id"])
     if not isinstance(evidence_item["related_workstream_ids"], list):
         raise DeepResearchProviderError("Deep Research evidence_item related_workstream_ids must be an array.")
     if not isinstance(evidence_item["related_evidence_requirement_ids"], list):
@@ -315,24 +380,114 @@ def _validate_evidence_item(evidence_item: Any, known_provider_source_ids: set[s
         raise DeepResearchProviderError("Deep Research evidence_item caveats must be an array.")
 
 
-def _validate_unresolved_gap(unresolved_gap: Any) -> None:
+def _validate_source_gap(source_gap: Any, seen_source_gap_ids: set[str]) -> None:
     required = {
-        "gap_id",
+        "source_gap_id",
         "gap_description",
         "attempted_source_types",
         "reason_unresolved",
         "recommended_next_search",
     }
-    if not isinstance(unresolved_gap, dict):
-        raise DeepResearchProviderError("Each Deep Research unresolved_gap must be an object.")
-    missing = sorted(field for field in required if field not in unresolved_gap)
+    if not isinstance(source_gap, dict):
+        raise DeepResearchProviderError("Each Deep Research source_gap must be an object.")
+    missing = sorted(field for field in required if field not in source_gap)
     if missing:
-        raise DeepResearchProviderError(f"Deep Research unresolved_gap missing field(s): {', '.join(missing)}")
-    for field in ("gap_id", "gap_description", "reason_unresolved", "recommended_next_search"):
-        if not isinstance(unresolved_gap[field], str) or not unresolved_gap[field].strip():
-            raise DeepResearchProviderError(f"Deep Research unresolved_gap field {field} must be a non-empty string.")
-    if not isinstance(unresolved_gap["attempted_source_types"], list):
-        raise DeepResearchProviderError("Deep Research unresolved_gap attempted_source_types must be an array.")
+        raise DeepResearchProviderError(f"Deep Research source_gap missing field(s): {', '.join(missing)}")
+    for field in ("source_gap_id", "gap_description", "reason_unresolved", "recommended_next_search"):
+        if not isinstance(source_gap[field], str) or not source_gap[field].strip():
+            raise DeepResearchProviderError(f"Deep Research source_gap field {field} must be a non-empty string.")
+    if source_gap["source_gap_id"] in seen_source_gap_ids:
+        raise DeepResearchProviderError(f"Duplicate Deep Research source_gap_id: {source_gap['source_gap_id']}")
+    seen_source_gap_ids.add(source_gap["source_gap_id"])
+    if not isinstance(source_gap["attempted_source_types"], list):
+        raise DeepResearchProviderError("Deep Research source_gap attempted_source_types must be an array.")
+
+
+def _validate_candidate_claim(
+    candidate_claim: Any,
+    known_evidence_item_ids: set[str],
+    known_source_gap_ids: set[str],
+    seen_candidate_claim_ids: set[str],
+) -> None:
+    required = {
+        "candidate_claim_id",
+        "claim_statement",
+        "claim_type",
+        "claim_scope",
+        "temporal_scope",
+        "permitted_use",
+        "supporting_evidence_item_ids",
+        "contradicting_evidence_item_ids",
+        "related_source_gap_ids",
+        "confidence_preliminary",
+        "requires_numeric_verification",
+        "requires_human_review",
+        "downstream_use_warning",
+    }
+    if not isinstance(candidate_claim, dict):
+        raise DeepResearchProviderError("Each Deep Research candidate_claim must be an object.")
+    missing = sorted(field for field in required if field not in candidate_claim)
+    if missing:
+        raise DeepResearchProviderError(f"Deep Research candidate_claim missing field(s): {', '.join(missing)}")
+    for field in ("candidate_claim_id", "claim_statement", "claim_type", "claim_scope", "temporal_scope", "permitted_use", "confidence_preliminary", "downstream_use_warning"):
+        if not isinstance(candidate_claim[field], str) or not candidate_claim[field].strip():
+            raise DeepResearchProviderError(f"Deep Research candidate_claim field {field} must be a non-empty string.")
+    if candidate_claim["candidate_claim_id"] in seen_candidate_claim_ids:
+        raise DeepResearchProviderError(f"Duplicate Deep Research candidate_claim_id: {candidate_claim['candidate_claim_id']}")
+    seen_candidate_claim_ids.add(candidate_claim["candidate_claim_id"])
+    if candidate_claim["claim_type"] not in ALLOWED_CLAIM_TYPES:
+        raise DeepResearchProviderError(f"Deep Research candidate_claim claim_type is outside the allowed taxonomy: {candidate_claim['claim_type']}")
+    if candidate_claim["temporal_scope"] not in {"pre_decision", "at_decision", "post_decision", "retrospective", "unknown", "source_gap"}:
+        raise DeepResearchProviderError(f"Deep Research candidate_claim temporal_scope is invalid: {candidate_claim['candidate_claim_id']}")
+    if candidate_claim["permitted_use"] not in {
+        "ex_ante_deal_evaluation",
+        "transaction_terms_verification",
+        "retrospective_outcome_validation",
+        "source_lead_only",
+        "gap_tracking",
+    }:
+        raise DeepResearchProviderError(f"Deep Research candidate_claim permitted_use is invalid: {candidate_claim['candidate_claim_id']}")
+    if candidate_claim["temporal_scope"] in {"post_decision", "retrospective"} and candidate_claim["permitted_use"] == "ex_ante_deal_evaluation":
+        raise DeepResearchProviderError(f"Post-decision or retrospective candidate_claim cannot be ex_ante_deal_evaluation: {candidate_claim['candidate_claim_id']}")
+    if candidate_claim["temporal_scope"] == "source_gap" and candidate_claim["permitted_use"] != "gap_tracking":
+        raise DeepResearchProviderError(f"source_gap candidate_claim must be permitted for gap_tracking only: {candidate_claim['candidate_claim_id']}")
+    if candidate_claim["confidence_preliminary"] not in {"low", "medium", "high"}:
+        raise DeepResearchProviderError(f"Deep Research candidate_claim confidence_preliminary is invalid: {candidate_claim['candidate_claim_id']}")
+    for field in ("requires_numeric_verification", "requires_human_review"):
+        if not isinstance(candidate_claim[field], bool):
+            raise DeepResearchProviderError(f"Deep Research candidate_claim {field} must be boolean: {candidate_claim['candidate_claim_id']}")
+    if candidate_claim.get("certification_status") == "certified" or candidate_claim.get("is_certified") is True or candidate_claim.get("certified") is True:
+        raise DeepResearchProviderError(f"Deep Research candidate_claim must not be treated as certified: {candidate_claim['candidate_claim_id']}")
+    for field in ("supporting_evidence_item_ids", "contradicting_evidence_item_ids", "related_source_gap_ids"):
+        if not isinstance(candidate_claim[field], list):
+            raise DeepResearchProviderError(f"Deep Research candidate_claim {field} must be an array: {candidate_claim['candidate_claim_id']}")
+    unknown_supporting = sorted(set(candidate_claim["supporting_evidence_item_ids"]) - known_evidence_item_ids)
+    unknown_contradicting = sorted(set(candidate_claim["contradicting_evidence_item_ids"]) - known_evidence_item_ids)
+    unknown_gaps = sorted(set(candidate_claim["related_source_gap_ids"]) - known_source_gap_ids)
+    if unknown_supporting:
+        raise DeepResearchProviderError(f"candidate_claim references missing supporting evidence_item_id(s): {candidate_claim['candidate_claim_id']} -> {', '.join(unknown_supporting)}")
+    if unknown_contradicting:
+        raise DeepResearchProviderError(f"candidate_claim references missing contradicting evidence_item_id(s): {candidate_claim['candidate_claim_id']} -> {', '.join(unknown_contradicting)}")
+    if unknown_gaps:
+        raise DeepResearchProviderError(f"candidate_claim references missing source_gap_id(s): {candidate_claim['candidate_claim_id']} -> {', '.join(unknown_gaps)}")
+
+
+def _validate_claim_evidence_link(link: Any, known_candidate_claim_ids: set[str], known_evidence_item_ids: set[str]) -> None:
+    required = {"candidate_claim_id", "evidence_item_id", "link_type", "rationale"}
+    if not isinstance(link, dict):
+        raise DeepResearchProviderError("Each Deep Research claim_evidence_link must be an object.")
+    missing = sorted(field for field in required if field not in link)
+    if missing:
+        raise DeepResearchProviderError(f"Deep Research claim_evidence_link missing field(s): {', '.join(missing)}")
+    for field in required:
+        if not isinstance(link[field], str) or not link[field].strip():
+            raise DeepResearchProviderError(f"Deep Research claim_evidence_link field {field} must be a non-empty string.")
+    if link["candidate_claim_id"] not in known_candidate_claim_ids:
+        raise DeepResearchProviderError(f"claim_evidence_link references missing candidate_claim_id: {link['candidate_claim_id']}")
+    if link["evidence_item_id"] not in known_evidence_item_ids:
+        raise DeepResearchProviderError(f"claim_evidence_link references missing evidence_item_id: {link['evidence_item_id']}")
+    if link["link_type"] not in CLAIM_EVIDENCE_LINK_TYPES:
+        raise DeepResearchProviderError(f"claim_evidence_link link_type is invalid: {link['link_type']}")
 
 
 def _deep_research_prompt(request_artifact: dict[str, Any]) -> str:
@@ -341,7 +496,9 @@ def _deep_research_prompt(request_artifact: dict[str, Any]) -> str:
             "You are not writing the final acquisition report.",
             "You are acting as a source discovery and evidence collection provider for a downstream M&A agent runtime.",
             "Return structured JSON only.",
-            "Top-level keys: case_id, provider, model, response_id, completed_at, sources, evidence_items, unresolved_gaps, provider_notes.",
+            "Top-level keys: case_id, provider, model, response_id, completed_at, sources, evidence_items, candidate_claims, claim_evidence_links, source_gaps, provider_notes.",
+            "candidate_claims are not certified claims; M5 verifier decides certification, caveats, repair, human review, and report eligibility.",
+            "Do not provide final report text, investment memo prose, or recommendation text as a substitute for structured claims and evidence.",
             "Do not rely on model memory.",
             "Do not use the case_seed as evidence.",
             "Do not treat summaries or prior reports as authoritative evidence.",
