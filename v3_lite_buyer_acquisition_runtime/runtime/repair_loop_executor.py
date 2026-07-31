@@ -12,8 +12,8 @@ class RepairLoopError(ValueError):
 
 ALLOWED_REPAIR_TARGET_STATES = {
     "M2_source_retrieval",
-    "M2_source_retrieval_or_M5_numeric_verification",
     "M4_claim_evidence_graph_update",
+    "M5_numeric_verification",
 }
 FORBIDDEN_OUTPUT_MARKERS = {"final_report.md", "analysis_package.json", "final_report", "analysis_package"}
 MUST_NOT_USE_SOURCES = ["case_seed", "mandate_notes", "model memory", "test fixtures", "unverified local notes"]
@@ -112,7 +112,7 @@ def build_targeted_source_discovery_plan(
     targeted_source_needs = []
     blocked_or_deferred_repairs = []
     for step in repair_plan["repair_steps"]:
-        if "M2_source_retrieval" in step["target_state"]:
+        if step["target_state"] in {"M2_source_retrieval", "M5_numeric_verification"}:
             related_gap = _first_related_gap(step, gaps_by_id)
             targeted_source_needs.append(_targeted_source_need(len(targeted_source_needs) + 1, step, related_gap, certs_by_id, case_context))
         else:
@@ -159,16 +159,16 @@ def build_repair_attempt_log(targeted_plan: dict[str, Any], repair_plan: dict[st
     }
     unresolved = []
     for step in repair_plan["repair_steps"]:
-        is_m2 = "M2_source_retrieval" in step["target_state"]
-        status = "deferred_provider_unavailable" if is_m2 else "planned"
+        is_source_or_numeric = step["target_state"] in {"M2_source_retrieval", "M5_numeric_verification"}
+        status = "deferred_provider_unavailable" if is_source_or_numeric else "planned"
         reason = (
             "Dry run only: no retrieval provider was invoked and no authoritative source manifest was supplied."
-            if is_m2
+            if is_source_or_numeric
             else "Repair step is not executable as targeted M2 source retrieval in M5.1 dry run."
         )
         next_action = (
             "Supply manual authoritative sources or configure a retrieval provider, then rerun M2 source retrieval."
-            if is_m2
+            if is_source_or_numeric
             else "Handle after source repair, claim graph update, or human review decision."
         )
         attempts.append(
@@ -176,7 +176,7 @@ def build_repair_attempt_log(targeted_plan: dict[str, Any], repair_plan: dict[st
                 "repair_attempt_id": f"RA-{len(attempts) + 1:03d}",
                 "related_repair_step_id": step["repair_step_id"],
                 "target_state": step["target_state"],
-                "intended_provider": "manual_authoritative_source_supply_or_configured_retrieval_provider" if is_m2 else "not_invoked_in_m5_1",
+                "intended_provider": "manual_authoritative_source_supply_or_configured_retrieval_provider" if is_source_or_numeric else "not_invoked_in_m5_1",
                 "status": status,
                 "reason": reason,
                 "output_artifact_generated": False,
@@ -383,8 +383,8 @@ def _purpose_for_need(fact_types: list[str]) -> str:
 
 
 def _expected_downstream_update(step: dict[str, Any]) -> str:
-    if step["target_state"] == "M2_source_retrieval_or_M5_numeric_verification":
-        return "Update M2 retrieved sources or M5 numeric verification inputs, then rerun downstream certification."
+    if step["target_state"] == "M5_numeric_verification":
+        return "Update M5 numeric verification inputs, then rerun downstream certification."
     return "If authoritative sources are supplied, rerun M2 then M3/M4/M5 to update evidence and certification state."
 
 

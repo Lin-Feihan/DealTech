@@ -42,6 +42,7 @@ CLAIM_CERTIFICATION_STATUSES = {
 OVERALL_STATUSES = {"passed_with_caveats", "failed", "repair_required", "human_review_required"}
 REPORT_ASSERTION_USE = "report_assertion"
 RECOMMENDATION_BLOCKING_USES = {"final_recommendation", "ex_ante_recommendation", "recommendation_use"}
+ANALYSIS_ALLOWED_STATUSES = {"certified", "certified_with_caveat"}
 NEXT_WORKFLOW_ACTIONS = {
     "send_to_M6_analysis",
     "send_to_M6_with_caveat",
@@ -108,6 +109,7 @@ def build_certification_result(graph: dict[str, Any], evidence_repository: dict[
 
     verification_checks = _build_verification_checks(citation_results, temporal_results, numeric_results, evidence_check_results, claim_evidence_check_results, usage_check_results)
     overall_status = _overall_certification_status(claim_certifications, human_review_items)
+    analysis_gate_summary = _build_analysis_gate_summary(claim_certifications)
     report_gate_summary = _build_report_gate_summary(claim_certifications)
     recommendation_gate_summary = _build_recommendation_gate_summary(claim_certifications)
     result = {
@@ -128,6 +130,7 @@ def build_certification_result(graph: dict[str, Any], evidence_repository: dict[
         "numeric_verification_results": numeric_results,
         "citation_verification_results": citation_results,
         "temporal_verification_results": temporal_results,
+        "analysis_gate_summary": analysis_gate_summary,
         "report_gate_summary": report_gate_summary,
         "recommendation_gate_summary": recommendation_gate_summary,
         "human_review_items": _dedupe_human_review_items(human_review_items),
@@ -212,6 +215,9 @@ def certify_claim(
     elif claim.get("requires_numeric_verification") is True or claim["claim_type"] == "derived_numeric_candidate":
         status = "requires_numeric_verification"
         basis = "Usage gate blocks uncaveated financial conclusion until deterministic numeric verification passes."
+    elif claim.get("requires_human_review") is True and claim.get("support_level") == "needs_review":
+        status = "requires_human_review"
+        basis = "Claim requires human review before certification."
     elif claim["support_level"] == "source_supported" and _all_tier1(records):
         if claim["temporal_scope"] == "at_decision" and claim["permitted_use"] == "transaction_terms_verification" and temporal_result["verification_status"] == "passed":
             status = "certified"
@@ -276,6 +282,7 @@ def validate_certification_result(result: Any) -> None:
         "numeric_verification_results",
         "citation_verification_results",
         "temporal_verification_results",
+        "analysis_gate_summary",
         "report_gate_summary",
         "recommendation_gate_summary",
         "human_review_items",
@@ -302,6 +309,12 @@ def validate_certification_result(result: Any) -> None:
                 raise CertificationError(f"claim certification missing usage field {field}: {cert['claim_id']}")
         if cert["next_workflow_action"] not in NEXT_WORKFLOW_ACTIONS:
             raise CertificationError(f"invalid next_workflow_action: {cert['claim_id']}")
+        for action in cert["repair_actions"]:
+            target = action.get("target")
+            if target not in {"M2_source_retrieval", "M4_claim_evidence_graph", "M5_numeric_verification", "human_review", "block_pipeline_until_structure_repaired"}:
+                raise CertificationError(f"invalid repair_action target: {cert['claim_id']} -> {target}")
+            if "_or_" in target:
+                raise CertificationError(f"mixed repair_action target not allowed: {cert['claim_id']} -> {target}")
         if cert["certification_status"] in {"certified", "certified_with_caveat"} and not cert["supporting_evidence_record_ids"]:
             raise CertificationError(f"certified claim lacks supporting evidence: {cert['claim_id']}")
         if cert["certification_status"] == "certified" and cert["related_source_gap_ids"]:
@@ -355,6 +368,10 @@ def _dedupe_action_dicts(actions: list[dict[str, str]]) -> list[dict[str, str]]:
 
 
 def _next_workflow_action(status: str, caveats: list[str], repair_actions: list[dict[str, str]]) -> str:
+    if status == "certified_with_caveat" or (status == "certified" and caveats):
+        return "send_to_M6_with_caveat"
+    if status == "certified":
+        return "send_to_M6_analysis"
     targets = {action["target"] for action in repair_actions}
     if "M5_numeric_verification" in targets:
         return "route_to_M5_numeric_verification"
@@ -366,15 +383,33 @@ def _next_workflow_action(status: str, caveats: list[str], repair_actions: list[
         return "route_to_human_review"
     if repair_actions:
         return "block_pipeline_until_structure_repaired"
-    if status == "certified":
-        return "send_to_M6_analysis"
-    if status == "certified_with_caveat" or caveats:
-        return "send_to_M6_with_caveat"
     if status == "requires_numeric_verification":
         return "route_to_M5_numeric_verification"
     if status == "requires_human_review":
         return "route_to_human_review"
     return "block_pipeline_until_structure_repaired"
+
+
+def _build_analysis_gate_summary(claim_certifications: list[dict[str, Any]]) -> dict[str, Any]:
+    allowed_claim_ids = []
+    caveated_claim_ids = []
+    blocked_claim_ids = []
+    blocking_reasons = []
+    for cert in claim_certifications:
+        claim_id = cert["claim_id"]
+        if cert["next_workflow_action"] == "send_to_M6_analysis":
+            allowed_claim_ids.append(claim_id)
+        elif cert["next_workflow_action"] == "send_to_M6_with_caveat":
+            caveated_claim_ids.append(claim_id)
+        else:
+            blocked_claim_ids.append(claim_id)
+            blocking_reasons.extend(_blocking_reasons_for_claim(cert, "analysis"))
+    return {
+        "analysis_allowed_claim_ids": allowed_claim_ids,
+        "analysis_caveated_claim_ids": caveated_claim_ids,
+        "analysis_blocked_claim_ids": blocked_claim_ids,
+        "analysis_blocking_reasons": _ordered_unique(blocking_reasons),
+    }
 
 
 def _build_report_gate_summary(claim_certifications: list[dict[str, Any]]) -> dict[str, Any]:
@@ -539,9 +574,9 @@ def _compat_temporal_status(claim: dict[str, Any]) -> tuple[str, str]:
             return "failed", "Post-decision or retrospective evidence cannot support ex-ante buyer decision claims."
         if not warning_preserved:
             return "failed", "Hindsight warning is missing for post-decision or retrospective evidence."
-        return "passed_with_caveat", "Evidence may support retrospective validation only; it must not be worded as ex-ante buyer decision support."
+        return "passed_with_caveat", "Evidence may support retrospective validation only; preserve a retrospective/source-limit caveat and do not word it as ex-ante buyer decision support."
     if "mixed temporal support" in warning_text.lower():
-        return "passed_with_caveat", "Mixed temporal support requires explicit caveat even when anchored to decision-time transaction verification."
+        return "passed_with_caveat", "Mixed temporal support requires explicit retrospective/source-limit caveat even when anchored to decision-time transaction verification."
     if temporal_scope == "at_decision" and permitted_use != "transaction_terms_verification":
         return "passed_with_caveat", "At-decision evidence is not being used for transaction_terms_verification; preserve narrow wording."
     return "passed", "Temporal scope and permitted use are aligned."

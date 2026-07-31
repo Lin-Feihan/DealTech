@@ -133,6 +133,8 @@ def validate_repair_plan(payload: dict[str, Any]) -> None:
         ):
             if field not in step:
                 raise ValueError(f"repair_step missing {field}.")
+        if "_or_" in str(step.get("target_state", "")):
+            raise ValueError(f"repair_step target_state must be explicit: {step['repair_step_id']}")
 
 
 def _append_repair_step(
@@ -304,7 +306,7 @@ def _repair_action(gap: dict[str, Any]) -> str:
 
 def _repair_target_state(action: str) -> str:
     if action == "repair_numeric_formula_or_inputs":
-        return "M2_source_retrieval_or_M5_numeric_verification"
+        return "M5_numeric_verification"
     if action in {"resolve_source_conflict", "add_human_review_item"}:
         return "M4_claim_evidence_graph_update"
     return "M2_source_retrieval"
@@ -312,7 +314,7 @@ def _repair_target_state(action: str) -> str:
 
 def _target_artifact(action: str) -> str:
     if action == "repair_numeric_formula_or_inputs":
-        return "retrieved_sources_manifest.json or certification_result.json"
+        return "certification_result.json"
     if action in {"resolve_source_conflict", "add_human_review_item"}:
         return "claim_evidence_graph.json"
     return "retrieved_sources_manifest.json"
@@ -361,7 +363,7 @@ def _target_state_for_claim_action(target: str) -> str:
     if target == "M4_claim_evidence_graph":
         return "M4_claim_evidence_graph_update"
     if target == "M5_numeric_verification":
-        return "M2_source_retrieval_or_M5_numeric_verification"
+        return "M5_numeric_verification"
     if target == "human_review":
         return "M4_claim_evidence_graph_update"
     return "M5_loop_certification"

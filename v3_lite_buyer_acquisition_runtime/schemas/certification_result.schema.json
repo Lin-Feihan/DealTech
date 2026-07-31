@@ -22,6 +22,7 @@
     "numeric_verification_results",
     "citation_verification_results",
     "temporal_verification_results",
+    "analysis_gate_summary",
     "report_gate_summary",
     "recommendation_gate_summary",
     "human_review_items",
@@ -130,6 +131,17 @@
     },
     "citation_verification_results": {"type": "array", "items": {"type": "object"}},
     "temporal_verification_results": {"type": "array", "items": {"type": "object"}},
+    "analysis_gate_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["analysis_allowed_claim_ids", "analysis_caveated_claim_ids", "analysis_blocked_claim_ids", "analysis_blocking_reasons"],
+      "properties": {
+        "analysis_allowed_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "analysis_caveated_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "analysis_blocked_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "analysis_blocking_reasons": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
     "report_gate_summary": {
       "type": "object",
       "additionalProperties": false,

@@ -66,6 +66,8 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
         self.assertEqual(certification["overall_certification_status"], "repair_required")
         self.assertTrue(certification["evidence_check_results"])
         self.assertTrue(certification["claim_evidence_check_results"])
+        self.assertTrue(certification["usage_check_results"])
+        self.assertIn("analysis_gate_summary", certification)
         self.assertFalse((output_dir / "final_report.md").exists())
         self.assertFalse((output_dir / "analysis_package.json").exists())
 
@@ -83,6 +85,9 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
             self.assertIn("usage_check_status", claim_cert)
             self.assertIn("next_workflow_action", claim_cert)
             self.assertIn("repair_actions", claim_cert)
+            self.assertNotIn("_or_", claim_cert["next_workflow_action"])
+            for repair_action in claim_cert["repair_actions"]:
+                self.assertNotIn("_or_", repair_action["target"])
 
     def test_claim_evidence_gate_blocks_mismatched_supported_claim(self) -> None:
         graph = self._load(self.graph_path)
@@ -124,6 +129,20 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
         self.assertEqual(routed["certification_status"], "certified_with_caveat")
         self.assertEqual(routed["next_workflow_action"], "send_to_M6_with_caveat")
 
+    def test_one_claim_has_one_route_and_caveated_claim_never_uses_analysis_route(self) -> None:
+        graph = self._graph_with_clean_claim("CL-004")
+        for claim in graph["claim_nodes"]:
+            if claim["claim_id"] == "CL-004":
+                claim["support_level"] = "partially_supported"
+                claim["claim_statement"] = "Narrow caveated transaction timing claim."
+                break
+        certification = self._run_certification_for_graph(graph, "m5_single_route")
+        routed = self._claim_certification(certification, "CL-004")
+
+        self.assertEqual(sum(cert["claim_id"] == "CL-004" for cert in certification["claim_certifications"]), 1)
+        self.assertEqual(routed["next_workflow_action"], "send_to_M6_with_caveat")
+        self.assertNotEqual(routed["next_workflow_action"], "send_to_M6_analysis")
+
     def test_routing_returns_source_gap_to_m2_source_retrieval(self) -> None:
         certification = self._run_certification("m5_source_gap_route")
         routed = self._claim_certification(certification, "CL-005")
@@ -164,6 +183,7 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
         for claim in graph["claim_nodes"]:
             if claim["claim_id"] == "CL-004":
                 claim["requires_human_review"] = True
+                claim["support_level"] = "needs_review"
                 claim["claim_statement"] = "Narrow transaction timing claim requiring human review."
                 break
         certification = self._run_certification_for_graph(graph, "m5_human_route")
@@ -238,9 +258,19 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
         source_gap_steps = [step for step in repair_plan["repair_steps"] if step["priority"] == "high"]
 
         self.assertTrue(source_gap_steps)
-        self.assertTrue(all(step["target_state"] in {"M2_source_retrieval", "M2_source_retrieval_or_M5_numeric_verification"} for step in source_gap_steps))
+        self.assertTrue(all(step["target_state"] in {"M2_source_retrieval", "M5_numeric_verification"} for step in source_gap_steps))
         self.assertTrue(any(step.get("repair_action") == "repair_numeric_formula_or_inputs" for step in repair_plan["repair_steps"]))
         self.assertTrue(all(step.get("repair_action") for step in repair_plan["repair_steps"]))
+        self.assertTrue(all("_or_" not in step["target_state"] for step in repair_plan["repair_steps"]))
+
+    def test_analysis_gate_is_separate_from_report_gate(self) -> None:
+        graph = self._graph_with_clean_claim("CL-004")
+        certification = self._run_certification_for_graph(graph, "m5_analysis_report_gate_split")
+
+        self.assertIn("CL-004", certification["analysis_gate_summary"]["analysis_allowed_claim_ids"])
+        self.assertNotIn("CL-004", certification["analysis_gate_summary"]["analysis_blocked_claim_ids"])
+        self.assertNotIn("CL-004", certification["report_gate_summary"]["report_blocked_claim_ids"])
+        self.assertNotEqual(certification["analysis_gate_summary"], certification["report_gate_summary"])
 
     def test_report_gate_summary_lists_allowed_caveated_and_blocked_claims(self) -> None:
         graph = self._graph_with_clean_claim("CL-001")
