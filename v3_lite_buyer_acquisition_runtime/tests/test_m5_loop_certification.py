@@ -64,8 +64,39 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
         validate_repair_plan(repair_plan)
         self.assertEqual(certification["generated_artifact"], "certification_result.json")
         self.assertEqual(certification["overall_certification_status"], "repair_required")
+        self.assertTrue(certification["evidence_check_results"])
+        self.assertTrue(certification["claim_evidence_check_results"])
         self.assertFalse((output_dir / "final_report.md").exists())
         self.assertFalse((output_dir / "analysis_package.json").exists())
+
+    def test_certification_result_exposes_evidence_and_claim_evidence_gates(self) -> None:
+        certification = self._run_certification("m5_gate_results")
+        verification_by_type = {check["check_type"]: check for check in certification["verification_checks"]}
+
+        self.assertIn("evidence", verification_by_type)
+        self.assertIn("claim_evidence", verification_by_type)
+        self.assertEqual(verification_by_type["evidence"]["result_count"], len(certification["evidence_check_results"]))
+        self.assertEqual(verification_by_type["claim_evidence"]["result_count"], len(certification["claim_evidence_check_results"]))
+        for claim_cert in certification["claim_certifications"]:
+            self.assertIn("evidence_check_status", claim_cert)
+            self.assertIn("claim_evidence_check_status", claim_cert)
+
+    def test_claim_evidence_gate_blocks_mismatched_supported_claim(self) -> None:
+        graph = self._load(self.graph_path)
+        for claim in graph["claim_nodes"]:
+            if claim["claim_id"] == "CL-004":
+                claim["claim_statement"] = f"{claim['claim_statement']} The buyer also paid $123 million in unsupported extra consideration."
+                break
+        broken_graph_path = self.root / "mismatched_claim_evidence_graph.json"
+        broken_graph_path.write_text(json.dumps(graph, indent=2), encoding="utf-8")
+
+        artifacts = run_m5_pipeline(broken_graph_path, self.repository_path, self.root / "m5_mismatched_claim")
+        certification = self._load(artifacts["certification_result"])
+        mismatched = self._claim_certification(certification, "CL-004")
+
+        self.assertEqual(mismatched["certification_status"], "failed")
+        self.assertEqual(mismatched["claim_evidence_check_status"], "failed")
+        self.assertIn("claim-evidence gate failed", mismatched["certification_basis"])
 
     def test_invalid_graph_fails_closed(self) -> None:
         graph = self._load(self.graph_path)

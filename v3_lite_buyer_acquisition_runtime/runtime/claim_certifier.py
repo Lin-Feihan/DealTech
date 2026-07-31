@@ -6,9 +6,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from v3_lite_buyer_acquisition_runtime.runtime.citation_verifier import verify_citations
-from v3_lite_buyer_acquisition_runtime.runtime.numeric_verifier import verify_numeric_claims
-from v3_lite_buyer_acquisition_runtime.runtime.temporal_verifier import verify_temporal_alignment
+from v3_lite_buyer_acquisition_runtime.runtime.claim_evidence_check import (
+    claim_evidence_results_by_claim_id,
+    run_claim_evidence_check,
+)
+from v3_lite_buyer_acquisition_runtime.runtime.evidence_check import evidence_results_by_record_id, run_evidence_check
+from v3_lite_buyer_acquisition_runtime.runtime.usage_check import run_usage_check, usage_results_by_claim_id
 
 
 class CertificationError(ValueError):
@@ -66,13 +69,17 @@ def certification_result_source_id(certification_result: dict[str, Any]) -> str:
 
 def build_certification_result(graph: dict[str, Any], evidence_repository: dict[str, Any]) -> dict[str, Any]:
     validate_m5_inputs(graph, evidence_repository)
-    citation_results = verify_citations(graph, evidence_repository)
-    temporal_results = verify_temporal_alignment(graph, evidence_repository)
-    numeric_results = verify_numeric_claims(graph, evidence_repository)
+    evidence_check_results = run_evidence_check(evidence_repository)
+    claim_evidence_check_results = run_claim_evidence_check(graph, evidence_repository)
+    usage_check_results = run_usage_check(graph, evidence_repository)
+    citation_results = _build_compat_citation_results(graph, claim_evidence_check_results)
+    temporal_results = _build_compat_temporal_results(graph)
+    numeric_results: list[dict[str, Any]] = []
     records_by_id = {record["evidence_record_id"]: record for record in evidence_repository["evidence_records"]}
-    citation_by_claim = {result["claim_id"]: result for result in citation_results}
+    evidence_check_by_record = evidence_results_by_record_id(evidence_check_results)
+    claim_evidence_check_by_claim = claim_evidence_results_by_claim_id(claim_evidence_check_results)
     temporal_by_claim = {result["claim_id"]: result for result in temporal_results}
-    numeric_by_claim = {result["related_claim_id"]: result for result in numeric_results}
+    usage_check_by_claim = usage_results_by_claim_id(usage_check_results)
 
     claim_certifications = []
     human_review_items = []
@@ -80,14 +87,15 @@ def build_certification_result(graph: dict[str, Any], evidence_repository: dict[
         cert = certify_claim(
             claim=claim,
             records_by_id=records_by_id,
-            citation_result=citation_by_claim[claim["claim_id"]],
+            evidence_check_by_record=evidence_check_by_record,
+            claim_evidence_check=claim_evidence_check_by_claim[claim["claim_id"]],
             temporal_result=temporal_by_claim[claim["claim_id"]],
-            numeric_result=numeric_by_claim.get(claim["claim_id"]),
+            usage_check=usage_check_by_claim[claim["claim_id"]],
         )
         claim_certifications.append(cert)
         human_review_items.extend(_human_review_items_for_claim(cert, claim))
 
-    verification_checks = _build_verification_checks(citation_results, temporal_results, numeric_results)
+    verification_checks = _build_verification_checks(citation_results, temporal_results, numeric_results, evidence_check_results, claim_evidence_check_results, usage_check_results)
     overall_status = _overall_certification_status(claim_certifications, human_review_items)
     result = {
         "case_id": graph["case_id"],
@@ -101,6 +109,9 @@ def build_certification_result(graph: dict[str, Any], evidence_repository: dict[
         "overall_certification_status": overall_status,
         "claim_certifications": claim_certifications,
         "verification_checks": verification_checks,
+        "evidence_check_results": evidence_check_results,
+        "claim_evidence_check_results": claim_evidence_check_results,
+        "usage_check_results": usage_check_results,
         "numeric_verification_results": numeric_results,
         "citation_verification_results": citation_results,
         "temporal_verification_results": temporal_results,
@@ -161,30 +172,30 @@ def validate_m5_inputs(graph: Any, evidence_repository: Any) -> None:
 def certify_claim(
     claim: dict[str, Any],
     records_by_id: dict[str, dict[str, Any]],
-    citation_result: dict[str, Any],
+    evidence_check_by_record: dict[str, dict[str, Any]],
+    claim_evidence_check: dict[str, Any],
     temporal_result: dict[str, Any],
-    numeric_result: dict[str, Any] | None,
+    usage_check: dict[str, Any],
 ) -> dict[str, Any]:
     records = [records_by_id[record_id] for record_id in claim["supporting_evidence_record_ids"] if record_id in records_by_id]
+    evidence_checks = [evidence_check_by_record[record["evidence_record_id"]] for record in records if record["evidence_record_id"] in evidence_check_by_record]
     caveats = []
     if temporal_result["verification_status"] == "passed_with_caveat":
         caveats.append(temporal_result["caveat"])
-    if citation_result["verification_status"] not in {"passed", "not_applicable"}:
-        status = "failed"
-        basis = "Citation verification failed."
-    elif temporal_result["verification_status"] == "failed":
+    caveats.extend(_check_caveats(evidence_checks))
+    caveats.extend(claim_evidence_check.get("required_caveats", []))
+    caveats.extend(usage_check.get("required_caveats", []))
+    if temporal_result["verification_status"] == "failed":
         status = "failed"
         basis = "Temporal verification failed."
     elif claim["support_level"] in {"gap_only", "unsupported"}:
         status, basis = _gap_or_unsupported_status(claim)
-    elif claim["claim_type"] == "derived_numeric_candidate":
-        if numeric_result and numeric_result["verification_status"] == "passed_with_caveat":
-            status = "certified_with_caveat"
-            basis = "Arithmetic relationship verified from source-supported components only."
-            caveats.append(numeric_result["caveat"])
-        else:
-            status = "requires_numeric_verification"
-            basis = "Numeric verification failed or was not available."
+    elif _has_blocking_check(evidence_checks) or claim_evidence_check["check_status"] in {"failed", "repair_required"}:
+        status = "failed"
+        basis = _blocking_check_basis(evidence_checks, claim_evidence_check)
+    elif claim.get("requires_numeric_verification") is True or claim["claim_type"] == "derived_numeric_candidate":
+        status = "requires_numeric_verification"
+        basis = "Usage gate blocks uncaveated financial conclusion until deterministic numeric verification passes."
     elif claim["support_level"] == "source_supported" and _all_tier1(records):
         if claim["temporal_scope"] == "at_decision" and claim["permitted_use"] == "transaction_terms_verification" and temporal_result["verification_status"] == "passed":
             status = "certified"
@@ -210,9 +221,15 @@ def certify_claim(
         "certification_basis": basis,
         "supporting_evidence_record_ids": claim["supporting_evidence_record_ids"],
         "related_source_gap_ids": claim["related_source_gap_ids"],
-        "citation_check_status": citation_result["verification_status"],
+        "evidence_check_status": _aggregate_check_status(evidence_checks),
+        "claim_evidence_check_status": claim_evidence_check["check_status"],
+        "usage_check_status": usage_check["usage_check_status"],
+        "allowed_downstream_uses": usage_check["allowed_downstream_uses"],
+        "blocked_downstream_uses": usage_check["blocked_downstream_uses"],
+        "required_caveats": sorted(set(caveats)),
+        "citation_check_status": _compat_citation_status(claim, claim_evidence_check),
         "temporal_check_status": temporal_result["verification_status"],
-        "numeric_check_status": numeric_result["verification_status"] if numeric_result else "not_applicable",
+        "numeric_check_status": "not_applicable",
         "caveats": sorted(set(caveats)),
         "requires_human_review": _requires_human_review(status, claim),
         "downstream_use_warning": _downstream_warning(status, claim),
@@ -234,6 +251,9 @@ def validate_certification_result(result: Any) -> None:
         "overall_certification_status",
         "claim_certifications",
         "verification_checks",
+        "evidence_check_results",
+        "claim_evidence_check_results",
+        "usage_check_results",
         "numeric_verification_results",
         "citation_verification_results",
         "temporal_verification_results",
@@ -254,6 +274,11 @@ def validate_certification_result(result: Any) -> None:
     for cert in result["claim_certifications"]:
         if cert["certification_status"] not in CLAIM_CERTIFICATION_STATUSES:
             raise CertificationError(f"invalid claim certification status: {cert['claim_id']}")
+        if "evidence_check_status" not in cert or "claim_evidence_check_status" not in cert:
+            raise CertificationError(f"claim certification missing check status: {cert['claim_id']}")
+        for field in ("usage_check_status", "allowed_downstream_uses", "blocked_downstream_uses", "required_caveats"):
+            if field not in cert:
+                raise CertificationError(f"claim certification missing usage field {field}: {cert['claim_id']}")
         if cert["certification_status"] in {"certified", "certified_with_caveat"} and not cert["supporting_evidence_record_ids"]:
             raise CertificationError(f"certified claim lacks supporting evidence: {cert['claim_id']}")
         if cert["certification_status"] == "certified" and cert["related_source_gap_ids"]:
@@ -266,6 +291,128 @@ def _gap_or_unsupported_status(claim: dict[str, Any]) -> tuple[str, str]:
     if claim["related_source_gap_ids"]:
         return "blocked_by_source_gap", "Claim is blocked by unresolved source gap(s)."
     return "unsupported", "Claim lacks supporting evidence."
+
+
+def _aggregate_check_status(checks: list[dict[str, Any]]) -> str:
+    statuses = {check["check_status"] for check in checks}
+    if "failed" in statuses:
+        return "failed"
+    if "repair_required" in statuses:
+        return "repair_required"
+    if "passed_with_caveat" in statuses:
+        return "passed_with_caveat"
+    if "passed" in statuses:
+        return "passed"
+    return "not_applicable"
+
+
+def _has_blocking_check(checks: list[dict[str, Any]]) -> bool:
+    return any(check["check_status"] in {"failed", "repair_required"} for check in checks)
+
+
+def _check_caveats(checks: list[dict[str, Any]]) -> list[str]:
+    caveats = []
+    for check in checks:
+        caveats.extend(check.get("required_caveats", []))
+    return caveats
+
+
+def _blocking_check_basis(evidence_checks: list[dict[str, Any]], claim_evidence_check: dict[str, Any]) -> str:
+    reasons = []
+    for check in evidence_checks:
+        if check["check_status"] in {"failed", "repair_required"}:
+            reasons.extend(check.get("blocking_reasons", []))
+            reasons.extend(action.get("reason", "") for action in check.get("repair_actions", []))
+    if claim_evidence_check["check_status"] in {"failed", "repair_required"}:
+        reasons.extend(claim_evidence_check.get("blocking_reasons", []))
+        reasons.extend(action.get("reason", "") for action in claim_evidence_check.get("repair_actions", []))
+    unique_reasons = _ordered_unique([reason for reason in reasons if reason])
+    if unique_reasons:
+        return "Evidence or claim-evidence gate failed: " + "; ".join(unique_reasons)
+    return "Evidence or claim-evidence gate requires repair before certification."
+
+
+def _build_compat_citation_results(graph: dict[str, Any], claim_evidence_check_results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    checks_by_claim_id = {result["claim_id"]: result for result in claim_evidence_check_results}
+    results = []
+    for index, claim in enumerate(graph["claim_nodes"], start=1):
+        check = checks_by_claim_id[claim["claim_id"]]
+        results.append(
+            {
+                "citation_check_id": f"CV-{index:03d}",
+                "claim_id": claim["claim_id"],
+                "verification_status": _compat_citation_status(claim, check),
+                "supporting_edge_ids": [],
+                "supporting_evidence_record_ids": list(claim.get("supporting_evidence_record_ids", [])),
+                "source_ids": sorted(set(claim.get("supporting_source_ids", []))),
+                "source_tiers": sorted(set(claim.get("source_tiers", []))),
+                "raw_evidence_ids": sorted(set(claim.get("supporting_raw_evidence_ids", []))),
+                "provenance_fields_present": bool(claim.get("supporting_evidence_record_ids")),
+                "forbidden_source_markers_detected": [],
+                "caveat": "Compatibility citation status derived from claim-evidence gate; legacy citation verifier was not run.",
+            }
+        )
+    return results
+
+
+def _compat_citation_status(claim: dict[str, Any], claim_evidence_check: dict[str, Any]) -> str:
+    if claim.get("support_level") in {"gap_only", "unsupported"} or not claim.get("supporting_evidence_record_ids"):
+        return "not_applicable"
+    if claim_evidence_check["check_status"] in {"failed", "repair_required"}:
+        return "failed"
+    return "passed"
+
+
+def _build_compat_temporal_results(graph: dict[str, Any]) -> list[dict[str, Any]]:
+    results = []
+    for index, claim in enumerate(graph["claim_nodes"], start=1):
+        status, caveat = _compat_temporal_status(claim)
+        results.append(
+            {
+                "temporal_check_id": f"TV-{index:03d}",
+                "claim_id": claim["claim_id"],
+                "verification_status": status,
+                "temporal_scope": claim.get("temporal_scope", ""),
+                "permitted_use": claim.get("permitted_use", ""),
+                "supporting_time_relations": [claim.get("evidence_time_relation_to_decision_date")]
+                if claim.get("evidence_time_relation_to_decision_date")
+                else [],
+                "hindsight_leakage_warning_preserved": bool(claim.get("hindsight_leakage_warning")),
+                "caveat": caveat,
+            }
+        )
+    return results
+
+
+def _compat_temporal_status(claim: dict[str, Any]) -> tuple[str, str]:
+    temporal_scope = claim.get("temporal_scope")
+    permitted_use = claim.get("permitted_use")
+    warning_text = str(claim.get("hindsight_leakage_warning", ""))
+    warning_preserved = bool(warning_text)
+    if temporal_scope == "source_gap":
+        return "not_applicable", "Source-gap claim has no evidence timing and cannot be certified from evidence."
+    if temporal_scope in {"post_decision", "retrospective"}:
+        if permitted_use == "ex_ante_deal_evaluation":
+            return "failed", "Post-decision or retrospective evidence cannot support ex-ante buyer decision claims."
+        if not warning_preserved:
+            return "failed", "Hindsight warning is missing for post-decision or retrospective evidence."
+        return "passed_with_caveat", "Evidence may support retrospective validation only; it must not be worded as ex-ante buyer decision support."
+    if "mixed temporal support" in warning_text.lower():
+        return "passed_with_caveat", "Mixed temporal support requires explicit caveat even when anchored to decision-time transaction verification."
+    if temporal_scope == "at_decision" and permitted_use != "transaction_terms_verification":
+        return "passed_with_caveat", "At-decision evidence is not being used for transaction_terms_verification; preserve narrow wording."
+    return "passed", "Temporal scope and permitted use are aligned."
+
+
+def _ordered_unique(values: list[str]) -> list[str]:
+    seen = set()
+    unique = []
+    for value in values:
+        if value in seen or value in {None, ""}:
+            continue
+        seen.add(value)
+        unique.append(value)
+    return unique
 
 
 def _all_tier1(records: list[dict[str, Any]]) -> bool:
@@ -341,25 +488,33 @@ def _build_verification_checks(
     citation_results: list[dict[str, Any]],
     temporal_results: list[dict[str, Any]],
     numeric_results: list[dict[str, Any]],
+    evidence_check_results: list[dict[str, Any]],
+    claim_evidence_check_results: list[dict[str, Any]],
+    usage_check_results: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     return [
-        _summary_check("VC-001", "citation", citation_results),
-        _summary_check("VC-002", "temporal", temporal_results),
-        _summary_check("VC-003", "numeric", numeric_results),
+        _summary_check("VC-001", "evidence", evidence_check_results, "check_status"),
+        _summary_check("VC-002", "claim_evidence", claim_evidence_check_results, "check_status"),
+        _summary_check("VC-003", "usage", usage_check_results, "usage_check_status"),
+        _summary_check("VC-004", "citation_compat", citation_results, "verification_status"),
+        _summary_check("VC-005", "temporal_compat", temporal_results, "verification_status"),
+        _summary_check("VC-006", "numeric_compat", numeric_results, "verification_status"),
     ]
 
 
-def _summary_check(check_id: str, check_type: str, results: list[dict[str, Any]]) -> dict[str, Any]:
-    statuses = Counter(result["verification_status"] for result in results)
+def _summary_check(check_id: str, check_type: str, results: list[dict[str, Any]], status_key: str) -> dict[str, Any]:
+    statuses = Counter(result[status_key] for result in results)
     failed = statuses.get("failed", 0)
-    status = "failed" if failed else "passed_with_caveats" if any(key.endswith("caveat") for key in statuses) else "passed"
+    repair_required = statuses.get("repair_required", 0)
+    blocked = statuses.get("blocked", 0)
+    status = "failed" if failed else "repair_required" if repair_required or blocked else "passed_with_caveats" if any(key.endswith("caveat") for key in statuses) else "passed"
     return {
         "verification_check_id": check_id,
         "check_type": check_type,
         "check_status": status,
         "result_count": len(results),
         "status_counts": dict(statuses),
-        "blocking": bool(failed),
+        "blocking": bool(failed or repair_required or blocked),
     }
 
 
