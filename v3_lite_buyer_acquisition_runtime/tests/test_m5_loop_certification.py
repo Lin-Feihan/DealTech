@@ -13,6 +13,7 @@ from v3_lite_buyer_acquisition_runtime.runtime.research_planning import build_re
 from v3_lite_buyer_acquisition_runtime.runtime.claim_certifier import validate_certification_result
 from v3_lite_buyer_acquisition_runtime.runtime.repair_plan_builder import validate_repair_plan, validate_research_gaps
 from v3_lite_buyer_acquisition_runtime.runtime.source_refetch_check import run_source_refetch_check
+from v3_lite_buyer_acquisition_runtime.runtime.xbrl_numeric_check import run_xbrl_numeric_check
 from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m2 import run_m2_pipeline
 from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m3 import run_m3_pipeline
 from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m4 import run_m4_pipeline
@@ -69,6 +70,7 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
         self.assertEqual(certification["overall_certification_status"], "repair_required")
         self.assertTrue(certification["evidence_check_results"])
         self.assertTrue(certification["source_refetch_check_results"])
+        self.assertTrue(certification["xbrl_numeric_check_results"])
         self.assertTrue(certification["claim_evidence_check_results"])
         self.assertTrue(certification["usage_check_results"])
         self.assertIn("analysis_gate_summary", certification)
@@ -81,13 +83,16 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
 
         self.assertIn("evidence", verification_by_type)
         self.assertIn("source_refetch", verification_by_type)
+        self.assertIn("xbrl_numeric", verification_by_type)
         self.assertIn("claim_evidence", verification_by_type)
         self.assertEqual(verification_by_type["evidence"]["result_count"], len(certification["evidence_check_results"]))
         self.assertEqual(verification_by_type["source_refetch"]["result_count"], len(certification["source_refetch_check_results"]))
+        self.assertEqual(verification_by_type["xbrl_numeric"]["result_count"], len(certification["xbrl_numeric_check_results"]))
         self.assertEqual(verification_by_type["claim_evidence"]["result_count"], len(certification["claim_evidence_check_results"]))
         for claim_cert in certification["claim_certifications"]:
             self.assertIn("evidence_check_status", claim_cert)
             self.assertIn("source_refetch_check_status", claim_cert)
+            self.assertIn("xbrl_numeric_check_status", claim_cert)
             self.assertIn("claim_evidence_check_status", claim_cert)
             self.assertIn("usage_check_status", claim_cert)
             self.assertIn("next_workflow_action", claim_cert)
@@ -431,6 +436,87 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
         self.assertIn("Source refetch text unavailable", " ".join(routed["caveats"]))
         self.assertNotEqual(routed["source_refetch_check_status"], "verified")
 
+    def test_xbrl_numeric_metadata_missing_is_not_applicable(self) -> None:
+        repository = self._load(self.repository_path)
+
+        results = run_xbrl_numeric_check(repository, provider=lambda cik, tag, period, unit: {"observed_value": 42})
+
+        self.assertTrue(results)
+        self.assertTrue(all(result["xbrl_check_status"] == "not_applicable" for result in results))
+        self.assertTrue(all(result["repair_actions"] == [] for result in results))
+        self.assertTrue(all(result["blocking_reasons"] == [] for result in results))
+
+    def test_xbrl_numeric_fake_provider_value_matches(self) -> None:
+        repository = self._repository_with_xbrl_metadata(expected_value=60900000000)
+
+        results = run_xbrl_numeric_check(repository, provider=lambda cik, tag, period, unit: {"observed_value": 60900000000})
+        result = results[0]
+
+        self.assertEqual(result["cik"], "0000320193")
+        self.assertEqual(result["taxonomy_tag"], "Revenues")
+        self.assertEqual(result["period"], "FY2024")
+        self.assertEqual(result["unit"], "USD")
+        self.assertEqual(result["xbrl_check_status"], "verified")
+        self.assertEqual(result["observed_value"], 60900000000)
+        self.assertEqual(result["repair_actions"], [])
+
+    def test_xbrl_numeric_fake_provider_value_mismatch_blocks_claim_and_routes_to_m5(self) -> None:
+        certification = self._run_certification_with_xbrl_result(
+            "xbrl_numeric_mismatch",
+            {
+                "xbrl_check_status": "mismatch",
+                "observed_value": 60800000000,
+                "blocking_reasons": ["XBRL observed value does not match expected canonical value."],
+                "repair_actions": [
+                    {"target": "M5_numeric_verification", "action": "repair_xbrl_numeric_value", "reason": "XBRL observed value does not match expected canonical value."}
+                ],
+            },
+        )
+        routed = self._claim_certification(certification, "CL-004")
+
+        self.assertIn("xbrl_numeric_check_results", certification)
+        self.assertEqual(routed["certification_status"], "failed")
+        self.assertEqual(routed["xbrl_numeric_check_status"], "mismatch")
+        self.assertEqual(routed["next_workflow_action"], "route_to_M5_numeric_verification")
+        self.assertTrue(any(action["target"] == "M5_numeric_verification" for action in routed["repair_actions"]))
+
+    def test_xbrl_numeric_not_found_routes_to_m2_source_retrieval(self) -> None:
+        certification = self._run_certification_with_xbrl_result(
+            "xbrl_numeric_not_found",
+            {
+                "xbrl_check_status": "not_found",
+                "observed_value": None,
+                "blocking_reasons": ["XBRL fact was not found for explicit CIK, taxonomy tag, period, and unit."],
+                "repair_actions": [
+                    {"target": "M2_source_retrieval", "action": "repair_xbrl_source_metadata_or_source", "reason": "XBRL fact was not found for explicit CIK, taxonomy tag, period, and unit."}
+                ],
+            },
+        )
+        routed = self._claim_certification(certification, "CL-004")
+
+        self.assertEqual(routed["certification_status"], "failed")
+        self.assertEqual(routed["xbrl_numeric_check_status"], "not_found")
+        self.assertEqual(routed["next_workflow_action"], "return_to_M2_source_retrieval")
+
+    def test_xbrl_numeric_provider_unavailable_is_not_verified(self) -> None:
+        certification = self._run_certification_with_xbrl_result(
+            "xbrl_numeric_provider_unavailable",
+            {
+                "xbrl_check_status": "provider_unavailable",
+                "observed_value": None,
+                "blocking_reasons": ["XBRL provider unavailable; numeric claim cannot be treated as verified."],
+                "repair_actions": [
+                    {"target": "block_pipeline_until_structure_repaired", "action": "retry_or_document_xbrl_provider_unavailable", "reason": "XBRL provider unavailable; numeric claim cannot be treated as verified."}
+                ],
+            },
+        )
+        routed = self._claim_certification(certification, "CL-004")
+
+        self.assertEqual(routed["certification_status"], "failed")
+        self.assertEqual(routed["xbrl_numeric_check_status"], "provider_unavailable")
+        self.assertNotEqual(routed["xbrl_numeric_check_status"], "verified")
+        self.assertEqual(routed["next_workflow_action"], "block_pipeline_until_structure_repaired")
+
     def test_no_final_report_or_analysis_package_generated(self) -> None:
         output_dir = self.root / "m5_forbidden_outputs"
 
@@ -477,6 +563,24 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
         repository["evidence_records"] = [dict(repository["evidence_records"][0], source_urls=[url], normalized_fact_summary=summary)]
         return repository
 
+    def _repository_with_xbrl_metadata(self, expected_value: int) -> dict:
+        repository = self._load(self.repository_path)
+        repository["evidence_records"] = [
+            dict(
+                repository["evidence_records"][0],
+                structured_attributes={
+                    "xbrl": {
+                        "cik": "0000320193",
+                        "taxonomy_tag": "Revenues",
+                        "period": "FY2024",
+                        "unit": "USD",
+                        "expected_value": expected_value,
+                    }
+                },
+            )
+        ]
+        return repository
+
     def _run_certification_with_refetch_result(self, label: str, result_fields: dict) -> dict:
         graph = self._graph_with_clean_claim("CL-004")
         for claim in graph["claim_nodes"]:
@@ -491,6 +595,26 @@ class V3LiteM5LoopCertificationTest(unittest.TestCase):
             **result_fields,
         }
         with patch("v3_lite_buyer_acquisition_runtime.runtime.claim_certifier.run_source_refetch_check", return_value=[refetch_result]):
+            return self._run_certification_for_graph(graph, label)
+
+    def _run_certification_with_xbrl_result(self, label: str, result_fields: dict) -> dict:
+        graph = self._graph_with_clean_claim("CL-004")
+        for claim in graph["claim_nodes"]:
+            if claim["claim_id"] == "CL-004":
+                claim["supporting_evidence_record_ids"] = ["ER-001"]
+                claim["claim_type"] = "transaction_consideration"
+                claim["claim_statement"] = "Financial transaction consideration claim."
+                break
+        xbrl_result = {
+            "evidence_record_id": "ER-001",
+            "cik": "0000320193",
+            "taxonomy_tag": "Revenues",
+            "period": "FY2024",
+            "unit": "USD",
+            "expected_value": 60900000000,
+            **result_fields,
+        }
+        with patch("v3_lite_buyer_acquisition_runtime.runtime.claim_certifier.run_xbrl_numeric_check", return_value=[xbrl_result]):
             return self._run_certification_for_graph(graph, label)
 
     def _claim_certification(self, certification: dict, claim_id: str) -> dict:

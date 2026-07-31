@@ -13,6 +13,7 @@ from v3_lite_buyer_acquisition_runtime.runtime.claim_evidence_check import (
 from v3_lite_buyer_acquisition_runtime.runtime.evidence_check import evidence_results_by_record_id, run_evidence_check
 from v3_lite_buyer_acquisition_runtime.runtime.source_refetch_check import run_source_refetch_check, source_refetch_results_by_record_id
 from v3_lite_buyer_acquisition_runtime.runtime.usage_check import run_usage_check, usage_results_by_claim_id
+from v3_lite_buyer_acquisition_runtime.runtime.xbrl_numeric_check import run_xbrl_numeric_check, xbrl_results_by_record_id
 
 
 class CertificationError(ValueError):
@@ -84,6 +85,7 @@ def build_certification_result(graph: dict[str, Any], evidence_repository: dict[
     validate_m5_inputs(graph, evidence_repository)
     evidence_check_results = run_evidence_check(evidence_repository)
     source_refetch_check_results = run_source_refetch_check(evidence_repository)
+    xbrl_numeric_check_results = run_xbrl_numeric_check(evidence_repository)
     claim_evidence_check_results = run_claim_evidence_check(graph, evidence_repository)
     usage_check_results = run_usage_check(graph, evidence_repository)
     citation_results = _build_compat_citation_results(graph, claim_evidence_check_results)
@@ -92,6 +94,7 @@ def build_certification_result(graph: dict[str, Any], evidence_repository: dict[
     records_by_id = {record["evidence_record_id"]: record for record in evidence_repository["evidence_records"]}
     evidence_check_by_record = evidence_results_by_record_id(evidence_check_results)
     source_refetch_by_record = source_refetch_results_by_record_id(source_refetch_check_results)
+    xbrl_numeric_by_record = xbrl_results_by_record_id(xbrl_numeric_check_results)
     claim_evidence_check_by_claim = claim_evidence_results_by_claim_id(claim_evidence_check_results)
     temporal_by_claim = {result["claim_id"]: result for result in temporal_results}
     usage_check_by_claim = usage_results_by_claim_id(usage_check_results)
@@ -104,6 +107,7 @@ def build_certification_result(graph: dict[str, Any], evidence_repository: dict[
             records_by_id=records_by_id,
             evidence_check_by_record=evidence_check_by_record,
             source_refetch_by_record=source_refetch_by_record,
+            xbrl_numeric_by_record=xbrl_numeric_by_record,
             claim_evidence_check=claim_evidence_check_by_claim[claim["claim_id"]],
             temporal_result=temporal_by_claim[claim["claim_id"]],
             usage_check=usage_check_by_claim[claim["claim_id"]],
@@ -117,6 +121,7 @@ def build_certification_result(graph: dict[str, Any], evidence_repository: dict[
         numeric_results,
         evidence_check_results,
         source_refetch_check_results,
+        xbrl_numeric_check_results,
         claim_evidence_check_results,
         usage_check_results,
     )
@@ -138,6 +143,7 @@ def build_certification_result(graph: dict[str, Any], evidence_repository: dict[
         "verification_checks": verification_checks,
         "evidence_check_results": evidence_check_results,
         "source_refetch_check_results": source_refetch_check_results,
+        "xbrl_numeric_check_results": xbrl_numeric_check_results,
         "claim_evidence_check_results": claim_evidence_check_results,
         "usage_check_results": usage_check_results,
         "numeric_verification_results": numeric_results,
@@ -205,6 +211,7 @@ def certify_claim(
     records_by_id: dict[str, dict[str, Any]],
     evidence_check_by_record: dict[str, dict[str, Any]],
     source_refetch_by_record: dict[str, list[dict[str, Any]]],
+    xbrl_numeric_by_record: dict[str, list[dict[str, Any]]],
     claim_evidence_check: dict[str, Any],
     temporal_result: dict[str, Any],
     usage_check: dict[str, Any],
@@ -212,7 +219,9 @@ def certify_claim(
     records = [records_by_id[record_id] for record_id in claim["supporting_evidence_record_ids"] if record_id in records_by_id]
     evidence_checks = [evidence_check_by_record[record["evidence_record_id"]] for record in records if record["evidence_record_id"] in evidence_check_by_record]
     source_refetch_checks = [check for record in records for check in source_refetch_by_record.get(record["evidence_record_id"], [])]
-    repair_actions = _combine_repair_actions(evidence_checks, source_refetch_checks, claim_evidence_check, usage_check)
+    xbrl_numeric_checks = [check for record in records for check in xbrl_numeric_by_record.get(record["evidence_record_id"], [])]
+    claim_xbrl_numeric_checks = xbrl_numeric_checks if _claim_uses_numeric_gate(claim) else []
+    repair_actions = _combine_repair_actions(evidence_checks, source_refetch_checks, claim_xbrl_numeric_checks, claim_evidence_check, usage_check)
     caveats = []
     if temporal_result["verification_status"] == "passed_with_caveat":
         caveats.append(temporal_result["caveat"])
@@ -225,9 +234,14 @@ def certify_claim(
         basis = "Temporal verification failed."
     elif claim["support_level"] in {"gap_only", "unsupported"}:
         status, basis = _gap_or_unsupported_status(claim)
-    elif _has_blocking_check(evidence_checks) or _has_blocking_source_refetch(source_refetch_checks) or claim_evidence_check["check_status"] in {"failed", "repair_required"}:
+    elif (
+        _has_blocking_check(evidence_checks)
+        or _has_blocking_source_refetch(source_refetch_checks)
+        or _has_blocking_xbrl_numeric(claim_xbrl_numeric_checks)
+        or claim_evidence_check["check_status"] in {"failed", "repair_required"}
+    ):
         status = "failed"
-        basis = _blocking_check_basis(evidence_checks, source_refetch_checks, claim_evidence_check)
+        basis = _blocking_check_basis(evidence_checks, source_refetch_checks, claim_xbrl_numeric_checks, claim_evidence_check)
     elif claim.get("requires_numeric_verification") is True or claim["claim_type"] == "derived_numeric_candidate":
         status = "requires_numeric_verification"
         basis = "Usage gate blocks uncaveated financial conclusion until deterministic numeric verification passes."
@@ -262,6 +276,7 @@ def certify_claim(
         "related_source_gap_ids": claim["related_source_gap_ids"],
         "evidence_check_status": _aggregate_check_status(evidence_checks),
         "source_refetch_check_status": _aggregate_source_refetch_status(source_refetch_checks),
+        "xbrl_numeric_check_status": _aggregate_xbrl_numeric_status(claim_xbrl_numeric_checks),
         "claim_evidence_check_status": claim_evidence_check["check_status"],
         "usage_check_status": usage_check["usage_check_status"],
         "allowed_downstream_uses": usage_check["allowed_downstream_uses"],
@@ -271,7 +286,7 @@ def certify_claim(
         "repair_actions": repair_actions,
         "citation_check_status": _compat_citation_status(claim, claim_evidence_check),
         "temporal_check_status": temporal_result["verification_status"],
-        "numeric_check_status": "not_applicable",
+        "numeric_check_status": _aggregate_xbrl_numeric_status(claim_xbrl_numeric_checks),
         "caveats": sorted(set(caveats)),
         "requires_human_review": _requires_human_review(status, claim),
         "downstream_use_warning": _downstream_warning(status, claim),
@@ -295,6 +310,7 @@ def validate_certification_result(result: Any) -> None:
         "verification_checks",
         "evidence_check_results",
         "source_refetch_check_results",
+        "xbrl_numeric_check_results",
         "claim_evidence_check_results",
         "usage_check_results",
         "numeric_verification_results",
@@ -320,7 +336,7 @@ def validate_certification_result(result: Any) -> None:
     for cert in result["claim_certifications"]:
         if cert["certification_status"] not in CLAIM_CERTIFICATION_STATUSES:
             raise CertificationError(f"invalid claim certification status: {cert['claim_id']}")
-        if "evidence_check_status" not in cert or "source_refetch_check_status" not in cert or "claim_evidence_check_status" not in cert:
+        if "evidence_check_status" not in cert or "source_refetch_check_status" not in cert or "xbrl_numeric_check_status" not in cert or "claim_evidence_check_status" not in cert:
             raise CertificationError(f"claim certification missing check status: {cert['claim_id']}")
         for field in ("usage_check_status", "allowed_downstream_uses", "blocked_downstream_uses", "required_caveats", "next_workflow_action", "repair_actions"):
             if field not in cert:
@@ -350,6 +366,7 @@ def _gap_or_unsupported_status(claim: dict[str, Any]) -> tuple[str, str]:
 def _combine_repair_actions(
     evidence_checks: list[dict[str, Any]],
     source_refetch_checks: list[dict[str, Any]],
+    xbrl_numeric_checks: list[dict[str, Any]],
     claim_evidence_check: dict[str, Any],
     usage_check: dict[str, Any],
 ) -> list[dict[str, str]]:
@@ -360,6 +377,9 @@ def _combine_repair_actions(
     for check in source_refetch_checks:
         for action in check.get("repair_actions", []):
             actions.append(_normalize_repair_action(action, "source_refetch_check", check.get("evidence_record_id")))
+    for check in xbrl_numeric_checks:
+        for action in check.get("repair_actions", []):
+            actions.append(_normalize_repair_action(action, "xbrl_numeric_check", check.get("evidence_record_id")))
     for action in claim_evidence_check.get("repair_actions", []):
         actions.append(_normalize_repair_action(action, "claim_evidence_check", claim_evidence_check.get("claim_id")))
     for action in usage_check.get("repair_actions", []):
@@ -520,12 +540,37 @@ def _aggregate_source_refetch_status(checks: list[dict[str, Any]]) -> str:
     return "not_applicable"
 
 
+def _aggregate_xbrl_numeric_status(checks: list[dict[str, Any]]) -> str:
+    statuses = {check["xbrl_check_status"] for check in checks}
+    if "mismatch" in statuses:
+        return "mismatch"
+    if "not_found" in statuses:
+        return "not_found"
+    if "provider_unavailable" in statuses:
+        return "provider_unavailable"
+    if "verified" in statuses:
+        return "verified"
+    return "not_applicable"
+
+
 def _has_blocking_check(checks: list[dict[str, Any]]) -> bool:
     return any(check["check_status"] in {"failed", "repair_required"} for check in checks)
 
 
 def _has_blocking_source_refetch(checks: list[dict[str, Any]]) -> bool:
     return any(check["refetch_status"] in {"failed", "provider_unavailable"} or check["quote_match_status"] == "not_matched" for check in checks)
+
+
+def _has_blocking_xbrl_numeric(checks: list[dict[str, Any]]) -> bool:
+    return any(check["xbrl_check_status"] in {"mismatch", "not_found", "provider_unavailable"} for check in checks)
+
+
+def _claim_uses_numeric_gate(claim: dict[str, Any]) -> bool:
+    if claim.get("requires_numeric_verification") is True:
+        return True
+    claim_type = str(claim.get("claim_type", "")).lower()
+    numeric_markers = ("numeric", "financial", "revenue", "income", "asset", "cash", "debt", "consideration", "valuation", "price", "share")
+    return any(marker in claim_type for marker in numeric_markers)
 
 
 def _check_caveats(checks: list[dict[str, Any]]) -> list[str]:
@@ -548,6 +593,7 @@ def _source_refetch_caveats(checks: list[dict[str, Any]]) -> list[str]:
 def _blocking_check_basis(
     evidence_checks: list[dict[str, Any]],
     source_refetch_checks: list[dict[str, Any]],
+    xbrl_numeric_checks: list[dict[str, Any]],
     claim_evidence_check: dict[str, Any],
 ) -> str:
     reasons = []
@@ -559,13 +605,17 @@ def _blocking_check_basis(
         if check["refetch_status"] in {"failed", "provider_unavailable"} or check["quote_match_status"] == "not_matched":
             reasons.extend(check.get("blocking_reasons", []))
             reasons.extend(action.get("reason", "") for action in check.get("repair_actions", []))
+    for check in xbrl_numeric_checks:
+        if check["xbrl_check_status"] in {"mismatch", "not_found", "provider_unavailable"}:
+            reasons.extend(check.get("blocking_reasons", []))
+            reasons.extend(action.get("reason", "") for action in check.get("repair_actions", []))
     if claim_evidence_check["check_status"] in {"failed", "repair_required"}:
         reasons.extend(claim_evidence_check.get("blocking_reasons", []))
         reasons.extend(action.get("reason", "") for action in claim_evidence_check.get("repair_actions", []))
     unique_reasons = _ordered_unique([reason for reason in reasons if reason])
     if unique_reasons:
-        return "Evidence or claim-evidence gate failed: " + "; ".join(unique_reasons)
-    return "Evidence or claim-evidence gate requires repair before certification."
+        return "Evidence, XBRL numeric, or claim-evidence gate failed: " + "; ".join(unique_reasons)
+    return "Evidence, XBRL numeric, or claim-evidence gate requires repair before certification."
 
 
 def _build_compat_citation_results(graph: dict[str, Any], claim_evidence_check_results: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -726,35 +776,39 @@ def _build_verification_checks(
     numeric_results: list[dict[str, Any]],
     evidence_check_results: list[dict[str, Any]],
     source_refetch_check_results: list[dict[str, Any]],
+    xbrl_numeric_check_results: list[dict[str, Any]],
     claim_evidence_check_results: list[dict[str, Any]],
     usage_check_results: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     return [
         _summary_check("VC-001", "evidence", evidence_check_results, "check_status"),
         _summary_check("VC-002", "source_refetch", source_refetch_check_results, "refetch_status"),
-        _summary_check("VC-003", "claim_evidence", claim_evidence_check_results, "check_status"),
-        _summary_check("VC-004", "usage", usage_check_results, "usage_check_status"),
-        _summary_check("VC-005", "citation_compat", citation_results, "verification_status"),
-        _summary_check("VC-006", "temporal_compat", temporal_results, "verification_status"),
-        _summary_check("VC-007", "numeric_compat", numeric_results, "verification_status"),
+        _summary_check("VC-003", "xbrl_numeric", xbrl_numeric_check_results, "xbrl_check_status"),
+        _summary_check("VC-004", "claim_evidence", claim_evidence_check_results, "check_status"),
+        _summary_check("VC-005", "usage", usage_check_results, "usage_check_status"),
+        _summary_check("VC-006", "citation_compat", citation_results, "verification_status"),
+        _summary_check("VC-007", "temporal_compat", temporal_results, "verification_status"),
+        _summary_check("VC-008", "numeric_compat", numeric_results, "verification_status"),
     ]
 
 
 def _summary_check(check_id: str, check_type: str, results: list[dict[str, Any]], status_key: str) -> dict[str, Any]:
     statuses = Counter(result[status_key] for result in results)
     failed = statuses.get("failed", 0)
+    mismatch = statuses.get("mismatch", 0)
+    not_found = statuses.get("not_found", 0)
     provider_unavailable = statuses.get("provider_unavailable", 0)
     repair_required = statuses.get("repair_required", 0)
     blocked = statuses.get("blocked", 0)
     text_unavailable = statuses.get("text_unavailable", 0)
-    status = "failed" if failed else "repair_required" if repair_required or blocked or provider_unavailable else "passed_with_caveats" if text_unavailable or any(key.endswith("caveat") for key in statuses) else "passed"
+    status = "failed" if failed or mismatch else "repair_required" if repair_required or blocked or not_found or provider_unavailable else "passed_with_caveats" if text_unavailable or any(key.endswith("caveat") for key in statuses) else "passed"
     return {
         "verification_check_id": check_id,
         "check_type": check_type,
         "check_status": status,
         "result_count": len(results),
         "status_counts": dict(statuses),
-        "blocking": bool(failed or repair_required or blocked or provider_unavailable),
+        "blocking": bool(failed or mismatch or repair_required or blocked or not_found or provider_unavailable),
     }
 
 
