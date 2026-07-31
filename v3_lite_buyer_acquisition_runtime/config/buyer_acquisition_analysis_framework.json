@@ -1,0 +1,207 @@
+{
+  "framework_id": "v3_lite_buyer_acquisition_analysis_framework",
+  "framework_version": "1.1",
+  "source_runtime": "v3_lite_buyer_acquisition_runtime",
+  "sections": [
+    {
+      "section_id": "transaction_logic",
+      "section_title": "Transaction Logic",
+      "business_question": "What transaction is being analyzed, what problem may it solve, and what certified facts establish the transaction baseline?",
+      "analyst_lens": "Explain what transaction is being analyzed, why it exists, what problem it may solve, and what the available facts allow us to say about the transaction baseline.",
+      "interpretation_rules": ["Use transaction terms, timing, parties, and asset or entity lineage to establish the factual transaction frame."],
+      "buyer_implication_rules": ["Clarify what the buyer is actually acquiring and which claims define the deal perimeter."],
+      "decision_impact_rules": ["Anchor later price, structure, risk, diligence, and recommendation-readiness analysis to certified transaction facts."],
+      "analysis_boundary_rules": ["Do not infer buyer motive, strategic rationale, or value creation unless supported by certified claims."],
+      "relevant_claim_types": ["transaction_terms", "transaction_background", "transaction_parties", "party_identity", "timing", "payment_mechanics", "consideration", "asset_lineage"],
+      "optional_exhibits": [
+        {"exhibit_id": "key_transaction_parameters", "required_inputs": ["buyer", "target", "transaction structure", "base consideration", "contingent consideration", "timing"]},
+        {"exhibit_id": "deal_conditions_and_red_lines", "required_inputs": ["closing conditions", "required approvals", "red-line terms"]}
+      ]
+    },
+    {
+      "section_id": "buyer_strategic_objectives",
+      "section_title": "Buyer Strategic Objectives",
+      "business_question": "What is the buyer trying to achieve, and does the acquisition address a real strategic need?",
+      "analyst_lens": "Assess what the buyer is trying to achieve and whether the acquisition addresses a real strategic need.",
+      "interpretation_rules": ["Buyer objectives may include capability acquisition, market entry, product pipeline expansion, technology or IP acquisition, scale, defensive positioning, or capital-market narrative."],
+      "buyer_implication_rules": ["Without buyer objective evidence, the deal cannot be judged as strategically necessary."],
+      "decision_impact_rules": ["Weak or missing buyer objective evidence should limit recommendation readiness, but it should not erase analysis of transaction facts."],
+      "analysis_boundary_rules": ["Do not invent buyer strategy from target facts alone."],
+      "relevant_claim_types": ["strategic_rationale", "buyer_objective", "alternative", "success_criteria", "value_creation"],
+      "optional_exhibits": [
+        {"exhibit_id": "buyer_objectives_and_success_criteria", "required_inputs": ["buyer objectives", "success criteria", "alternatives", "strategic gaps"]}
+      ]
+    },
+    {
+      "section_id": "target_business_quality",
+      "section_title": "Target Business Quality",
+      "business_question": "What is the quality of what is being acquired: business, asset, product, IP, technology, team, or pipeline?",
+      "analyst_lens": "Assess the quality of what is being acquired: business, asset, product, IP, technology, team, or pipeline.",
+      "interpretation_rules": ["Use certified product, asset, business, and lineage evidence to judge durability, differentiation, maturity, and diligence needs."],
+      "buyer_implication_rules": ["A buyer pays for quality, defensibility, and future value potential; weak evidence limits underwriting."],
+      "decision_impact_rules": ["Strong target quality can support strategic interest; unresolved quality issues should become diligence priorities or price and structure protections."],
+      "analysis_boundary_rules": ["Do not claim commercial attractiveness, clinical value, IP freedom-to-operate, or competitive superiority without supporting evidence."],
+      "relevant_claim_types": ["business_quality", "asset_lineage", "product", "pipeline", "customer", "management", "operations", "scientific", "clinical", "intellectual_property"],
+      "optional_exhibits": [
+        {"exhibit_id": "target_quality_scorecard", "required_inputs": ["business model", "product quality", "customer evidence", "management evidence", "operational KPIs"]}
+      ]
+    },
+    {
+      "section_id": "industry_and_competitive_position",
+      "section_title": "Industry And Competitive Position",
+      "business_question": "Does market context support the acquisition thesis?",
+      "analyst_lens": "Assess whether the market context supports the acquisition thesis.",
+      "interpretation_rules": ["Market size, growth, competition, customer needs, regulatory trend, and substitute products determine whether target value can scale."],
+      "buyer_implication_rules": ["The same target can be attractive or unattractive depending on market position and competitive intensity."],
+      "decision_impact_rules": ["Missing market evidence should prevent strong growth or market-share claims."],
+      "analysis_boundary_rules": ["Do not invent TAM, market share, growth rate, competitor position, or customer demand."],
+      "relevant_claim_types": ["market", "industry", "competitive", "customer", "market_share", "growth", "regulatory_trend"],
+      "optional_exhibits": [
+        {"exhibit_id": "market_and_competitive_map", "required_inputs": ["market size", "market growth", "competitors", "share", "differentiation"]}
+      ]
+    },
+    {
+      "section_id": "strategic_fit",
+      "section_title": "Strategic Fit",
+      "business_question": "Does the target fit the buyer better than alternatives such as build, partner, license, minority investment, or delay?",
+      "analyst_lens": "Assess whether the target fits the buyer better than alternatives such as build, partner, license, minority investment, or delay.",
+      "interpretation_rules": ["Strategic fit depends on overlap and complementarity across product, technology, customers, geography, channel, IP, talent, and operating model."],
+      "buyer_implication_rules": ["A full acquisition is justified only if ownership or control adds value beyond alternatives."],
+      "decision_impact_rules": ["Weak strategic fit should affect transaction structure, price discipline, or readiness."],
+      "analysis_boundary_rules": ["Do not assume acquisition is superior to licensing, partnering, or building without evidence."],
+      "relevant_claim_types": ["strategic_fit", "synergy_or_value_creation", "alternative", "portfolio", "capability", "technology", "channel", "geography"],
+      "optional_exhibits": [
+        {"exhibit_id": "strategic_fit_scorecard", "required_inputs": ["buyer objectives", "target capabilities", "portfolio gaps", "alternatives", "fit evidence"]}
+      ]
+    },
+    {
+      "section_id": "standalone_financial_analysis",
+      "section_title": "Standalone Financial Analysis",
+      "business_question": "What does certified evidence say about standalone financial performance independent of buyer synergies?",
+      "analyst_lens": "Assess the target's financial performance independent of buyer synergies.",
+      "interpretation_rules": ["Revenue, EBITDA, margin, cash flow, working capital, capex, and forecast drivers support standalone value underwriting."],
+      "buyer_implication_rules": ["The buyer needs standalone economics before paying for synergies or upside."],
+      "decision_impact_rules": ["Missing financials should block DCF, return analysis, and maximum acceptable price."],
+      "analysis_boundary_rules": ["Do not fabricate revenue, EBITDA, cash flow, margins, forecasts, or financial trends."],
+      "relevant_claim_types": ["financial", "revenue", "ebitda", "cash_flow", "margin", "forecast", "working_capital", "capex", "xbrl"],
+      "optional_exhibits": [
+        {"exhibit_id": "historical_financials_and_forecast", "required_inputs": ["revenue", "EBITDA", "cash flow", "growth", "margin", "forecast assumptions"]}
+      ]
+    },
+    {
+      "section_id": "valuation_and_acceptable_price",
+      "section_title": "Valuation And Acceptable Price",
+      "business_question": "What can be said about price, value, consideration structure, and buyer price discipline?",
+      "analyst_lens": "Assess what can be said about price, value, consideration structure, and buyer price discipline.",
+      "interpretation_rules": ["Deal consideration is not the same as valuation. Upfront, contingent consideration, headline value, and risk-adjusted value must be separated."],
+      "buyer_implication_rules": ["The buyer must understand what value is paid upfront, what is contingent, and whether price can be justified."],
+      "decision_impact_rules": ["This section affects bid range, price-readiness, risk allocation, and negotiation stance."],
+      "analysis_boundary_rules": ["Do not produce DCF, IRR, MOIC, NPV, ROIC, or maximum acceptable price without required inputs. Do not treat headline value as upfront price unless certified."],
+      "relevant_claim_types": ["valuation", "consideration", "purchase_price", "transaction_value", "milestone", "numeric", "financial", "payment_mechanics"],
+      "optional_exhibits": [
+        {"exhibit_id": "valuation_methods_comparison", "required_inputs": ["financial forecast", "valuation method inputs", "comparable data", "discount rate", "terminal value"]},
+        {"exhibit_id": "purchase_price_bridge", "required_inputs": ["standalone value", "buyer-shareable synergies", "integration costs", "transaction costs", "risk discount", "return buffer"]}
+      ]
+    },
+    {
+      "section_id": "synergy_and_value_creation",
+      "section_title": "Synergy And Value Creation",
+      "business_question": "How could the buyer create value beyond standalone value?",
+      "analyst_lens": "Assess how the buyer could create value beyond standalone value.",
+      "interpretation_rules": ["Synergies can be revenue, cost, technology, R&D, channel, tax, financing, or strategic option value."],
+      "buyer_implication_rules": ["Synergy supports control premium only when value, timing, cost, probability, and execution responsibility are credible."],
+      "decision_impact_rules": ["Unverified synergy should remain a diligence hypothesis, not a valuation input."],
+      "analysis_boundary_rules": ["Do not quantify synergy without certified assumptions or evidence."],
+      "relevant_claim_types": ["synergy", "value_creation", "strategic_rationale", "integration", "cost_saving", "revenue_synergy", "technology", "channel"],
+      "optional_exhibits": [
+        {"exhibit_id": "synergy_breakdown", "required_inputs": ["synergy type", "annual value", "timing", "one-time costs", "probability", "owner", "risks"]}
+      ]
+    },
+    {
+      "section_id": "deal_structure",
+      "section_title": "Deal Structure",
+      "business_question": "Does transaction structure allocate risk appropriately between buyer and seller?",
+      "analyst_lens": "Assess whether transaction structure allocates risk appropriately between buyer and seller.",
+      "interpretation_rules": ["Cash, stock, earn-out, milestone, contingent consideration, escrow, indemnity, closing conditions, and governance terms affect risk sharing."],
+      "buyer_implication_rules": ["Good structure can protect the buyer when valuation or performance uncertainty is high."],
+      "decision_impact_rules": ["Structure affects negotiation, price protection, downside control, and recommendation readiness."],
+      "analysis_boundary_rules": ["Do not judge negotiation quality without evidence on alternatives, triggers, covenants, and risk allocation."],
+      "relevant_claim_types": ["deal_structure", "consideration", "milestone", "payment_mechanics", "condition", "risk_allocation", "transaction_terms"],
+      "optional_exhibits": [
+        {"exhibit_id": "key_transaction_parameters", "required_inputs": ["upfront payment", "contingent payment", "milestones", "conditions", "closing mechanics"]},
+        {"exhibit_id": "deal_conditions_and_red_lines", "required_inputs": ["conditions", "red lines", "risk allocation", "termination rights"]}
+      ]
+    },
+    {
+      "section_id": "financing_and_capital_structure",
+      "section_title": "Financing And Capital Structure",
+      "business_question": "Can the buyer finance the deal without unacceptable balance sheet or liquidity risk?",
+      "analyst_lens": "Assess whether the buyer can finance the deal without creating unacceptable balance sheet or liquidity risk.",
+      "interpretation_rules": ["Sources and uses, debt, cash, equity, leverage, dilution, liquidity, credit rating, and covenants matter."],
+      "buyer_implication_rules": ["Even a strategically good deal can be unattractive if financing risk is too high."],
+      "decision_impact_rules": ["Financing affects affordability, return thresholds, and execution feasibility."],
+      "analysis_boundary_rules": ["Do not create Sources & Uses, leverage, EPS impact, dilution, or credit conclusions without inputs."],
+      "relevant_claim_types": ["financing", "capital_structure", "sources_uses", "debt", "equity", "cash", "leverage", "liquidity", "payment_mechanics"],
+      "optional_exhibits": [
+        {"exhibit_id": "sources_and_uses", "required_inputs": ["purchase price", "fees", "debt", "cash", "equity", "refinancing", "minimum liquidity"]}
+      ]
+    },
+    {
+      "section_id": "return_analysis",
+      "section_title": "Return Analysis",
+      "business_question": "Can the transaction meet buyer return thresholds?",
+      "analyst_lens": "Assess whether the transaction can meet buyer return thresholds.",
+      "interpretation_rules": ["IRR, MOIC, NPV, payback, EPS accretion or dilution, ROIC versus WACC, and downside sensitivity convert strategy into financial decision quality."],
+      "buyer_implication_rules": ["The buyer needs risk-adjusted return evidence before approving capital allocation."],
+      "decision_impact_rules": ["Missing return inputs should block recommendation readiness."],
+      "analysis_boundary_rules": ["Do not calculate or imply returns without price, cash flow, synergy, financing, and exit or holding assumptions."],
+      "relevant_claim_types": ["return", "irr", "moic", "npv", "payback", "eps", "roic", "sensitivity", "numeric"],
+      "optional_exhibits": [
+        {"exhibit_id": "return_sensitivity", "required_inputs": ["purchase price", "cash flows", "synergies", "financing cost", "exit assumptions", "discount rate"]}
+      ]
+    },
+    {
+      "section_id": "due_diligence_priorities",
+      "section_title": "Due Diligence Priorities",
+      "business_question": "Which M5-certified gaps and caveats become practical buyer diligence priorities?",
+      "analyst_lens": "Convert M5-certified gaps and caveats into practical diligence priorities.",
+      "interpretation_rules": ["This is the main place where M6 can carry M5 limitations forward."],
+      "buyer_implication_rules": ["The buyer needs to know which unanswered questions matter most before advancing the transaction process."],
+      "decision_impact_rules": ["Prioritize diligence items by whether they affect price, structure, risk, closing conditions, or stop conditions."],
+      "analysis_boundary_rules": ["Do not treat unresolved diligence items as facts."],
+      "relevant_claim_types": ["source_gap", "human_review", "diligence", "legal", "financial", "commercial", "technical", "management"],
+      "optional_exhibits": [
+        {"exhibit_id": "diligence_priority_list", "required_inputs": ["research gaps", "human review items", "claim blockers", "repair targets"]}
+      ]
+    },
+    {
+      "section_id": "regulatory_integration_and_downside_risks",
+      "section_title": "Regulatory Integration And Downside Risks",
+      "business_question": "What could break the transaction thesis after signing or closing?",
+      "analyst_lens": "Assess what could break the transaction thesis after signing or closing.",
+      "interpretation_rules": ["Regulatory, legal, IP, clinical or technical, operational, integration, key-person, customer, financing, and downside scenario risks matter."],
+      "buyer_implication_rules": ["Risks should translate into terms, covenants, price adjustment, diligence, or red lines."],
+      "decision_impact_rules": ["High-risk unresolved issues should limit recommendation readiness or require conditions."],
+      "analysis_boundary_rules": ["Do not invent regulatory or integration risks, but do explain the implications of certified risk or gap evidence."],
+      "relevant_claim_types": ["regulatory", "legal", "integration", "operational", "risk", "downside", "intellectual_property", "clinical", "ownership_or_governance"],
+      "optional_exhibits": [
+        {"exhibit_id": "risk_matrix", "required_inputs": ["risk", "probability", "impact", "mitigant", "owner", "status"]},
+        {"exhibit_id": "integration_100_day_plan", "required_inputs": ["integration workstreams", "owners", "timing", "costs", "risks"]}
+      ]
+    },
+    {
+      "section_id": "decision_recommendation_readiness",
+      "section_title": "Decision Recommendation Readiness",
+      "business_question": "Can the current certified evidence support a final buyer recommendation process?",
+      "analyst_lens": "Assess whether the current certified evidence can support a final buyer recommendation.",
+      "interpretation_rules": ["This section summarizes readiness, not the final recommendation."],
+      "buyer_implication_rules": ["The buyer needs to know whether the case is ready for IC or board decision, or whether it needs repair and diligence first."],
+      "decision_impact_rules": ["Recommendation remains blocked when M5 or M7 gates are closed."],
+      "analysis_boundary_rules": ["Do not issue final transaction recommendation labels in M6."],
+      "relevant_claim_types": ["recommendation_readiness", "gate_status", "source_gap", "human_review", "repair_plan"],
+      "optional_exhibits": [
+        {"exhibit_id": "deal_conditions_and_red_lines", "required_inputs": ["blocked claims", "repair steps", "human review", "recommendation gate", "report gate"]}
+      ]
+    }
+  ]
+}
