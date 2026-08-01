@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/schemas/v3-lite/analysis_package.schema.json",
+  "title": "Buyer-Side Acquisition Strategy Agent Professional Buyer-Side Acquisition Analysis Package",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "generated_artifact",
+    "stage",
+    "source_bounded",
+    "evidence_coverage_status",
+    "created_from_certification_result_id",
+    "created_from_claim_evidence_graph_id",
+    "created_from_evidence_repository_id",
+    "created_at",
+    "analysis_readiness_status",
+    "recommendation_allowed",
+    "final_report_allowed",
+    "supporting_claim_ids",
+    "consumed_certified_claim_ids",
+    "consumed_caveated_claim_ids",
+    "excluded_claim_ids",
+    "exclusion_reasons",
+    "preserved_caveats",
+    "recommendation_gate_status",
+    "report_gate_status",
+    "analysis_sections",
+    "blocked_analysis_items",
+    "caveats",
+    "human_review_items",
+    "next_action"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "generated_artifact": {"type": "string", "const": "analysis_package.json"},
+    "stage": {"type": "string", "const": "M6_evidence_bounded_deal_analysis"},
+    "source_bounded": {"type": "boolean", "const": true},
+    "evidence_coverage_status": {"type": "string", "minLength": 1},
+    "created_from_certification_result_id": {"type": "string", "minLength": 1},
+    "created_from_claim_evidence_graph_id": {"type": "string", "minLength": 1},
+    "created_from_evidence_repository_id": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "minLength": 1},
+    "analysis_readiness_status": {
+      "type": "string",
+      "enum": [
+        "ready_for_limited_analysis",
+        "limited_by_repair_required",
+        "blocked_by_certification_failure",
+        "human_review_required"
+      ]
+    },
+    "recommendation_allowed": {"type": "boolean"},
+    "final_report_allowed": {"type": "boolean"},
+    "supporting_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "consumed_certified_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "consumed_caveated_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "excluded_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "exclusion_reasons": {"type": "array", "items": {"type": "object"}},
+    "preserved_caveats": {"type": "array", "items": {"type": "object"}},
+    "recommendation_gate_status": {"type": "string", "enum": ["allowed", "blocked"]},
+    "report_gate_status": {"type": "string", "enum": ["allowed", "blocked"]},
+    "analysis_sections": {
+      "type": "array",
+      "minItems": 14,
+      "maxItems": 14,
+      "allOf": [
+        {"contains": {"type": "object", "required": ["section_id"], "properties": {"section_id": {"const": "transaction_logic"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "required": ["section_id"], "properties": {"section_id": {"const": "buyer_strategic_objectives"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "required": ["section_id"], "properties": {"section_id": {"const": "target_business_quality"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "required": ["section_id"], "properties": {"section_id": {"const": "industry_and_competitive_position"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "required": ["section_id"], "properties": {"section_id": {"const": "strategic_fit"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "required": ["section_id"], "properties": {"section_id": {"const": "standalone_financial_analysis"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "required": ["section_id"], "properties": {"section_id": {"const": "valuation_and_acceptable_price"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "required": ["section_id"], "properties": {"section_id": {"const": "synergy_and_value_creation"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "required": ["section_id"], "properties": {"section_id": {"const": "deal_structure"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "required": ["section_id"], "properties": {"section_id": {"const": "financing_and_capital_structure"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "required": ["section_id"], "properties": {"section_id": {"const": "return_analysis"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "required": ["section_id"], "properties": {"section_id": {"const": "due_diligence_priorities"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "required": ["section_id"], "properties": {"section_id": {"const": "regulatory_integration_and_downside_risks"}}}, "minContains": 1, "maxContains": 1},
+        {"contains": {"type": "object", "required": ["section_id"], "properties": {"section_id": {"const": "decision_recommendation_readiness"}}}, "minContains": 1, "maxContains": 1}
+      ],
+      "items": {"$ref": "#/$defs/analysis_section"}
+    },
+    "blocked_analysis_items": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/blocked_analysis_item"}
+    },
+    "caveats": {"type": "array", "items": {"type": "object"}},
+    "human_review_items": {"type": "array", "items": {"type": "object"}},
+    "next_action": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "analysis_section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "section_id",
+        "section_title",
+        "analysis_status",
+        "business_question",
+        "analyst_interpretation",
+        "buyer_implication",
+        "key_takeaway",
+        "decision_impact",
+        "analysis_boundary",
+        "supporting_claim_ids",
+        "supporting_evidence_record_ids",
+        "imported_limitations_from_m5",
+        "missing_inputs",
+        "pending_diligence_items",
+        "caveats",
+        "confidence",
+        "optional_exhibits"
+      ],
+      "properties": {
+        "section_id": {
+          "type": "string",
+          "enum": [
+            "transaction_logic",
+            "buyer_strategic_objectives",
+            "target_business_quality",
+            "industry_and_competitive_position",
+            "strategic_fit",
+            "standalone_financial_analysis",
+            "valuation_and_acceptable_price",
+            "synergy_and_value_creation",
+            "deal_structure",
+            "financing_and_capital_structure",
+            "return_analysis",
+            "due_diligence_priorities",
+            "regulatory_integration_and_downside_risks",
+            "decision_recommendation_readiness"
+          ]
+        },
+        "section_title": {"type": "string", "minLength": 1},
+        "analysis_status": {
+          "type": "string",
+          "enum": [
+            "ready",
+            "limited",
+            "blocked_by_missing_evidence",
+            "not_assessable_due_to_missing_evidence",
+            "human_review_required",
+            "not_applicable",
+            "blocked_by_certification_failure"
+          ]
+        },
+        "business_question": {"type": "string", "minLength": 1},
+        "analyst_interpretation": {"type": "string", "minLength": 1},
+        "buyer_implication": {"type": "string", "minLength": 1},
+        "key_takeaway": {"type": "string", "minLength": 1},
+        "decision_impact": {"type": "string", "minLength": 1},
+        "analysis_boundary": {"type": "string", "minLength": 1},
+        "supporting_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "supporting_evidence_record_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "imported_limitations_from_m5": {"type": "array", "items": {"type": "object"}},
+        "missing_inputs": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "pending_diligence_items": {"type": "array", "items": {"type": "object"}},
+        "caveats": {"type": "array", "items": {"type": "string"}},
+        "confidence": {"type": "string", "enum": ["high", "medium", "low", "not_assessable"]},
+        "optional_exhibits": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/optional_exhibit"}
+        },
+        "title": {"type": "string", "minLength": 1},
+        "section_status": {"type": "string", "minLength": 1},
+        "summary": {"type": "string", "minLength": 1},
+        "included_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "excluded_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "findings": {"type": "array", "items": {"type": "object"}}
+      }
+    },
+    "optional_exhibit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["exhibit_id", "status", "reason", "required_inputs", "available_inputs"],
+      "properties": {
+        "exhibit_id": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["ready", "skeleton_only", "blocked_by_missing_inputs", "not_applicable"]},
+        "reason": {"type": "string", "minLength": 1},
+        "required_inputs": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "available_inputs": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "blocked_analysis_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "blocked_item_id",
+        "blocked_topic",
+        "reason",
+        "related_research_gap_ids",
+        "required_repair_target",
+        "can_appear_in_final_report"
+      ],
+      "properties": {
+        "blocked_item_id": {"type": "string", "minLength": 1},
+        "blocked_topic": {"type": "string", "minLength": 1},
+        "reason": {"type": "string", "minLength": 1},
+        "related_research_gap_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "required_repair_target": {"type": "string", "minLength": 1},
+        "can_appear_in_final_report": {"type": "boolean", "const": false}
+      }
+    }
+  }
+}

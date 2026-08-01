@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/schemas/v3-lite/repair_plan.schema.json",
+  "title": "Buyer-Side Acquisition Strategy Agent Repair Plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["case_id", "generated_artifact", "stage", "created_from_certification_result_id", "next_action", "repair_steps", "stop_conditions"],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "generated_artifact": {"type": "string", "const": "repair_plan.json"},
+    "stage": {"type": "string", "const": "M5_repair_plan"},
+    "created_from_certification_result_id": {"type": "string", "minLength": 1},
+    "next_action": {"type": "string", "minLength": 1},
+    "repair_steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "repair_step_id",
+          "target_state",
+          "target_artifact",
+          "reason",
+          "related_claim_ids",
+          "related_research_gap_ids",
+          "required_source_types",
+          "priority",
+          "expected_output"
+        ],
+        "properties": {
+          "repair_step_id": {"type": "string", "minLength": 1},
+          "target_state": {"type": "string", "minLength": 1},
+          "target_artifact": {"type": "string", "minLength": 1},
+          "reason": {"type": "string", "minLength": 1},
+          "related_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "related_research_gap_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "required_source_types": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "priority": {"type": "string", "enum": ["low", "medium", "high"]},
+          "expected_output": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "stop_conditions": {"type": "array", "items": {"type": "string", "minLength": 1}}
+  }
+}

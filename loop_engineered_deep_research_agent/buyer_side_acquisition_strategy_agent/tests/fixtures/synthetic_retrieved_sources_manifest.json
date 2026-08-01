@@ -1,0 +1,91 @@
+{
+  "case_id": "synthetic_buyer_acquisition_m1",
+  "generated_artifact": "retrieved_sources_manifest.json",
+  "retrieval_mode": "manual_retrieved_sources",
+  "retrieval_date": "2026-07-28",
+  "source_discovery_plan_id": "SDP-synthetic_buyer_acquisition_m1-CASE-SEED-SYNTHETIC-ACQ-001",
+  "evidence_coverage_status": "partial",
+  "retrieved_sources": [
+    {
+      "source_id": "SRC-AGREEMENT-001",
+      "title": "Synthetic Transaction Agreement Fixture Excerpt",
+      "url_or_file": "synthetic_authoritative_sources/transaction_agreement_excerpt.txt",
+      "source_type": "signed stock purchase agreement fixture",
+      "source_tier": "Tier 1",
+      "source_owner": "synthetic regulator fixture",
+      "retrieval_date": "2026-07-28",
+      "retrieved_by": "manual_retrieved_sources_provider_fixture",
+      "related_source_need_ids": ["SN-001", "SN-002"],
+      "related_search_query_ids": ["SQ-001", "SQ-002"],
+      "reliability_reason": "Fixture represents an authoritative signed agreement excerpt for contract testing; not a case brief or model summary.",
+      "use_limitations": "Fixture for M2 contract tests only; raw extraction must not be treated as certified analysis.",
+      "local_cache_path": "synthetic_authoritative_sources/transaction_agreement_excerpt.txt"
+    },
+    {
+      "source_id": "SRC-ANNUAL-REPORT-001",
+      "title": "Synthetic Annual Report Fixture Excerpt",
+      "url_or_file": "synthetic_authoritative_sources/annual_report_excerpt.txt",
+      "source_type": "annual report fixture",
+      "source_tier": "Tier 1",
+      "source_owner": "synthetic regulator fixture",
+      "retrieval_date": "2026-07-28",
+      "retrieved_by": "manual_retrieved_sources_provider_fixture",
+      "related_source_need_ids": ["SN-003", "SN-004"],
+      "related_search_query_ids": ["SQ-003", "SQ-004"],
+      "reliability_reason": "Fixture represents an authoritative annual report excerpt for contingent payment and entity lineage testing.",
+      "use_limitations": "Fixture for M2 contract tests only; raw extraction must not be treated as certified analysis.",
+      "local_cache_path": "synthetic_authoritative_sources/annual_report_excerpt.txt"
+    },
+    {
+      "source_id": "SRC-GOVERNANCE-001",
+      "title": "Synthetic Governance Disclosure Fixture Excerpt",
+      "url_or_file": "synthetic_authoritative_sources/governance_disclosure_excerpt.txt",
+      "source_type": "company governance filing fixture",
+      "source_tier": "Tier 1",
+      "source_owner": "synthetic company filing fixture",
+      "retrieval_date": "2026-07-28",
+      "retrieved_by": "manual_retrieved_sources_provider_fixture",
+      "related_source_need_ids": ["SN-005", "SN-008"],
+      "related_search_query_ids": ["SQ-005"],
+      "reliability_reason": "Fixture represents an authoritative company filing excerpt for management role and ownership testing.",
+      "use_limitations": "Fixture for M2 contract tests only; personal proceeds remain unverified unless direct source evidence exists.",
+      "local_cache_path": "synthetic_authoritative_sources/governance_disclosure_excerpt.txt"
+    },
+    {
+      "source_id": "SRC-PATENT-IP-001",
+      "title": "Synthetic Patent Database Fixture Excerpt",
+      "url_or_file": "synthetic_authoritative_sources/patent_record_excerpt.txt",
+      "source_type": "official patent database fixture",
+      "source_tier": "Tier 1",
+      "source_owner": "synthetic patent office fixture",
+      "retrieval_date": "2026-07-28",
+      "retrieved_by": "manual_retrieved_sources_provider_fixture",
+      "related_source_need_ids": ["SN-006"],
+      "related_search_query_ids": ["SQ-006"],
+      "reliability_reason": "Fixture represents an authoritative patent database excerpt for IP lineage testing.",
+      "use_limitations": "Fixture for M2 contract tests only; patent scope and ownership require downstream validation.",
+      "local_cache_path": "synthetic_authoritative_sources/patent_record_excerpt.txt"
+    },
+    {
+      "source_id": "SRC-PIPELINE-001",
+      "title": "Synthetic Official Product Page Fixture Excerpt",
+      "url_or_file": "synthetic_authoritative_sources/product_pipeline_excerpt.txt",
+      "source_type": "official company product page fixture",
+      "source_tier": "Tier 2",
+      "source_owner": "AcquirerCo official company fixture",
+      "retrieval_date": "2026-07-28",
+      "retrieved_by": "manual_retrieved_sources_provider_fixture",
+      "related_source_need_ids": ["SN-007"],
+      "related_search_query_ids": ["SQ-007"],
+      "reliability_reason": "Fixture represents an official company product page excerpt for ProductX testing.",
+      "use_limitations": "Fixture for M2 contract tests only; product status requires downstream date and source validation.",
+      "local_cache_path": "synthetic_authoritative_sources/product_pipeline_excerpt.txt"
+    }
+  ],
+  "failed_source_needs": [
+    {
+      "source_need_id": "SN-008",
+      "reason": "Direct evidence for founder personal realized proceeds and immediate pre-transaction cap table is not present in retrieved authoritative fixtures. Record as source gap; do not infer proceeds."
+    }
+  ]
+}

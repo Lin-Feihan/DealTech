@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/schemas/v3-lite/evidence_repository.schema.json",
+  "title": "Buyer-Side Acquisition Strategy Agent Evidence Repository",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "generated_artifact",
+    "stage",
+    "source_bounded",
+    "evidence_coverage_status",
+    "created_from_raw_evidence_id",
+    "created_at",
+    "evidence_records",
+    "source_gaps",
+    "repository_quality_summary"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "generated_artifact": {"type": "string", "const": "evidence_repository.json"},
+    "stage": {"type": "string", "const": "M3_evidence_repository"},
+    "source_bounded": {"type": "boolean", "const": true},
+    "evidence_coverage_status": {"type": "string", "enum": ["complete", "partial"]},
+    "created_from_raw_evidence_id": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "minLength": 1},
+    "evidence_records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "evidence_record_id",
+          "case_id",
+          "canonical_fact_key",
+          "canonical_fact_type",
+          "normalized_fact_summary",
+          "source_ids",
+          "source_titles",
+          "source_tiers",
+          "source_count",
+          "strongest_source_tier",
+          "evidence_time_relation_to_decision_date",
+          "permitted_use",
+          "raw_evidence_ids",
+          "related_source_need_ids",
+          "related_workstream_ids",
+          "related_evidence_requirement_ids",
+          "related_verification_target_ids",
+          "confidence_preliminary",
+          "support_status",
+          "conflict_status",
+          "duplicate_group_id",
+          "downstream_use_warning",
+          "hindsight_leakage_warning"
+        ],
+        "properties": {
+          "evidence_record_id": {"type": "string", "minLength": 1},
+          "case_id": {"type": "string", "minLength": 1},
+          "canonical_fact_key": {"type": "string", "minLength": 1},
+          "canonical_fact_type": {"type": "string", "minLength": 1},
+          "normalized_fact_summary": {"type": "string", "minLength": 1},
+          "source_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+          "source_titles": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+          "source_tiers": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["Tier 1", "Tier 2", "Tier 3", "Tier 4"]}},
+          "source_count": {"type": "integer", "minimum": 1},
+          "strongest_source_tier": {"type": "string", "enum": ["Tier 1", "Tier 2", "Tier 3", "Tier 4"]},
+          "evidence_time_relation_to_decision_date": {"type": "string", "enum": ["pre_decision", "at_decision", "post_decision", "retrospective", "unknown"]},
+          "permitted_use": {"type": "string", "enum": ["ex_ante_deal_evaluation", "transaction_terms_verification", "retrospective_outcome_validation", "source_lead_only", "gap_tracking"]},
+          "raw_evidence_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+          "related_source_need_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "related_workstream_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "related_evidence_requirement_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "related_verification_target_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "confidence_preliminary": {"type": "string", "enum": ["low", "medium", "high"]},
+          "support_status": {"type": "string", "enum": ["source_supported", "partially_supported", "source_gap", "conflicting", "unsupported"]},
+          "conflict_status": {"type": "string", "enum": ["no_conflict_detected", "potential_conflict", "conflict_detected", "not_evaluated"]},
+          "duplicate_group_id": {"type": "string", "minLength": 1},
+          "downstream_use_warning": {"type": "string", "minLength": 1},
+          "hindsight_leakage_warning": {"type": "string", "minLength": 1},
+          "supporting_time_relations": {"type": "array", "items": {"type": "string", "enum": ["pre_decision", "at_decision", "post_decision", "retrospective", "unknown"]}},
+          "supporting_permitted_uses": {"type": "array", "items": {"type": "string", "enum": ["ex_ante_deal_evaluation", "transaction_terms_verification", "retrospective_outcome_validation", "source_lead_only", "gap_tracking"]}}
+        }
+      }
+    },
+    "source_gaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_gap_id",
+          "missing_source_need_id",
+          "missing_source_description",
+          "reason",
+          "affected_fact_types",
+          "affected_workstreams",
+          "downstream_risk",
+          "recommended_repair_target"
+        ],
+        "properties": {
+          "source_gap_id": {"type": "string", "minLength": 1},
+          "provider_source_gap_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "missing_source_need_id": {"type": "string", "minLength": 1},
+          "missing_source_description": {"type": "string", "minLength": 1},
+          "reason": {"type": "string", "minLength": 1},
+          "affected_fact_types": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "affected_workstreams": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "downstream_risk": {"type": "string", "minLength": 1},
+          "recommended_repair_target": {"type": "string", "const": "M2_source_retrieval"}
+        }
+      }
+    },
+    "candidate_claims_from_research": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "candidate_claim_id",
+          "claim_statement",
+          "claim_type",
+          "claim_scope",
+          "temporal_scope",
+          "permitted_use",
+          "supporting_evidence_item_ids",
+          "contradicting_evidence_item_ids",
+          "related_source_gap_ids",
+          "confidence_preliminary",
+          "requires_numeric_verification",
+          "requires_human_review",
+          "downstream_use_warning",
+          "source_bounded_precheck_status"
+        ],
+        "properties": {
+          "candidate_claim_id": {"type": "string", "minLength": 1},
+          "claim_statement": {"type": "string", "minLength": 1},
+          "claim_type": {"type": "string", "minLength": 1},
+          "claim_scope": {"type": "string", "minLength": 1},
+          "temporal_scope": {"type": "string", "minLength": 1},
+          "permitted_use": {"type": "string", "enum": ["ex_ante_deal_evaluation", "transaction_terms_verification", "retrospective_outcome_validation", "source_lead_only", "gap_tracking"]},
+          "supporting_evidence_item_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "contradicting_evidence_item_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "related_source_gap_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "provider_related_source_gap_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "confidence_preliminary": {"type": "string", "enum": ["low", "medium", "high"]},
+          "requires_numeric_verification": {"type": "boolean"},
+          "requires_human_review": {"type": "boolean"},
+          "downstream_use_warning": {"type": "string", "minLength": 1},
+          "source_bounded_precheck_status": {"type": "string", "enum": ["pending_m4_mapping", "gap_reference_requires_repair"]}
+        }
+      }
+    },
+    "candidate_claim_evidence_links_from_research": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["candidate_claim_id", "evidence_item_id", "link_type", "rationale", "mapped_evidence_record_ids", "mapping_status"],
+        "properties": {
+          "candidate_claim_id": {"type": "string", "minLength": 1},
+          "evidence_item_id": {"type": "string", "minLength": 1},
+          "link_type": {"type": "string", "enum": ["supports", "partially_supports", "contextualizes", "contradicts", "requires_verification"]},
+          "rationale": {"type": "string", "minLength": 1},
+          "mapped_evidence_record_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "mapping_status": {"type": "string", "enum": ["mapped_to_evidence_record", "evidence_item_not_in_repository_requires_repair"]}
+        }
+      }
+    },
+    "repository_quality_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "raw_evidence_item_count",
+        "evidence_record_count",
+        "duplicate_groups_count",
+        "source_gap_count",
+        "source_tier_distribution",
+        "temporal_distribution",
+        "permitted_use_distribution",
+        "unsupported_or_gap_fact_count",
+        "notes_for_next_stage"
+      ],
+      "properties": {
+        "raw_evidence_item_count": {"type": "integer", "minimum": 0},
+        "evidence_record_count": {"type": "integer", "minimum": 0},
+        "duplicate_groups_count": {"type": "integer", "minimum": 0},
+        "source_gap_count": {"type": "integer", "minimum": 0},
+        "source_tier_distribution": {"type": "object"},
+        "temporal_distribution": {"type": "object"},
+        "permitted_use_distribution": {"type": "object"},
+        "unsupported_or_gap_fact_count": {"type": "integer", "minimum": 0},
+        "notes_for_next_stage": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    }
+  }
+}

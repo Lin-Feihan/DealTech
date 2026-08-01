@@ -1,0 +1,3 @@
+Annual report fixture excerpt. This local test fixture represents an authoritative annual report or prospectus excerpt; it is not a user narrative note and is not a model-generated source.
+
+Later AcquirerCo reporting states a $7 million contingent payment in a later reporting period related to the TargetCo acquisition. The filing context identifies AcquirerCo and TargetCo in the entity history and supports retrospective outcome validation, not ex-ante deal evaluation.

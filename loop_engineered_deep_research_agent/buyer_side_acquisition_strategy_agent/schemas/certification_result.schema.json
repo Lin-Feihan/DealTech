@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/schemas/v3-lite/certification_result.schema.json",
+  "title": "Buyer-Side Acquisition Strategy Agent Certification Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "generated_artifact",
+    "stage",
+    "source_bounded",
+    "evidence_coverage_status",
+    "created_from_claim_evidence_graph_id",
+    "created_from_evidence_repository_id",
+    "created_at",
+    "overall_certification_status",
+    "claim_certifications",
+    "verification_checks",
+    "evidence_check_results",
+    "source_refetch_check_results",
+    "xbrl_numeric_check_results",
+    "claim_evidence_check_results",
+    "usage_check_results",
+    "numeric_verification_results",
+    "citation_verification_results",
+    "temporal_verification_results",
+    "analysis_gate_summary",
+    "report_gate_summary",
+    "recommendation_gate_summary",
+    "human_review_items",
+    "next_action"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "generated_artifact": {"type": "string", "const": "certification_result.json"},
+    "stage": {"type": "string", "const": "M5_loop_certification"},
+    "source_bounded": {"type": "boolean", "const": true},
+    "evidence_coverage_status": {"type": "string", "enum": ["complete", "partial"]},
+    "created_from_claim_evidence_graph_id": {"type": "string", "minLength": 1},
+    "created_from_evidence_repository_id": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "minLength": 1},
+    "overall_certification_status": {"type": "string", "enum": ["passed_with_caveats", "failed", "repair_required", "human_review_required"]},
+    "claim_certifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "claim_certification_id",
+          "claim_id",
+          "claim_type",
+          "claim_statement",
+          "certification_status",
+          "certification_basis",
+          "supporting_evidence_record_ids",
+          "related_source_gap_ids",
+          "evidence_check_status",
+          "source_refetch_check_status",
+          "xbrl_numeric_check_status",
+          "claim_evidence_check_status",
+          "usage_check_status",
+          "allowed_downstream_uses",
+          "blocked_downstream_uses",
+          "required_caveats",
+          "next_workflow_action",
+          "repair_actions",
+          "citation_check_status",
+          "temporal_check_status",
+          "numeric_check_status",
+          "caveats",
+          "requires_human_review",
+          "downstream_use_warning"
+        ],
+        "properties": {
+          "claim_certification_id": {"type": "string", "minLength": 1},
+          "claim_id": {"type": "string", "minLength": 1},
+          "claim_type": {"type": "string", "minLength": 1},
+          "claim_statement": {"type": "string", "minLength": 1},
+          "certification_status": {
+            "type": "string",
+            "enum": ["certified", "certified_with_caveat", "failed", "blocked_by_source_gap", "unsupported", "requires_numeric_verification", "requires_human_review", "not_applicable"]
+          },
+          "certification_basis": {"type": "string", "minLength": 1},
+          "supporting_evidence_record_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "related_source_gap_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "evidence_check_status": {"type": "string", "minLength": 1},
+          "source_refetch_check_status": {"type": "string", "minLength": 1},
+          "xbrl_numeric_check_status": {"type": "string", "minLength": 1},
+          "claim_evidence_check_status": {"type": "string", "minLength": 1},
+          "usage_check_status": {"type": "string", "minLength": 1},
+          "allowed_downstream_uses": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "blocked_downstream_uses": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "required_caveats": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "next_workflow_action": {
+            "type": "string",
+            "enum": [
+              "send_to_M6_analysis",
+              "send_to_M6_with_caveat",
+              "return_to_M2_source_retrieval",
+              "return_to_M4_claim_rewrite",
+              "route_to_M5_numeric_verification",
+              "route_to_human_review",
+              "block_pipeline_until_structure_repaired"
+            ]
+          },
+          "repair_actions": {"type": "array", "items": {"type": "object"}},
+          "citation_check_status": {"type": "string", "minLength": 1},
+          "temporal_check_status": {"type": "string", "minLength": 1},
+          "numeric_check_status": {"type": "string", "minLength": 1},
+          "caveats": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "requires_human_review": {"type": "boolean"},
+          "downstream_use_warning": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "verification_checks": {"type": "array", "items": {"type": "object"}},
+    "evidence_check_results": {"type": "array", "items": {"type": "object"}},
+    "source_refetch_check_results": {"type": "array", "items": {"type": "object"}},
+    "xbrl_numeric_check_results": {"type": "array", "items": {"type": "object"}},
+    "claim_evidence_check_results": {"type": "array", "items": {"type": "object"}},
+    "usage_check_results": {"type": "array", "items": {"type": "object"}},
+    "numeric_verification_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["numeric_check_id", "related_claim_id", "inputs", "formula", "computed_result", "verification_status", "caveat", "downstream_use_warning"],
+        "properties": {
+          "numeric_check_id": {"type": "string", "minLength": 1},
+          "related_claim_id": {"type": "string", "minLength": 1},
+          "inputs": {"type": "array", "items": {"type": "object"}},
+          "formula": {"type": "string", "minLength": 1},
+          "computed_result": {"type": "integer"},
+          "verification_status": {"type": "string", "enum": ["passed", "passed_with_caveat", "failed"]},
+          "caveat": {"type": "string", "minLength": 1},
+          "downstream_use_warning": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "citation_verification_results": {"type": "array", "items": {"type": "object"}},
+    "temporal_verification_results": {"type": "array", "items": {"type": "object"}},
+    "analysis_gate_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["analysis_allowed_claim_ids", "analysis_caveated_claim_ids", "analysis_blocked_claim_ids", "analysis_blocking_reasons"],
+      "properties": {
+        "analysis_allowed_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "analysis_caveated_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "analysis_blocked_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "analysis_blocking_reasons": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "report_gate_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["report_allowed_claim_ids", "report_caveated_claim_ids", "report_blocked_claim_ids", "report_blocking_reasons"],
+      "properties": {
+        "report_allowed_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "report_caveated_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "report_blocked_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "report_blocking_reasons": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "recommendation_gate_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recommendation_allowed",
+        "recommendation_supporting_claim_ids",
+        "recommendation_blocked_claim_ids",
+        "recommendation_blocking_reasons",
+        "human_review_required_claim_ids"
+      ],
+      "properties": {
+        "recommendation_allowed": {"type": "boolean"},
+        "recommendation_supporting_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "recommendation_blocked_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "recommendation_blocking_reasons": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "human_review_required_claim_ids": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "human_review_items": {"type": "array", "items": {"type": "object"}},
+    "next_action": {"type": "string", "minLength": 1}
+  }
+}

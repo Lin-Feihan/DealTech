@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/schemas/v3-lite/claim_evidence_graph.schema.json",
+  "title": "Buyer-Side Acquisition Strategy Agent Claim Evidence Graph",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "generated_artifact",
+    "stage",
+    "source_bounded",
+    "evidence_coverage_status",
+    "created_from_evidence_repository_id",
+    "created_at",
+    "claim_nodes",
+    "evidence_edges",
+    "gap_nodes",
+    "graph_quality_summary"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "generated_artifact": {"type": "string", "const": "claim_evidence_graph.json"},
+    "stage": {"type": "string", "const": "M4_claim_evidence_graph"},
+    "source_bounded": {"type": "boolean", "const": true},
+    "evidence_coverage_status": {"type": "string", "enum": ["complete", "partial"]},
+    "created_from_evidence_repository_id": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "minLength": 1},
+    "claim_nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "claim_id",
+          "case_id",
+          "claim_type",
+          "claim_statement",
+          "claim_scope",
+          "temporal_scope",
+          "permitted_use",
+          "supporting_evidence_record_ids",
+          "contradicting_evidence_record_ids",
+          "related_source_gap_ids",
+          "support_level",
+          "certification_status",
+          "requires_numeric_verification",
+          "requires_human_review",
+          "confidence_preliminary",
+          "downstream_use_warning",
+          "hindsight_leakage_warning"
+        ],
+        "properties": {
+          "claim_id": {"type": "string", "minLength": 1},
+          "case_id": {"type": "string", "minLength": 1},
+          "created_from_candidate_claim_id": {"type": "string", "minLength": 1},
+          "created_from_generic_fallback": {"type": "boolean"},
+          "claim_type": {
+            "type": "string",
+            "enum": [
+              "transaction_background",
+              "transaction_terms",
+              "transaction_timing",
+              "transaction_document_date",
+              "transaction_parties",
+              "transaction_consideration",
+              "contingent_consideration",
+              "milestone_economics",
+              "milestone_payment",
+              "financing_or_payment_mechanics",
+              "entity_identity",
+              "entity_lineage",
+              "scientific_asset",
+              "asset_lineage",
+              "asset_or_product_identity",
+              "ownership_or_governance",
+              "management_or_key_person",
+              "intellectual_property",
+              "regulatory_or_clinical",
+              "financial_performance",
+              "valuation_input",
+              "synergy_or_value_creation",
+              "market_or_competitive_position",
+              "legal_or_regulatory_risk",
+              "integration_or_operational_risk",
+              "generic_fact",
+              "derived_numeric_candidate",
+              "source_gap_claim"
+            ]
+          },
+          "claim_statement": {"type": "string", "minLength": 1},
+          "claim_scope": {"type": "string", "minLength": 1},
+          "temporal_scope": {"type": "string", "minLength": 1},
+          "permitted_use": {
+            "type": "string",
+            "enum": ["ex_ante_deal_evaluation", "transaction_terms_verification", "retrospective_outcome_validation", "source_lead_only", "gap_tracking"]
+          },
+          "supporting_evidence_record_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "contradicting_evidence_record_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "related_source_gap_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "support_level": {
+            "type": "string",
+            "enum": ["source_supported", "partially_supported", "gap_only", "unsupported", "conflicting", "requires_numeric_verification"]
+          },
+          "certification_status": {
+            "type": "string",
+            "enum": ["uncertified", "pending_verification", "failed_precheck", "not_applicable"]
+          },
+          "requires_numeric_verification": {"type": "boolean"},
+          "requires_human_review": {"type": "boolean"},
+          "confidence_preliminary": {"type": "string", "enum": ["low", "medium", "high"]},
+          "downstream_use_warning": {"type": "string", "minLength": 1},
+          "hindsight_leakage_warning": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "evidence_edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "edge_id",
+          "claim_id",
+          "evidence_record_id",
+          "edge_type",
+          "support_strength",
+          "temporal_alignment",
+          "source_tier_basis",
+          "notes"
+        ],
+        "properties": {
+          "edge_id": {"type": "string", "minLength": 1},
+          "claim_id": {"type": "string", "minLength": 1},
+          "evidence_record_id": {"type": "string", "minLength": 1},
+          "edge_type": {
+            "type": "string",
+            "enum": ["supports", "partially_supports", "contextualizes", "contradicts", "requires_verification", "blocked_by_source_gap"]
+          },
+          "support_strength": {"type": "string", "minLength": 1},
+          "temporal_alignment": {"type": "string", "minLength": 1},
+          "source_tier_basis": {"type": "string", "enum": ["Tier 1", "Tier 2", "Tier 3", "Tier 4"]},
+          "notes": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "gap_nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "gap_node_id",
+          "source_gap_id",
+          "missing_source_need_id",
+          "gap_statement",
+          "affected_claim_types",
+          "downstream_risk",
+          "recommended_repair_target"
+        ],
+        "properties": {
+          "gap_node_id": {"type": "string", "minLength": 1},
+          "source_gap_id": {"type": "string", "minLength": 1},
+          "missing_source_need_id": {"type": "string", "minLength": 1},
+          "gap_statement": {"type": "string", "minLength": 1},
+          "affected_claim_types": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "downstream_risk": {"type": "string", "minLength": 1},
+          "recommended_repair_target": {"type": "string", "const": "M2_source_retrieval"}
+        }
+      }
+    },
+    "graph_quality_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim_node_count",
+        "evidence_edge_count",
+        "gap_node_count",
+        "source_supported_claim_count",
+        "partially_supported_claim_count",
+        "gap_or_unsupported_claim_count",
+        "claims_requiring_numeric_verification_count",
+        "claims_requiring_human_review_count",
+        "temporal_scope_distribution",
+        "notes_for_next_stage"
+      ],
+      "properties": {
+        "claim_node_count": {"type": "integer", "minimum": 0},
+        "evidence_edge_count": {"type": "integer", "minimum": 0},
+        "gap_node_count": {"type": "integer", "minimum": 0},
+        "source_supported_claim_count": {"type": "integer", "minimum": 0},
+        "partially_supported_claim_count": {"type": "integer", "minimum": 0},
+        "gap_or_unsupported_claim_count": {"type": "integer", "minimum": 0},
+        "claims_requiring_numeric_verification_count": {"type": "integer", "minimum": 0},
+        "claims_requiring_human_review_count": {"type": "integer", "minimum": 0},
+        "temporal_scope_distribution": {"type": "object"},
+        "notes_for_next_stage": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    }
+  }
+}

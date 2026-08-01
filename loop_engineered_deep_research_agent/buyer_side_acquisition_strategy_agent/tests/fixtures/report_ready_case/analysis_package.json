@@ -1,0 +1,133 @@
+{
+  "analysis_readiness_status": "ready_for_limited_analysis",
+  "analysis_sections": [
+    {
+      "caveats": [],
+      "excluded_claim_ids": [],
+      "findings": [
+        {
+          "caveated": false,
+          "certification_status": "certified",
+          "finding_id": "F-transaction_terms_analysis-001",
+          "finding_text": "The transaction used a $10M upfront payment structure.",
+          "related_claim_ids": ["CL-RF-001"],
+          "supporting_evidence_record_ids": ["ER-RF-001"]
+        }
+      ],
+      "included_claim_ids": ["CL-RF-001"],
+      "section_id": "transaction_terms_analysis",
+      "section_status": "limited_analysis",
+      "summary": "Certified transaction terms support a narrow rendered report.",
+      "supporting_evidence_record_ids": ["ER-RF-001"],
+      "title": "Transaction Terms Analysis"
+    },
+    {
+      "caveats": ["Milestone term remains contingent and should be framed as a cap."],
+      "excluded_claim_ids": [],
+      "findings": [
+        {
+          "caveated": true,
+          "certification_status": "certified_with_caveat",
+          "finding_id": "F-milestone_economics_analysis-001",
+          "finding_text": "The deal includes up to $5M in milestone consideration, subject to caveat.",
+          "related_claim_ids": ["CL-RF-002"],
+          "supporting_evidence_record_ids": ["ER-RF-002"]
+        }
+      ],
+      "included_claim_ids": ["CL-RF-002"],
+      "section_id": "milestone_economics_analysis",
+      "section_status": "limited_analysis",
+      "summary": "Certified-with-caveat milestone economics are included with caveat.",
+      "supporting_evidence_record_ids": ["ER-RF-002"],
+      "title": "Milestone Economics Analysis"
+    },
+    {
+      "caveats": ["Asset lineage is certified with caveat from source-bounded evidence."],
+      "excluded_claim_ids": [],
+      "findings": [
+        {
+          "caveated": true,
+          "certification_status": "certified_with_caveat",
+          "finding_id": "F-entity_and_asset_lineage_analysis-001",
+          "finding_text": "The asset lineage is source-bounded and caveated.",
+          "related_claim_ids": ["CL-RF-003"],
+          "supporting_evidence_record_ids": ["ER-RF-003"]
+        }
+      ],
+      "included_claim_ids": ["CL-RF-003"],
+      "section_id": "entity_and_asset_lineage_analysis",
+      "section_status": "limited_analysis",
+      "summary": "Entity and asset lineage is rendered only from caveated certified claims.",
+      "supporting_evidence_record_ids": ["ER-RF-003"],
+      "title": "Entity And Asset Lineage Analysis"
+    },
+    {
+      "caveats": ["Source gaps are limitations and not factual findings."],
+      "excluded_claim_ids": ["CL-RF-999"],
+      "findings": [
+        {
+          "caveated": true,
+          "certification_status": "gap_tracking_only",
+          "finding_id": "F-evidence_gap_and_risk_analysis-001",
+          "finding_text": "Open source gap: management interview transcript not available.",
+          "related_claim_ids": ["CL-RF-999"],
+          "supporting_evidence_record_ids": []
+        }
+      ],
+      "included_claim_ids": [],
+      "section_id": "evidence_gap_and_risk_analysis",
+      "section_status": "gap_tracking_only",
+      "summary": "A non-blocking source gap is disclosed as a limitation.",
+      "supporting_evidence_record_ids": [],
+      "title": "Evidence Gap And Risk Analysis"
+    },
+    {
+      "caveats": [],
+      "excluded_claim_ids": [],
+      "findings": [
+        {
+          "caveated": true,
+          "certification_status": "ready_for_rendering",
+          "finding_id": "F-decision_readiness_assessment-001",
+          "finding_text": "The gate permits report rendering but does not authorize a recommendation decision.",
+          "related_claim_ids": [],
+          "supporting_evidence_record_ids": []
+        }
+      ],
+      "included_claim_ids": [],
+      "section_id": "decision_readiness_assessment",
+      "section_status": "ready_for_limited_report_rendering",
+      "summary": "Rendering is allowed for an evidence-bounded report without recommendation.",
+      "supporting_evidence_record_ids": [],
+      "title": "Decision Readiness Assessment"
+    }
+  ],
+  "blocked_analysis_items": [],
+  "case_id": "report_ready_fixture_case",
+  "caveats": [
+    {
+      "caveat_id": "CAV-RF-001",
+      "caveat_text": "Ready fixture caveat: report rendering is tested without recommendation authorization.",
+      "caveat_type": "fixture_rendering_scope",
+      "related_claim_ids": []
+    },
+    {
+      "caveat_id": "CAV-RF-002",
+      "caveat_text": "Milestone consideration is a cap and remains caveated.",
+      "caveat_type": "milestone_cap_caveat",
+      "related_claim_ids": ["CL-RF-002"]
+    }
+  ],
+  "created_at": "2026-07-29T12:20:00Z",
+  "created_from_certification_result_id": "CERT-report_ready_fixture_case-2026-07-29T12:10:00Z",
+  "created_from_claim_evidence_graph_id": "GRAPH-report_ready_fixture_case-2026-07-29T12:00:00Z",
+  "created_from_evidence_repository_id": "REPO-report_ready_fixture_case-2026-07-29T11:50:00Z",
+  "evidence_coverage_status": "sufficient_for_limited_report",
+  "final_report_allowed": true,
+  "generated_artifact": "analysis_package.json",
+  "human_review_items": [],
+  "next_action": "render_final_report_after_explicit_user_request",
+  "recommendation_allowed": false,
+  "source_bounded": true,
+  "stage": "M6_evidence_bounded_deal_analysis"
+}

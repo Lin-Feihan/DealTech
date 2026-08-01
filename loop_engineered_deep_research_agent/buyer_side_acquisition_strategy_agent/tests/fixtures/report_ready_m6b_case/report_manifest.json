@@ -1,0 +1,18 @@
+{
+  "case_id": "report_ready_m6b_fixture_case",
+  "generated_artifact": "report_manifest.json",
+  "stage": "M7_report_rendering_gate",
+  "source_bounded": true,
+  "created_at": "2026-08-01T12:00:00Z",
+  "created_from_analysis_package_id": "ANALYSIS-report_ready_m6b_fixture_case-2026-08-01T11:50:00Z",
+  "created_from_certification_result_id": "CERT-report_ready_m6b_fixture_case-2026-08-01T11:40:00Z",
+  "created_from_repair_plan_id": "REPAIR-report_ready_m6b_fixture_case-none",
+  "rendering_status": "ready_to_render",
+  "final_report_generated": true,
+  "required_repairs_before_report": [],
+  "blocked_reasons": [],
+  "human_review_required": false,
+  "allowed_sections": [],
+  "excluded_sections": [],
+  "next_action": "render_final_report_after_explicit_user_request"
+}

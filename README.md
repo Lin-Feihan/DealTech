@@ -194,7 +194,7 @@ The broader prototype is designed around the following stack:
 
 OpenClaw handles agent orchestration. Context engineering organizes prompts, inputs, sources, and intermediate files. FastAPI supports backend interfaces. Postgres stores structured states and intermediate results. Static or portable web frontends support demonstration and interaction.
 
-The technical stack above describes the broader design direction and earlier prototypes in this repository. The current V2 direction is packaged under `v2_loop_engineered_deep_research_agent/`, while earlier runnable prototypes remain available as prior implementation assets.
+The technical stack above describes the broader design direction and earlier prototypes in this repository. Earlier runnable prototypes remain available as prior implementation assets, while the current loop-engineered research runtime is packaged under `loop_engineered_deep_research_agent/`.
 
 ---
 
@@ -214,11 +214,11 @@ Key contributions include:
 
 ---
 
-## Latest Development: Loop-Engineered DealTech V2
+## Loop-Engineered Deep Research Agent
 
-The latest DealTech effort is the **V2 Loop-Engineered Certified Deep Research Agent** for buyer-side acquisition strategy research.
+The current DealTech loop-engineered research runtime is the **Loop-Engineered Deep Research Agent** package.
 
-V2 builds on the earlier Acquisition Strategy Agent, but adds a more controlled research and delivery layer: case intake, source-quality control, evidence lineage, method selection, calculation replay, recommendation logic, human review boundaries, and final delivery certification.
+The package includes the **Buyer-Side Acquisition Strategy Agent**, which builds on the earlier Acquisition Strategy Agent while adding a controlled research and delivery layer: case intake, source-quality control, evidence lineage, claim-evidence certification, repair routing, buyer-side analysis, report gating, audit packaging, and final report rendering.
 
 High-level workflow:
 
@@ -236,23 +236,22 @@ Case Intake
 → Final Delivery
 ```
 
-The current V2 package includes:
+The current package includes:
 
 - the preserved buyer-side acquisition research baseline;
 - loop-engineered policies for research, analysis, reporting, certification, and human review;
 - structured schemas for mandates, claims, evidence, analysis packages, recommendations, and report manifests;
-- a runnable buyer-side acquisition analysis runtime;
-- tests and baseline guards for method routing, evidence grounding, calculation replay, report-shape control, and prompt/output-contract preservation.
+- a runnable Buyer-Side Acquisition Strategy Agent runtime;
+- tests for mandate intake, external research handoff, evidence grounding, certification, repair routing, analysis packaging, report gating, audit packaging, and rendering.
 
-This release should be viewed as the current **Loop-Engineered Certified Deep Research baseline** for DealTech, not yet a fully productionized autonomous transaction system.
+This release should be viewed as the current **Loop-Engineered Deep Research Agent** baseline for DealTech, not yet a fully productionized autonomous transaction system.
 
 | Resource | Link |
 |---|---|
-| V2 Overview | [Open V2 README](v2_loop_engineered_deep_research_agent/README.md) |
-| Agent Baseline Map | [Open Baseline Map](v2_loop_engineered_deep_research_agent/AGENT_BASELINE_MAP.md) |
-| Runtime | [Open Runtime](v2_loop_engineered_deep_research_agent/runtime/) |
-| Tests | [Open Tests](v2_loop_engineered_deep_research_agent/runtime/tests/) |
-| Baseline Guard | [Open Guard](v2_loop_engineered_deep_research_agent/tools/verify_v2_agent_baseline.py) |
+| Loop-Engineered Deep Research Agent | [Open Package README](loop_engineered_deep_research_agent/README.md) |
+| Buyer-Side Acquisition Strategy Agent | [Open Agent README](loop_engineered_deep_research_agent/buyer_side_acquisition_strategy_agent/README.md) |
+| Runtime | [Open Runtime](loop_engineered_deep_research_agent/buyer_side_acquisition_strategy_agent/runtime/) |
+| Tests | [Open Tests](loop_engineered_deep_research_agent/buyer_side_acquisition_strategy_agent/tests/) |
 
 ---
 

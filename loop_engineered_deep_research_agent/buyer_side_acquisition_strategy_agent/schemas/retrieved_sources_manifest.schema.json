@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/schemas/v3-lite/retrieved_sources_manifest.schema.json",
+  "title": "Buyer-Side Acquisition Strategy Agent Retrieved Sources Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "generated_artifact",
+    "retrieval_mode",
+    "retrieval_date",
+    "source_discovery_plan_id",
+    "evidence_coverage_status",
+    "retrieved_sources",
+    "failed_source_needs"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "generated_artifact": {"type": "string", "const": "retrieved_sources_manifest.json"},
+    "retrieval_mode": {
+      "type": "string",
+      "enum": [
+        "manual_retrieved_sources",
+        "authoritative_url_retrieval",
+        "web_search",
+        "sec_edgar",
+        "patent",
+        "clinical_trials",
+        "deep_research"
+      ]
+    },
+    "retrieval_date": {"type": "string", "minLength": 1},
+    "source_discovery_plan_id": {"type": "string", "minLength": 1},
+    "evidence_coverage_status": {"type": "string", "enum": ["complete", "partial"]},
+    "retrieved_sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "source_id",
+          "title",
+          "url_or_file",
+          "source_type",
+          "source_tier",
+          "source_owner",
+          "retrieval_date",
+          "retrieved_by",
+          "related_source_need_ids",
+          "related_search_query_ids",
+          "reliability_reason",
+          "use_limitations",
+          "source_date_or_period",
+          "source_time_relation_to_decision_date",
+          "permitted_use",
+          "local_cache_path"
+        ],
+        "properties": {
+          "source_id": {"type": "string", "minLength": 1},
+          "title": {"type": "string", "minLength": 1},
+          "url_or_file": {"type": "string", "minLength": 1},
+          "source_type": {"type": "string", "minLength": 1},
+          "source_tier": {"type": "string", "enum": ["Tier 1", "Tier 2", "Tier 3", "Tier 4"]},
+          "source_owner": {"type": "string", "minLength": 1},
+          "retrieval_date": {"type": "string", "minLength": 1},
+          "retrieved_by": {"type": "string", "minLength": 1},
+          "related_source_need_ids": {"type": "array", "items": {"type": "string"}},
+          "related_search_query_ids": {"type": "array", "items": {"type": "string"}},
+          "reliability_reason": {"type": "string", "minLength": 1},
+          "use_limitations": {"type": "string", "minLength": 1},
+          "source_date_or_period": {"type": "string", "minLength": 1},
+          "source_time_relation_to_decision_date": {
+            "type": "string",
+            "enum": ["pre_decision", "at_decision", "post_decision", "retrospective", "unknown"]
+          },
+          "permitted_use": {
+            "type": "string",
+            "enum": ["ex_ante_deal_evaluation", "transaction_terms_verification", "retrospective_outcome_validation", "source_lead_only", "gap_tracking"]
+          },
+          "local_cache_path": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "failed_source_needs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["source_need_id", "reason"],
+        "properties": {
+          "source_need_id": {"type": "string", "minLength": 1},
+          "reason": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

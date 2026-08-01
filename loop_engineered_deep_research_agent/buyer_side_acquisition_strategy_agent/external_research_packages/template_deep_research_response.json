@@ -1,0 +1,139 @@
+{
+  "case_id": "<case_id>",
+  "provider": "external_deep_research_executor",
+  "model": "external_model_name",
+  "response_id": "example_response_id",
+  "completed_at": "<YYYY-MM-DDTHH:MM:SSZ>",
+  "sources": [
+    {
+      "provider_source_id": "SRC-001",
+      "title": "Signed acquisition agreement filed with SEC",
+      "url": "<https://... or stable document identifier>",
+      "source_type": "SEC filing",
+      "source_owner": "SEC / buyer registrant",
+      "source_date_or_period": "at decision date",
+      "source_tier": "Tier 1",
+      "source_time_relation_to_decision_date": "at_decision",
+      "permitted_use": "transaction_terms_verification",
+      "source_reliability_rationale": "Primary transaction document filed by the buyer registrant.",
+      "source_limitations": "Supports transaction terms only; it does not certify strategic rationale or later outcomes."
+    },
+    {
+      "provider_source_id": "SRC-002",
+      "title": "Official buyer pipeline page",
+      "url": "<https://... or stable document identifier>",
+      "source_type": "official company page",
+      "source_owner": "buyer company",
+      "source_date_or_period": "current as of retrieval date",
+      "source_tier": "Tier 2",
+      "source_time_relation_to_decision_date": "retrospective",
+      "permitted_use": "retrospective_outcome_validation",
+      "source_reliability_rationale": "Official buyer page for current asset naming and development status.",
+      "source_limitations": "Retrospective to the deal decision date; not ex-ante buyer decision support."
+    }
+  ],
+  "evidence_items": [
+    {
+      "provider_evidence_id": "EV-001",
+      "provider_source_id": "SRC-001",
+      "extracted_text_or_summary": "The agreement states that the buyer will pay $100 million at closing and up to $80 million in contingent milestone payments.",
+      "extraction_location_if_available": {"section": "Consideration", "page": 3},
+      "fact_type": "transaction_consideration",
+      "related_workstream_ids": ["WS-005"],
+      "related_evidence_requirement_ids": ["ER-006"],
+      "related_verification_target_ids": ["VT-003"],
+      "confidence_preliminary": "high",
+      "caveats": ["M5 must verify arithmetic and wording before any report use."]
+    },
+    {
+      "provider_evidence_id": "EV-002",
+      "provider_source_id": "SRC-002",
+      "extracted_text_or_summary": "The official pipeline page identifies the acquired asset under its current product candidate name.",
+      "extraction_location_if_available": {"section": "Pipeline"},
+      "fact_type": "asset_or_product_identity",
+      "related_workstream_ids": ["WS-003", "WS-008"],
+      "related_evidence_requirement_ids": ["ER-005"],
+      "related_verification_target_ids": ["VT-006"],
+      "confidence_preliminary": "medium",
+      "caveats": ["Current page is retrospective to the acquisition decision date."]
+    }
+  ],
+  "candidate_claims": [
+    {
+      "candidate_claim_id": "CC-001",
+      "claim_statement": "The signed transaction agreement provides source support that the buyer agreed to pay $100 million at closing plus up to $80 million in contingent milestone payments.",
+      "claim_type": "transaction_consideration",
+      "claim_scope": "Transaction consideration terms only; not a valuation conclusion or investment recommendation.",
+      "temporal_scope": "at_decision",
+      "permitted_use": "transaction_terms_verification",
+      "supporting_evidence_item_ids": ["EV-001"],
+      "contradicting_evidence_item_ids": [],
+      "related_source_gap_ids": [],
+      "confidence_preliminary": "high",
+      "requires_numeric_verification": true,
+      "requires_human_review": true,
+      "downstream_use_warning": "Candidate claim only. M5 must verify citations, arithmetic, caveats, and report eligibility before use."
+    },
+    {
+      "candidate_claim_id": "CC-002",
+      "claim_statement": "The current official pipeline page identifies the acquired asset under its current product candidate name, but this is retrospective evidence.",
+      "claim_type": "asset_or_product_identity",
+      "claim_scope": "Asset identity and naming context only.",
+      "temporal_scope": "retrospective",
+      "permitted_use": "retrospective_outcome_validation",
+      "supporting_evidence_item_ids": ["EV-002"],
+      "contradicting_evidence_item_ids": [],
+      "related_source_gap_ids": [],
+      "confidence_preliminary": "medium",
+      "requires_numeric_verification": false,
+      "requires_human_review": true,
+      "downstream_use_warning": "Retrospective candidate claim only. Must not be worded as ex-ante buyer decision support."
+    },
+    {
+      "candidate_claim_id": "CC-003",
+      "claim_statement": "Seller realized proceeds remain unresolved because no direct authoritative cap table or distribution source was located.",
+      "claim_type": "source_gap_claim",
+      "claim_scope": "Source gap tracking only; not an assertion for report use.",
+      "temporal_scope": "source_gap",
+      "permitted_use": "gap_tracking",
+      "supporting_evidence_item_ids": [],
+      "contradicting_evidence_item_ids": [],
+      "related_source_gap_ids": ["GAP-001"],
+      "confidence_preliminary": "low",
+      "requires_numeric_verification": false,
+      "requires_human_review": true,
+      "downstream_use_warning": "Gap-only candidate claim. Block from report assertions until M2_source_retrieval repairs the missing source."
+    }
+  ],
+  "claim_evidence_links": [
+    {
+      "candidate_claim_id": "CC-001",
+      "evidence_item_id": "EV-001",
+      "link_type": "requires_verification",
+      "rationale": "The evidence provides consideration components, but M5 must verify arithmetic and precise wording."
+    },
+    {
+      "candidate_claim_id": "CC-002",
+      "evidence_item_id": "EV-002",
+      "link_type": "contextualizes",
+      "rationale": "The evidence supports current asset naming only and carries a retrospective timing caveat."
+    }
+  ],
+  "source_gaps": [
+    {
+      "source_gap_id": "GAP-001",
+      "gap_description": "Direct authoritative support for seller realized proceeds remains unresolved.",
+      "attempted_source_types": ["stock exchange announcement", "company filing", "cap table disclosure"],
+      "reason_unresolved": "The external executor did not locate a direct authoritative source for seller proceeds.",
+      "recommended_next_search": "Run M2_source_retrieval against official filings and exchange disclosures for seller proceeds or cap table evidence."
+    }
+  ],
+  "uncertainties_or_limitations": [
+    "Candidate claims are not certified claims.",
+    "M5 decides certification, caveats, repair, human review, and report eligibility."
+  ],
+  "provider_notes": [
+    "Structured research package only; not a final report.",
+    "Provider notes are not evidence."
+  ]
+}
