@@ -216,6 +216,20 @@ M5 responsibilities:
 
 M5 numeric verification confirms arithmetic only. For example, a base consideration amount plus a contingent consideration cap can be recorded as a derived relationship, but it is not a direct source quote or final deal-value conclusion unless later source repair supplies direct authoritative support or wording preserves the caveat.
 
+## M6 Analysis Package Boundary
+
+M6 now produces a professional buyer-side acquisition analysis package with 14 business sections derived into a V3-owned buyer-side acquisition framework. Tables are treated as optional analytical exhibits and are not forced when supporting data is missing.
+
+## Professional Report Delivery Layer
+
+The professional report delivery layer separates the clean human-facing report from the machine-readable trace package.
+
+- `final_report.md` is the future clean professional buyer-side acquisition report for human readers.
+- `audit_package.json` is the machine-readable trace package for report-section mapping, claims, evidence records, source IDs, caveats, exclusions, human review, and gate status.
+- Step 6A defines the report delivery contract and builds `audit_package.json` only.
+- Step 6A does not rewrite `report_renderer.py`, does not generate `final_report.md`, and does not generate `recommendation_decision.json`.
+- Step 6B will later upgrade `report_renderer.py` into a clean professional assembler that consumes the report contract and audit trace.
+
 ## Known Limitations / Next Fixes
 
 1. Remove prototype-specific hard-code from runtime.
