@@ -1,0 +1,243 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/schemas/v3-lite/deep_research_response.schema.json",
+  "title": "Buyer-Side Acquisition Strategy Agent Deep Research Response",
+  "type": "object",
+  "additionalProperties": false,
+  "not": {
+    "anyOf": [
+      {"required": ["final_report"]},
+      {"required": ["final_report_text"]},
+      {"required": ["report"]},
+      {"required": ["report_text"]},
+      {"required": ["investment_memo"]},
+      {"required": ["recommendation"]},
+      {"required": ["recommendation_decision"]}
+    ]
+  },
+  "required": [
+    "case_id",
+    "provider",
+    "model",
+    "response_id",
+    "completed_at",
+    "sources",
+    "evidence_items",
+    "candidate_claims",
+    "claim_evidence_links",
+    "source_gaps",
+    "provider_notes"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "provider": {"type": "string", "minLength": 1},
+    "model": {"type": "string", "minLength": 1},
+    "response_id": {"type": "string", "minLength": 1},
+    "completed_at": {"type": "string", "minLength": 1},
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/source"}
+    },
+    "evidence_items": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/evidence_item"}
+    },
+    "candidate_claims": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/candidate_claim"}
+    },
+    "claim_evidence_links": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/claim_evidence_link"}
+    },
+    "source_gaps": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/source_gap"}
+    },
+    "provider_notes": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "uncertainties_or_limitations": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    }
+  },
+  "$defs": {
+    "claim_type": {
+      "type": "string",
+      "enum": [
+        "transaction_background",
+        "transaction_terms",
+        "transaction_timing",
+        "transaction_document_date",
+        "transaction_parties",
+        "transaction_consideration",
+        "contingent_consideration",
+        "milestone_economics",
+        "milestone_payment",
+        "financing_or_payment_mechanics",
+        "entity_identity",
+        "entity_lineage",
+        "asset_or_product_identity",
+        "scientific_asset",
+        "asset_lineage",
+        "ownership_or_governance",
+        "management_or_key_person",
+        "intellectual_property",
+        "regulatory_or_clinical",
+        "financial_performance",
+        "valuation_input",
+        "synergy_or_value_creation",
+        "market_or_competitive_position",
+        "legal_or_regulatory_risk",
+        "integration_or_operational_risk",
+        "source_gap_claim",
+        "generic_fact",
+        "derived_numeric_candidate"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider_source_id",
+        "title",
+        "url",
+        "source_type",
+        "source_owner",
+        "source_date_or_period",
+        "source_reliability_rationale",
+        "source_limitations"
+      ],
+      "properties": {
+        "provider_source_id": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "url": {"type": "string", "minLength": 1},
+        "source_type": {"type": "string", "minLength": 1},
+        "source_owner": {"type": "string", "minLength": 1},
+        "source_date_or_period": {"type": "string", "minLength": 1},
+        "source_tier": {"type": "string", "enum": ["Tier 1", "Tier 2", "Tier 3", "Tier 4"]},
+        "source_time_relation_to_decision_date": {"type": "string", "enum": ["pre_decision", "at_decision", "post_decision", "retrospective", "unknown"]},
+        "permitted_use": {"$ref": "#/$defs/permitted_use"},
+        "source_reliability_rationale": {"type": "string", "minLength": 1},
+        "source_limitations": {"type": "string", "minLength": 1}
+      }
+    },
+    "evidence_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider_evidence_id",
+        "provider_source_id",
+        "extracted_text_or_summary",
+        "extraction_location_if_available",
+        "fact_type",
+        "related_workstream_ids",
+        "related_evidence_requirement_ids",
+        "related_verification_target_ids",
+        "confidence_preliminary",
+        "caveats"
+      ],
+      "properties": {
+        "provider_evidence_id": {"type": "string", "minLength": 1},
+        "provider_source_id": {"type": "string", "minLength": 1},
+        "extracted_text_or_summary": {"type": "string", "minLength": 1},
+        "extraction_location_if_available": {
+          "oneOf": [
+            {"type": "string", "minLength": 1},
+            {"type": "object"},
+            {"type": "null"}
+          ]
+        },
+        "fact_type": {"type": "string", "minLength": 1},
+        "related_workstream_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "related_evidence_requirement_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "related_verification_target_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "confidence_preliminary": {"type": "string", "enum": ["low", "medium", "high"]},
+        "caveats": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "candidate_claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_claim_id",
+        "claim_statement",
+        "claim_type",
+        "claim_scope",
+        "temporal_scope",
+        "permitted_use",
+        "supporting_evidence_item_ids",
+        "contradicting_evidence_item_ids",
+        "related_source_gap_ids",
+        "confidence_preliminary",
+        "requires_numeric_verification",
+        "requires_human_review",
+        "downstream_use_warning"
+      ],
+      "properties": {
+        "candidate_claim_id": {"type": "string", "minLength": 1},
+        "claim_statement": {"type": "string", "minLength": 1},
+        "claim_type": {"$ref": "#/$defs/claim_type"},
+        "claim_scope": {"type": "string", "minLength": 1},
+        "temporal_scope": {"type": "string", "enum": ["pre_decision", "at_decision", "post_decision", "retrospective", "unknown", "source_gap"]},
+        "permitted_use": {"$ref": "#/$defs/permitted_use"},
+        "supporting_evidence_item_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "contradicting_evidence_item_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "related_source_gap_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "confidence_preliminary": {"type": "string", "enum": ["low", "medium", "high"]},
+        "requires_numeric_verification": {"type": "boolean"},
+        "requires_human_review": {"type": "boolean"},
+        "downstream_use_warning": {"type": "string", "minLength": 1},
+        "numeric_formula": {
+          "oneOf": [
+            {"type": "string", "minLength": 1},
+            {"type": "object"}
+          ]
+        }
+      }
+    },
+    "claim_evidence_link": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate_claim_id", "evidence_item_id", "link_type", "rationale"],
+      "properties": {
+        "candidate_claim_id": {"type": "string", "minLength": 1},
+        "evidence_item_id": {"type": "string", "minLength": 1},
+        "link_type": {"type": "string", "enum": ["supports", "partially_supports", "contextualizes", "contradicts", "requires_verification"]},
+        "rationale": {"type": "string", "minLength": 1}
+      }
+    },
+    "source_gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_gap_id",
+        "gap_description",
+        "attempted_source_types",
+        "reason_unresolved",
+        "recommended_next_search"
+      ],
+      "properties": {
+        "source_gap_id": {"type": "string", "minLength": 1},
+        "gap_description": {"type": "string", "minLength": 1},
+        "attempted_source_types": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "reason_unresolved": {"type": "string", "minLength": 1},
+        "recommended_next_search": {"type": "string", "minLength": 1}
+      }
+    },
+    "permitted_use": {
+      "type": "string",
+      "enum": [
+        "ex_ante_deal_evaluation",
+        "transaction_terms_verification",
+        "retrospective_outcome_validation",
+        "source_lead_only",
+        "gap_tracking"
+      ]
+    }
+  }
+}

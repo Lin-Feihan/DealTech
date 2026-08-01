@@ -1,0 +1,53 @@
+{
+  "case_id": "synthetic_buyer_acquisition_m1",
+  "seed_id": "CASE-SEED-SYNTHETIC-ACQ-001",
+  "seed_type": "case_brief_lead_document",
+  "source_description": "Synthetic user-provided acquisition case brief. This seed identifies a case to investigate and must not be treated as authoritative evidence.",
+  "case_parties": {
+    "buyer_or_acquiring_vehicle": [
+      "AcquirerCo"
+    ],
+    "target": [
+      "TargetCo"
+    ],
+    "people": [
+      "Jordan Lee"
+    ]
+  },
+  "transaction_leads": [
+    "January 2026 acquisition evaluation of TargetCo by AcquirerCo",
+    "January 15, 2026 transaction agreement lead",
+    "TargetCo transaction agreement exhibit lead"
+  ],
+  "key_assets_or_topics": [
+    "ProductX platform diligence",
+    "Example Therapeutics customer pipeline",
+    "TargetCo founder and key-person diligence",
+    "seller personal proceeds uncertainty"
+  ],
+  "known_dates": [
+    "January 2026",
+    "2026-01-15",
+    "later contingent payment lead"
+  ],
+  "known_amounts": [
+    "$42 million base initial consideration lead",
+    "up to $18 million contingent consideration lead",
+    "$60 million maximum aggregate headline value lead",
+    "$7 million later contingent payment lead",
+    "minority shareholding lead for a founder"
+  ],
+  "source_leads": [
+    "regulatory filings and exhibits for AcquirerCo and TargetCo transaction agreements",
+    "annual reports or investor materials for contingent payments and entity history",
+    "company disclosure or direct filing for TargetCo ownership, governance, and founder role",
+    "official patent databases for ProductX intellectual property lineage",
+    "official company product pages for ProductX pipeline or commercial status"
+  ],
+  "uncertainty_warnings": [
+    "Case seed is not authoritative evidence and cannot directly support high-confidence claims.",
+    "Do not infer founder personal realized proceeds without direct source evidence.",
+    "Do not treat headline maximum value as all-cash upfront consideration.",
+    "Use retrieved authoritative sources before extracting raw evidence."
+  ]
+}

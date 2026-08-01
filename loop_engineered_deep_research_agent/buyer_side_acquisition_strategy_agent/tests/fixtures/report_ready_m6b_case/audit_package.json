@@ -1,0 +1,75 @@
+{
+  "case_id": "report_ready_m6b_fixture_case",
+  "generated_artifact": "audit_package.json",
+  "stage": "Step6A_professional_report_audit_package",
+  "source_bounded": true,
+  "created_at": "2026-08-01T12:05:00Z",
+  "created_from_report_manifest_id": "REPORT-MANIFEST-report_ready_m6b_fixture_case-2026-08-01T12:00:00Z",
+  "created_from_analysis_package_id": "ANALYSIS-report_ready_m6b_fixture_case-2026-08-01T11:50:00Z",
+  "created_from_certification_result_id": "CERT-report_ready_m6b_fixture_case-2026-08-01T11:40:00Z",
+  "created_from_claim_evidence_graph_id": "GRAPH-report_ready_m6b_fixture_case-2026-08-01T11:20:00Z",
+  "created_from_evidence_repository_id": "REPO-report_ready_m6b_fixture_case-2026-08-01T11:10:00Z",
+  "report_generation_allowed": true,
+  "recommendation_allowed": false,
+  "report_section_trace": [
+    {
+      "report_section_id": "executive_summary",
+      "report_section_title": "Executive Summary",
+      "source_analysis_section_ids": ["transaction_logic", "valuation_and_acceptable_price", "deal_structure", "decision_recommendation_readiness"],
+      "used_claim_ids": ["CL-M6B-001", "CL-M6B-002"],
+      "used_evidence_record_ids": ["ER-M6B-001", "ER-M6B-002"],
+      "used_source_ids": ["SRC-M6B-001"],
+      "required_caveats": ["Return threshold remains unavailable."],
+      "excluded_claim_ids": ["CL-M6B-999"],
+      "trace_notes": ["Fixture trace for Step 6B.1"]
+    }
+  ],
+  "source_citation_table": [
+    {
+      "source_id": "SRC-M6B-001",
+      "source_title": "M6B fixture source memorandum",
+      "source_tier": "synthetic_authoritative_fixture",
+      "evidence_record_ids": ["ER-M6B-001", "ER-M6B-002"],
+      "claim_ids": ["CL-M6B-001", "CL-M6B-002"],
+      "report_section_ids": ["executive_summary", "valuation_and_price_reasonableness"]
+    }
+  ],
+  "excluded_claims": [
+    {
+      "claim_id": "CL-M6B-999",
+      "claim_type": "unsupported_fixture_claim",
+      "certification_status": "unsupported",
+      "exclusion_reason": "Unsupported fixture claim is excluded from facts.",
+      "related_source_gap_ids": ["SG-M6B-999"]
+    }
+  ],
+  "caveat_map": [
+    {
+      "caveat_id": "CAV-M6B-001",
+      "caveat_text": "Return threshold remains unavailable.",
+      "related_claim_ids": ["CL-M6B-002"],
+      "report_section_ids": ["valuation_and_price_reasonableness"]
+    }
+  ],
+  "human_review_summary": {
+    "human_review_required": false,
+    "human_review_item_count": 0,
+    "human_review_items": []
+  },
+  "recommendation_gate_record": {
+    "recommendation_allowed": false,
+    "source": "analysis_package",
+    "blocked_claim_ids": ["CL-M6B-999"],
+    "blocking_reasons": ["Recommendation decision artifact is not available."],
+    "decision_artifact_required_for_recommendation": true
+  },
+  "audit_summary": {
+    "report_section_count": 14,
+    "traced_claim_count": 2,
+    "traced_evidence_record_count": 2,
+    "traced_source_count": 1,
+    "excluded_claim_count": 1,
+    "caveat_count": 1,
+    "notes": ["Fixture audit package for optional M7.1 rendering input."]
+  }
+}

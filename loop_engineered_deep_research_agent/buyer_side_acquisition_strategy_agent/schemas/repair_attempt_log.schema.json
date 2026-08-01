@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/schemas/v3-lite/repair_attempt_log.schema.json",
+  "title": "Buyer-Side Acquisition Strategy Agent Repair Attempt Log",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "generated_artifact",
+    "stage",
+    "created_from_targeted_source_discovery_plan_id",
+    "created_at",
+    "repair_attempts",
+    "unresolved_repairs",
+    "next_action"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "generated_artifact": {"type": "string", "const": "repair_attempt_log.json"},
+    "stage": {"type": "string", "const": "M5_1_repair_attempt_log"},
+    "created_from_targeted_source_discovery_plan_id": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "minLength": 1},
+    "repair_attempts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "repair_attempt_id",
+          "related_repair_step_id",
+          "target_state",
+          "intended_provider",
+          "status",
+          "reason",
+          "output_artifact_generated",
+          "next_recommended_action"
+        ],
+        "properties": {
+          "repair_attempt_id": {"type": "string", "minLength": 1},
+          "related_repair_step_id": {"type": "string", "minLength": 1},
+          "target_state": {"type": "string", "minLength": 1},
+          "intended_provider": {"type": "string", "minLength": 1},
+          "status": {"type": "string", "enum": ["planned", "attempted", "failed_closed", "deferred_provider_unavailable", "completed"]},
+          "reason": {"type": "string", "minLength": 1},
+          "output_artifact_generated": {"type": "boolean"},
+          "next_recommended_action": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "unresolved_repairs": {"type": "array", "items": {"type": "object"}},
+    "next_action": {"type": "string", "minLength": 1}
+  }
+}

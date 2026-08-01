@@ -1,0 +1,127 @@
+{
+  "structure_id": "buyer_side_acquisition_strategy_agent_professional_buyer_acquisition_report_structure",
+  "structure_version": "1.0",
+  "report_type": "buyer_side_acquisition_professional_report",
+  "sections": [
+    {
+      "section_id": "cover",
+      "section_title": "Cover",
+      "purpose": "Identify the case, buyer-side context, report date, and report status without presenting analysis conclusions.",
+      "source_analysis_section_ids": [],
+      "required_when_available": true,
+      "may_be_blocked_if_missing_evidence": false
+    },
+    {
+      "section_id": "executive_summary",
+      "section_title": "Executive Summary",
+      "purpose": "Summarize the bounded buyer-side findings, critical limitations, and decision-readiness status for senior readers.",
+      "source_analysis_section_ids": ["transaction_logic", "valuation_and_acceptable_price", "deal_structure", "decision_recommendation_readiness"],
+      "required_when_available": true,
+      "may_be_blocked_if_missing_evidence": true
+    },
+    {
+      "section_id": "transaction_snapshot",
+      "section_title": "Transaction Snapshot",
+      "purpose": "Present the core transaction perimeter, parties, timing, consideration mechanics, and certified deal terms when available.",
+      "source_analysis_section_ids": ["transaction_logic", "deal_structure"],
+      "required_when_available": true,
+      "may_be_blocked_if_missing_evidence": true
+    },
+    {
+      "section_id": "buyer_mandate_and_decision_context",
+      "section_title": "Buyer Mandate And Decision Context",
+      "purpose": "Frame the buyer's mandate, decision question, and readiness constraints without inventing buyer strategy.",
+      "source_analysis_section_ids": ["buyer_strategic_objectives", "transaction_logic", "decision_recommendation_readiness"],
+      "required_when_available": true,
+      "may_be_blocked_if_missing_evidence": true
+    },
+    {
+      "section_id": "target_overview",
+      "section_title": "Target Overview",
+      "purpose": "Describe the target business, asset, product, technology, or pipeline quality supported by certified evidence.",
+      "source_analysis_section_ids": ["target_business_quality"],
+      "required_when_available": true,
+      "may_be_blocked_if_missing_evidence": true
+    },
+    {
+      "section_id": "strategic_rationale",
+      "section_title": "Strategic Rationale",
+      "purpose": "Explain certified buyer-side strategic logic and alternatives when evidence supports it.",
+      "source_analysis_section_ids": ["buyer_strategic_objectives", "strategic_fit", "transaction_logic"],
+      "required_when_available": true,
+      "may_be_blocked_if_missing_evidence": true
+    },
+    {
+      "section_id": "market_and_competitive_context",
+      "section_title": "Market And Competitive Context",
+      "purpose": "Summarize sourced industry, market, customer, and competitive context without fabricating TAM, share, or growth.",
+      "source_analysis_section_ids": ["industry_and_competitive_position"],
+      "required_when_available": true,
+      "may_be_blocked_if_missing_evidence": true
+    },
+    {
+      "section_id": "deal_structure_and_transaction_economics",
+      "section_title": "Deal Structure And Transaction Economics",
+      "purpose": "Explain structure, consideration mechanics, risk allocation, and transaction economics supported by certified claims.",
+      "source_analysis_section_ids": ["deal_structure", "transaction_logic", "financing_and_capital_structure"],
+      "required_when_available": true,
+      "may_be_blocked_if_missing_evidence": true
+    },
+    {
+      "section_id": "valuation_and_price_reasonableness",
+      "section_title": "Valuation And Price Reasonableness",
+      "purpose": "Discuss price discipline, valuation readiness, and consideration structure without producing unsupported valuation metrics.",
+      "source_analysis_section_ids": ["valuation_and_acceptable_price", "standalone_financial_analysis", "return_analysis"],
+      "required_when_available": true,
+      "may_be_blocked_if_missing_evidence": true
+    },
+    {
+      "section_id": "synergy_and_value_creation",
+      "section_title": "Synergy And Value Creation",
+      "purpose": "Explain buyer-specific value creation only where certified evidence supports it; otherwise preserve synergy as diligence hypothesis.",
+      "source_analysis_section_ids": ["synergy_and_value_creation", "strategic_fit"],
+      "required_when_available": true,
+      "may_be_blocked_if_missing_evidence": true
+    },
+    {
+      "section_id": "key_risks_and_red_flags",
+      "section_title": "Key Risks And Red Flags",
+      "purpose": "Surface certified downside risks, caveats, exclusions, human-review items, and red flags relevant to buyer decision quality.",
+      "source_analysis_section_ids": ["regulatory_integration_and_downside_risks", "due_diligence_priorities", "decision_recommendation_readiness"],
+      "required_when_available": true,
+      "may_be_blocked_if_missing_evidence": true
+    },
+    {
+      "section_id": "due_diligence_priorities",
+      "section_title": "Due Diligence Priorities",
+      "purpose": "Convert unresolved M5/M6 limitations into practical buyer diligence actions before report or recommendation use.",
+      "source_analysis_section_ids": ["due_diligence_priorities", "regulatory_integration_and_downside_risks", "valuation_and_acceptable_price", "deal_structure"],
+      "required_when_available": true,
+      "may_be_blocked_if_missing_evidence": false
+    },
+    {
+      "section_id": "decision_readiness_or_recommendation",
+      "section_title": "Decision Readiness Or Recommendation",
+      "purpose": "Present decision-readiness limitations unless upstream recommendation authorization and decision artifact allow recommendation language.",
+      "source_analysis_section_ids": ["decision_recommendation_readiness", "due_diligence_priorities"],
+      "required_when_available": true,
+      "may_be_blocked_if_missing_evidence": false
+    },
+    {
+      "section_id": "limitations",
+      "section_title": "Limitations",
+      "purpose": "List source, evidence, caveat, exclusion, temporal, and human-review limitations that bound the professional report.",
+      "source_analysis_section_ids": ["decision_recommendation_readiness", "due_diligence_priorities"],
+      "required_when_available": true,
+      "may_be_blocked_if_missing_evidence": false
+    },
+    {
+      "section_id": "appendix_source_list",
+      "section_title": "Appendix Source List",
+      "purpose": "Provide source and evidence trace detail appropriate for appendix or audit use, including internal IDs when needed.",
+      "source_analysis_section_ids": [],
+      "required_when_available": true,
+      "may_be_blocked_if_missing_evidence": false
+    }
+  ]
+}

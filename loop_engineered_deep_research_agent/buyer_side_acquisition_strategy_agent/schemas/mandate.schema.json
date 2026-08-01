@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/schemas/v3-lite/mandate.schema.json",
+  "title": "Buyer-Side Acquisition Strategy Agent Buyer Acquisition Mandate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "buyer",
+    "target",
+    "transaction_context",
+    "decision_date",
+    "requested_scope",
+    "source_pack_reference",
+    "constraints",
+    "output_requirements"
+  ],
+  "properties": {
+    "case_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "buyer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "transaction_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transaction_type", "stage", "decision_need"],
+      "properties": {
+        "transaction_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stage": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision_need": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "decision_date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "requested_scope": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "source_pack_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reference_id", "description"],
+      "properties": {
+        "reference_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["no_web_search", "no_evidence_generation", "no_report_generation"],
+      "properties": {
+        "no_web_search": {
+          "type": "boolean",
+          "const": true
+        },
+        "no_evidence_generation": {
+          "type": "boolean",
+          "const": true
+        },
+        "no_report_generation": {
+          "type": "boolean",
+          "const": true
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "output_requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["expected_artifacts", "language"],
+      "properties": {
+        "expected_artifacts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": ["mandate.json", "research_plan.json"]
+          }
+        },
+        "language": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}
+

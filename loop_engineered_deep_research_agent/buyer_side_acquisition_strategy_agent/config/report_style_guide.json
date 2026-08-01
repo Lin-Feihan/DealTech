@@ -1,0 +1,43 @@
+{
+  "style_guide_id": "buyer_side_acquisition_strategy_agent_professional_report_style_guide",
+  "style_guide_version": "1.0",
+  "report_voice": "clean professional buyer-side IC memo",
+  "principles": [
+    "Write the final report as a clean, professional, buyer-side acquisition memo for human readers.",
+    "Keep the main body focused on business interpretation, buyer implications, decision readiness, and limitations.",
+    "Do not expose internal engineering IDs in the main body, including claim IDs, evidence record IDs, raw evidence IDs, certification statuses, or source-gap machinery.",
+    "Internal IDs may appear only in appendices or in audit_package.json.",
+    "Do not use case_seed, mandate notes, local case briefs, Bohan PDF, model memory, or prior assistant memory as evidence.",
+    "Use only source-bounded, certified, or caveated evidence authorized by upstream artifacts.",
+    "Do not include unsupported, blocked, failed, source-gap-only, or human-review-required claims as facts.",
+    "Preserve caveats, source limitations, temporal limitations, and human-review requirements where they affect report wording.",
+    "Recommendation language is allowed only when upstream recommendation_allowed is true and recommendation_decision exists.",
+    "If recommendation is not allowed, write decision-readiness limitations instead of final recommendation labels such as Proceed or Walk Away.",
+    "Do not fabricate valuation, returns, financing, synergy, market, commercial, clinical, regulatory, legal, integration, or strategic conclusions when supporting evidence is missing."
+  ],
+  "main_body_forbidden_internal_markers": [
+    "claim_id",
+    "CL-",
+    "evidence_record_id",
+    "ER-",
+    "raw_evidence_id",
+    "certification_status",
+    "source_gap_id",
+    "research_gap_id"
+  ],
+  "evidence_exclusions": [
+    "case_seed",
+    "mandate_notes",
+    "local_case_brief",
+    "Bohan PDF",
+    "model_memory",
+    "assistant_memory",
+    "unsupported_claims",
+    "blocked_claims"
+  ],
+  "recommendation_policy": {
+    "allowed_only_if": ["recommendation_allowed is true", "recommendation_decision exists"],
+    "when_not_allowed": "Write decision-readiness limitations and required diligence instead of final recommendation language.",
+    "blocked_final_recommendation_terms_when_not_allowed": ["Proceed", "Proceed with Conditions", "Renegotiate", "Defer", "Walk Away"]
+  }
+}

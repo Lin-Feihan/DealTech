@@ -1,0 +1,377 @@
+{
+  "case_id": "report_ready_m6b_fixture_case",
+  "generated_artifact": "analysis_package.json",
+  "stage": "M6_evidence_bounded_deal_analysis",
+  "source_bounded": true,
+  "evidence_coverage_status": "sufficient_for_limited_report",
+  "created_from_certification_result_id": "CERT-report_ready_m6b_fixture_case-2026-08-01T11:40:00Z",
+  "created_from_claim_evidence_graph_id": "GRAPH-report_ready_m6b_fixture_case-2026-08-01T11:20:00Z",
+  "created_from_evidence_repository_id": "REPO-report_ready_m6b_fixture_case-2026-08-01T11:10:00Z",
+  "created_at": "2026-08-01T11:50:00Z",
+  "analysis_readiness_status": "ready_for_limited_analysis",
+  "recommendation_allowed": false,
+  "final_report_allowed": true,
+  "supporting_claim_ids": [
+    "CL-M6B-001",
+    "CL-M6B-002"
+  ],
+  "consumed_certified_claim_ids": [
+    "CL-M6B-001"
+  ],
+  "consumed_caveated_claim_ids": [
+    "CL-M6B-002"
+  ],
+  "excluded_claim_ids": [
+    "CL-M6B-999"
+  ],
+  "exclusion_reasons": [
+    {
+      "claim_id": "CL-M6B-999",
+      "reason": "Unsupported fixture claim is excluded from facts."
+    }
+  ],
+  "preserved_caveats": [
+    {
+      "claim_id": "CL-M6B-002",
+      "caveats": [
+        "Return threshold remains unavailable."
+      ]
+    }
+  ],
+  "recommendation_gate_status": "blocked",
+  "report_gate_status": "allowed",
+  "analysis_sections": [
+    {
+      "section_id": "transaction_logic",
+      "section_title": "Transaction Logic",
+      "analysis_status": "limited",
+      "business_question": "What does transaction logic imply for the buyer-side acquisition decision?",
+      "analyst_interpretation": "Analyst interpretation: the transaction perimeter is sufficiently defined for a limited buyer-side review.",
+      "buyer_implication": "Buyer implication: the buyer can compare strategic fit and transaction structure without relying on unsupported historical notes.",
+      "key_takeaway": "Transaction Logic is treated as source-bounded and limited.",
+      "decision_impact": "Decision impact: transaction logic supports memo preparation but does not authorize a final acquisition recommendation.",
+      "analysis_boundary": "Analysis boundary: transaction logic is limited to source-bounded M6B inputs.",
+      "supporting_claim_ids": [
+        "CL-M6B-001"
+      ],
+      "supporting_evidence_record_ids": [
+        "ER-M6B-001"
+      ],
+      "imported_limitations_from_m5": [],
+      "missing_inputs": [],
+      "pending_diligence_items": [],
+      "caveats": [],
+      "confidence": "medium",
+      "optional_exhibits": [],
+      "findings": [
+        {
+          "finding_id": "F-M6B-transaction-001",
+          "finding_text": "The target has a differentiated product candidate relevant to the buyer review perimeter.",
+          "related_claim_ids": [
+            "CL-M6B-001"
+          ],
+          "supporting_evidence_record_ids": [
+            "ER-M6B-001"
+          ],
+          "certification_status": "certified",
+          "caveated": false
+        }
+      ]
+    },
+    {
+      "section_id": "buyer_strategic_objectives",
+      "section_title": "Buyer Strategic Objectives",
+      "analysis_status": "limited",
+      "business_question": "What does buyer strategic objectives imply for the buyer-side acquisition decision?",
+      "analyst_interpretation": "Analyst interpretation: buyer strategic objectives has no additional source-bounded conclusion beyond the mapped M6B package.",
+      "buyer_implication": "Buyer implication: buyer strategic objectives remains a bounded diligence consideration.",
+      "key_takeaway": "Buyer Strategic Objectives is treated as source-bounded and limited.",
+      "decision_impact": "Decision impact: buyer strategic objectives does not independently authorize a recommendation.",
+      "analysis_boundary": "Analysis boundary: buyer strategic objectives is restricted to M6B source-bounded inputs.",
+      "supporting_claim_ids": [],
+      "supporting_evidence_record_ids": [],
+      "imported_limitations_from_m5": [],
+      "missing_inputs": [],
+      "pending_diligence_items": [],
+      "caveats": [],
+      "confidence": "medium",
+      "optional_exhibits": [],
+      "findings": []
+    },
+    {
+      "section_id": "target_business_quality",
+      "section_title": "Target Business Quality",
+      "analysis_status": "limited",
+      "business_question": "What does target business quality imply for the buyer-side acquisition decision?",
+      "analyst_interpretation": "Analyst interpretation: target business quality has no additional source-bounded conclusion beyond the mapped M6B package.",
+      "buyer_implication": "Buyer implication: target business quality remains a bounded diligence consideration.",
+      "key_takeaway": "Target Business Quality is treated as source-bounded and limited.",
+      "decision_impact": "Decision impact: target business quality does not independently authorize a recommendation.",
+      "analysis_boundary": "Analysis boundary: target business quality is restricted to M6B source-bounded inputs.",
+      "supporting_claim_ids": [],
+      "supporting_evidence_record_ids": [],
+      "imported_limitations_from_m5": [],
+      "missing_inputs": [],
+      "pending_diligence_items": [],
+      "caveats": [],
+      "confidence": "medium",
+      "optional_exhibits": [],
+      "findings": []
+    },
+    {
+      "section_id": "industry_and_competitive_position",
+      "section_title": "Industry And Competitive Position",
+      "analysis_status": "limited",
+      "business_question": "What does industry and competitive position imply for the buyer-side acquisition decision?",
+      "analyst_interpretation": "Analyst interpretation: industry and competitive position has no additional source-bounded conclusion beyond the mapped M6B package.",
+      "buyer_implication": "Buyer implication: industry and competitive position remains a bounded diligence consideration.",
+      "key_takeaway": "Industry And Competitive Position is treated as source-bounded and limited.",
+      "decision_impact": "Decision impact: industry and competitive position does not independently authorize a recommendation.",
+      "analysis_boundary": "Analysis boundary: industry and competitive position is restricted to M6B source-bounded inputs.",
+      "supporting_claim_ids": [],
+      "supporting_evidence_record_ids": [],
+      "imported_limitations_from_m5": [],
+      "missing_inputs": [],
+      "pending_diligence_items": [],
+      "caveats": [],
+      "confidence": "medium",
+      "optional_exhibits": [],
+      "findings": []
+    },
+    {
+      "section_id": "strategic_fit",
+      "section_title": "Strategic Fit",
+      "analysis_status": "limited",
+      "business_question": "What does strategic fit imply for the buyer-side acquisition decision?",
+      "analyst_interpretation": "Analyst interpretation: strategic fit has no additional source-bounded conclusion beyond the mapped M6B package.",
+      "buyer_implication": "Buyer implication: strategic fit remains a bounded diligence consideration.",
+      "key_takeaway": "Strategic Fit is treated as source-bounded and limited.",
+      "decision_impact": "Decision impact: strategic fit does not independently authorize a recommendation.",
+      "analysis_boundary": "Analysis boundary: strategic fit is restricted to M6B source-bounded inputs.",
+      "supporting_claim_ids": [],
+      "supporting_evidence_record_ids": [],
+      "imported_limitations_from_m5": [],
+      "missing_inputs": [],
+      "pending_diligence_items": [],
+      "caveats": [],
+      "confidence": "medium",
+      "optional_exhibits": [],
+      "findings": []
+    },
+    {
+      "section_id": "standalone_financial_analysis",
+      "section_title": "Standalone Financial Analysis",
+      "analysis_status": "limited",
+      "business_question": "What does standalone financial analysis imply for the buyer-side acquisition decision?",
+      "analyst_interpretation": "Analyst interpretation: standalone financial analysis has no additional source-bounded conclusion beyond the mapped M6B package.",
+      "buyer_implication": "Buyer implication: standalone financial analysis remains a bounded diligence consideration.",
+      "key_takeaway": "Standalone Financial Analysis is treated as source-bounded and limited.",
+      "decision_impact": "Decision impact: standalone financial analysis does not independently authorize a recommendation.",
+      "analysis_boundary": "Analysis boundary: standalone financial analysis is restricted to M6B source-bounded inputs.",
+      "supporting_claim_ids": [],
+      "supporting_evidence_record_ids": [],
+      "imported_limitations_from_m5": [],
+      "missing_inputs": [],
+      "pending_diligence_items": [],
+      "caveats": [],
+      "confidence": "medium",
+      "optional_exhibits": [],
+      "findings": []
+    },
+    {
+      "section_id": "valuation_and_acceptable_price",
+      "section_title": "Valuation And Acceptable Price",
+      "analysis_status": "limited",
+      "business_question": "What does valuation and acceptable price imply for the buyer-side acquisition decision?",
+      "analyst_interpretation": "Analyst interpretation: valuation work is directional because buyer-specific return thresholds are not available.",
+      "buyer_implication": "Buyer implication: price reasonableness should be treated as a diligence question rather than a completed valuation conclusion.",
+      "key_takeaway": "Valuation And Acceptable Price is treated as source-bounded and limited.",
+      "decision_impact": "Decision impact: valuation evidence is adequate for IC discussion but not for a final price recommendation.",
+      "analysis_boundary": "Analysis boundary: no unsupported valuation metric is created by the renderer.",
+      "supporting_claim_ids": [
+        "CL-M6B-002"
+      ],
+      "supporting_evidence_record_ids": [
+        "ER-M6B-002"
+      ],
+      "imported_limitations_from_m5": [],
+      "missing_inputs": [],
+      "pending_diligence_items": [],
+      "caveats": [
+        "Return threshold remains unavailable."
+      ],
+      "confidence": "medium",
+      "optional_exhibits": [],
+      "findings": [
+        {
+          "finding_id": "F-M6B-valuation-001",
+          "finding_text": "Valuation review remains limited by missing buyer-specific return thresholds.",
+          "related_claim_ids": [
+            "CL-M6B-002"
+          ],
+          "supporting_evidence_record_ids": [
+            "ER-M6B-002"
+          ],
+          "certification_status": "certified_with_caveat",
+          "caveated": true
+        }
+      ]
+    },
+    {
+      "section_id": "synergy_and_value_creation",
+      "section_title": "Synergy And Value Creation",
+      "analysis_status": "limited",
+      "business_question": "What does synergy and value creation imply for the buyer-side acquisition decision?",
+      "analyst_interpretation": "Analyst interpretation: synergy and value creation has no additional source-bounded conclusion beyond the mapped M6B package.",
+      "buyer_implication": "Buyer implication: synergy and value creation remains a bounded diligence consideration.",
+      "key_takeaway": "Synergy And Value Creation is treated as source-bounded and limited.",
+      "decision_impact": "Decision impact: synergy and value creation does not independently authorize a recommendation.",
+      "analysis_boundary": "Analysis boundary: synergy and value creation is restricted to M6B source-bounded inputs.",
+      "supporting_claim_ids": [],
+      "supporting_evidence_record_ids": [],
+      "imported_limitations_from_m5": [],
+      "missing_inputs": [],
+      "pending_diligence_items": [],
+      "caveats": [],
+      "confidence": "medium",
+      "optional_exhibits": [],
+      "findings": []
+    },
+    {
+      "section_id": "deal_structure",
+      "section_title": "Deal Structure",
+      "analysis_status": "limited",
+      "business_question": "What does deal structure imply for the buyer-side acquisition decision?",
+      "analyst_interpretation": "Analyst interpretation: deal structure has no additional source-bounded conclusion beyond the mapped M6B package.",
+      "buyer_implication": "Buyer implication: deal structure remains a bounded diligence consideration.",
+      "key_takeaway": "Deal Structure is treated as source-bounded and limited.",
+      "decision_impact": "Decision impact: deal structure does not independently authorize a recommendation.",
+      "analysis_boundary": "Analysis boundary: deal structure is restricted to M6B source-bounded inputs.",
+      "supporting_claim_ids": [],
+      "supporting_evidence_record_ids": [],
+      "imported_limitations_from_m5": [],
+      "missing_inputs": [],
+      "pending_diligence_items": [],
+      "caveats": [],
+      "confidence": "medium",
+      "optional_exhibits": [],
+      "findings": []
+    },
+    {
+      "section_id": "financing_and_capital_structure",
+      "section_title": "Financing And Capital Structure",
+      "analysis_status": "limited",
+      "business_question": "What does financing and capital structure imply for the buyer-side acquisition decision?",
+      "analyst_interpretation": "Analyst interpretation: financing and capital structure has no additional source-bounded conclusion beyond the mapped M6B package.",
+      "buyer_implication": "Buyer implication: financing and capital structure remains a bounded diligence consideration.",
+      "key_takeaway": "Financing And Capital Structure is treated as source-bounded and limited.",
+      "decision_impact": "Decision impact: financing and capital structure does not independently authorize a recommendation.",
+      "analysis_boundary": "Analysis boundary: financing and capital structure is restricted to M6B source-bounded inputs.",
+      "supporting_claim_ids": [],
+      "supporting_evidence_record_ids": [],
+      "imported_limitations_from_m5": [],
+      "missing_inputs": [],
+      "pending_diligence_items": [],
+      "caveats": [],
+      "confidence": "medium",
+      "optional_exhibits": [],
+      "findings": []
+    },
+    {
+      "section_id": "return_analysis",
+      "section_title": "Return Analysis",
+      "analysis_status": "limited",
+      "business_question": "What does return analysis imply for the buyer-side acquisition decision?",
+      "analyst_interpretation": "Analyst interpretation: return analysis has no additional source-bounded conclusion beyond the mapped M6B package.",
+      "buyer_implication": "Buyer implication: return analysis remains a bounded diligence consideration.",
+      "key_takeaway": "Return Analysis is treated as source-bounded and limited.",
+      "decision_impact": "Decision impact: return analysis does not independently authorize a recommendation.",
+      "analysis_boundary": "Analysis boundary: return analysis is restricted to M6B source-bounded inputs.",
+      "supporting_claim_ids": [],
+      "supporting_evidence_record_ids": [],
+      "imported_limitations_from_m5": [],
+      "missing_inputs": [],
+      "pending_diligence_items": [],
+      "caveats": [],
+      "confidence": "medium",
+      "optional_exhibits": [],
+      "findings": []
+    },
+    {
+      "section_id": "due_diligence_priorities",
+      "section_title": "Due Diligence Priorities",
+      "analysis_status": "limited",
+      "business_question": "What does due diligence priorities imply for the buyer-side acquisition decision?",
+      "analyst_interpretation": "Analyst interpretation: diligence should focus on confirming commercial durability and buyer-specific value capture.",
+      "buyer_implication": "Buyer implication: unresolved diligence topics should be closed before using the memo for approval.",
+      "key_takeaway": "Due Diligence Priorities is treated as source-bounded and limited.",
+      "decision_impact": "Decision impact: diligence gaps constrain decision readiness.",
+      "analysis_boundary": "Analysis boundary: this section converts gaps into diligence workstreams only.",
+      "supporting_claim_ids": [],
+      "supporting_evidence_record_ids": [],
+      "imported_limitations_from_m5": [],
+      "missing_inputs": [],
+      "pending_diligence_items": [
+        {
+          "diligence_item": "Confirm buyer-specific return threshold before recommendation use."
+        }
+      ],
+      "caveats": [],
+      "confidence": "medium",
+      "optional_exhibits": [],
+      "findings": []
+    },
+    {
+      "section_id": "regulatory_integration_and_downside_risks",
+      "section_title": "Regulatory Integration And Downside Risks",
+      "analysis_status": "limited",
+      "business_question": "What does regulatory integration and downside risks imply for the buyer-side acquisition decision?",
+      "analyst_interpretation": "Analyst interpretation: regulatory integration and downside risks has no additional source-bounded conclusion beyond the mapped M6B package.",
+      "buyer_implication": "Buyer implication: regulatory integration and downside risks remains a bounded diligence consideration.",
+      "key_takeaway": "Regulatory Integration And Downside Risks is treated as source-bounded and limited.",
+      "decision_impact": "Decision impact: regulatory integration and downside risks does not independently authorize a recommendation.",
+      "analysis_boundary": "Analysis boundary: regulatory integration and downside risks is restricted to M6B source-bounded inputs.",
+      "supporting_claim_ids": [],
+      "supporting_evidence_record_ids": [],
+      "imported_limitations_from_m5": [],
+      "missing_inputs": [],
+      "pending_diligence_items": [],
+      "caveats": [],
+      "confidence": "medium",
+      "optional_exhibits": [],
+      "findings": []
+    },
+    {
+      "section_id": "decision_recommendation_readiness",
+      "section_title": "Decision Recommendation Readiness",
+      "analysis_status": "limited",
+      "business_question": "What does decision recommendation readiness imply for the buyer-side acquisition decision?",
+      "analyst_interpretation": "Analyst interpretation: the package is ready for professional report rendering but not for recommendation issuance.",
+      "buyer_implication": "Buyer implication: the report can support IC discussion as a decision-readiness memo.",
+      "key_takeaway": "Decision Recommendation Readiness is treated as source-bounded and limited.",
+      "decision_impact": "Decision impact: unresolved gates prevent final recommendation language.",
+      "analysis_boundary": "Analysis boundary: recommendation wording is intentionally withheld.",
+      "supporting_claim_ids": [],
+      "supporting_evidence_record_ids": [],
+      "imported_limitations_from_m5": [],
+      "missing_inputs": [],
+      "pending_diligence_items": [],
+      "caveats": [],
+      "confidence": "medium",
+      "optional_exhibits": [],
+      "findings": []
+    }
+  ],
+  "blocked_analysis_items": [],
+  "caveats": [
+    {
+      "caveat_id": "CAV-M6B-001",
+      "caveat_text": "Return threshold remains unavailable.",
+      "related_claim_ids": [
+        "CL-M6B-002"
+      ]
+    }
+  ],
+  "human_review_items": [],
+  "next_action": "render_final_report_after_explicit_user_request"
+}

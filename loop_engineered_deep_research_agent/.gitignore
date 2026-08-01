@@ -1,0 +1,4 @@
+outputs/
+retrieved_sources/**/cache/
+**/__pycache__/
+*.pyc

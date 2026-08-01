@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/schemas/v3-lite/final_report_contract.schema.json",
+  "title": "Buyer-Side Acquisition Strategy Agent Final Report Delivery Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_id",
+    "contract_version",
+    "case_id",
+    "expected_artifact",
+    "clean_title_required",
+    "required_report_elements",
+    "content_controls",
+    "recommendation_controls",
+    "traceability_requirements"
+  ],
+  "properties": {
+    "contract_id": {"type": "string", "const": "buyer_side_acquisition_strategy_agent_final_report_contract"},
+    "contract_version": {"type": "string", "minLength": 1},
+    "case_id": {"type": "string", "minLength": 1},
+    "expected_artifact": {"type": "string", "const": "final_report.md"},
+    "clean_title_required": {"type": "boolean", "const": true},
+    "required_report_elements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executive_summary",
+        "transaction_overview_or_snapshot",
+        "analysis_sections",
+        "limitations_section",
+        "appendix_source_list"
+      ],
+      "properties": {
+        "executive_summary": {"type": "boolean", "const": true},
+        "transaction_overview_or_snapshot": {"type": "boolean", "const": true},
+        "analysis_sections": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "limitations_section": {"type": "boolean", "const": true},
+        "appendix_source_list": {"type": "boolean", "const": true}
+      }
+    },
+    "content_controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "no_unsupported_claims_as_facts",
+        "no_blocked_claims_as_facts",
+        "main_body_hides_internal_ids",
+        "appendix_may_include_internal_ids",
+        "preserve_required_caveats"
+      ],
+      "properties": {
+        "no_unsupported_claims_as_facts": {"type": "boolean", "const": true},
+        "no_blocked_claims_as_facts": {"type": "boolean", "const": true},
+        "main_body_hides_internal_ids": {"type": "boolean", "const": true},
+        "appendix_may_include_internal_ids": {"type": "boolean", "const": true},
+        "preserve_required_caveats": {"type": "boolean", "const": true}
+      }
+    },
+    "recommendation_controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unauthorized_recommendation_language_blocked",
+        "recommendation_requires_allowed_gate",
+        "recommendation_requires_decision_artifact",
+        "fallback_when_recommendation_not_allowed"
+      ],
+      "properties": {
+        "unauthorized_recommendation_language_blocked": {"type": "boolean", "const": true},
+        "recommendation_requires_allowed_gate": {"type": "boolean", "const": true},
+        "recommendation_requires_decision_artifact": {"type": "boolean", "const": true},
+        "fallback_when_recommendation_not_allowed": {"type": "string", "minLength": 1}
+      }
+    },
+    "traceability_requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["audit_package_required", "section_trace_required", "source_citation_table_required"],
+      "properties": {
+        "audit_package_required": {"type": "boolean", "const": true},
+        "section_trace_required": {"type": "boolean", "const": true},
+        "source_citation_table_required": {"type": "boolean", "const": true}
+      }
+    }
+  }
+}
