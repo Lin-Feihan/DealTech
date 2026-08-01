@@ -93,17 +93,21 @@ class V3LiteM71ReportRendererTest(unittest.TestCase):
         self.assertTrue(result["final_report_generated"])
         self.assertTrue((output_dir / "final_report.md").exists())
         report = (output_dir / "final_report.md").read_text(encoding="utf-8")
-        self.assertIn("# Evidence-Bounded Acquisition Analysis Report", report)
-        self.assertIn("## Source and Certification Basis", report)
+        self.assertIn("# Buyer-Side Acquisition Analysis Report", report)
         self.assertIn("## Executive Summary", report)
-        self.assertIn("## Transaction Background", report)
-        self.assertIn("## Transaction Terms", report)
-        self.assertIn("## Milestone Economics", report)
-        self.assertIn("## Entity and Asset Lineage", report)
-        self.assertIn("## Evidence Gaps and Limitations", report)
-        self.assertIn("## Human Review Notes", report)
-        self.assertIn("## Certification Caveats", report)
-        self.assertIn("## Appendix: Claim-Evidence References", report)
+        self.assertIn("## Transaction Snapshot", report)
+        self.assertIn("## Buyer Mandate And Decision Context", report)
+        self.assertIn("## Target Overview", report)
+        self.assertIn("## Strategic Rationale", report)
+        self.assertIn("## Market And Competitive Context", report)
+        self.assertIn("## Deal Structure And Transaction Economics", report)
+        self.assertIn("## Valuation And Price Reasonableness", report)
+        self.assertIn("## Synergy And Value Creation", report)
+        self.assertIn("## Key Risks And Red Flags", report)
+        self.assertIn("## Due Diligence Priorities", report)
+        self.assertIn("## Decision Readiness Or Recommendation", report)
+        self.assertIn("## Limitations", report)
+        self.assertIn("## Appendix: Source List", report)
 
     def test_renderer_refuses_when_final_report_allowed_is_false(self) -> None:
         analysis_package = self._load(self.ready_analysis_package_path)
@@ -146,7 +150,7 @@ class V3LiteM71ReportRendererTest(unittest.TestCase):
         report = (output_dir / "final_report.md").read_text(encoding="utf-8")
 
         self.assertNotIn("Unsupported fixture claim should never appear as a factual report finding", report)
-        self.assertNotIn("CL-RF-999: Unsupported fixture claim", report)
+        self.assertNotIn("CL-RF-999", report)
         self.assertIn("Open source gap: management interview transcript not available", report)
 
     def test_renderer_includes_caveats_and_source_gaps_when_provided(self) -> None:
@@ -156,9 +160,18 @@ class V3LiteM71ReportRendererTest(unittest.TestCase):
         report = (output_dir / "final_report.md").read_text(encoding="utf-8")
 
         self.assertIn("Milestone consideration is a cap and remains caveated", report)
-        self.assertIn("Caveat preserved", report)
-        self.assertIn("Evidence Gaps and Limitations", report)
-        self.assertIn("This is a limitation, not a factual finding", report)
+        self.assertIn("Limitations", report)
+        self.assertIn("This is a limitation, not a factual report finding", report)
+
+    def test_main_body_hides_internal_engineering_markers(self) -> None:
+        output_dir = self.root / "clean_main_body"
+
+        self._run_ready_fixture(output_dir)
+        report = (output_dir / "final_report.md").read_text(encoding="utf-8")
+        main_body = report.split("## Appendix: Source List", maxsplit=1)[0]
+
+        for marker in ("CL-RF-001", "ER-RF-001", "certification_status", "raw_evidence_id", "claim_node", "evidence_record"):
+            self.assertNotIn(marker, main_body)
 
     def test_no_recommendation_decision_generated(self) -> None:
         output_dir = self.root / "no_recommendation_decision"
@@ -170,7 +183,10 @@ class V3LiteM71ReportRendererTest(unittest.TestCase):
         self.assertFalse((output_dir / "valuation_analysis.json").exists())
         report = (output_dir / "final_report.md").read_text(encoding="utf-8")
         self.assertNotIn("Proceed", report)
+        self.assertNotIn("Renegotiate", report)
+        self.assertNotIn("Defer", report)
         self.assertNotIn("Walk Away", report)
+        self.assertIn("A final acquisition recommendation is not authorized by the upstream gates", report)
 
     def _run_ready_fixture(self, output_dir: Path) -> dict:
         return run_m7_render_pipeline(

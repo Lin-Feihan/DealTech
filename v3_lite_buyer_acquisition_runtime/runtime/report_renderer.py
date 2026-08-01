@@ -9,9 +9,38 @@ class ReportRendererError(ValueError):
     pass
 
 
+RUNTIME_ROOT = Path(__file__).resolve().parents[1]
+REPORT_STRUCTURE_PATH = RUNTIME_ROOT / "config" / "professional_report_structure.json"
+REPORT_STYLE_GUIDE_PATH = RUNTIME_ROOT / "config" / "report_style_guide.json"
+
 ALLOWED_CLAIM_STATUSES = {"certified", "certified_with_caveat"}
 BLOCKING_CERTIFICATION_STATUSES = {"repair_required", "failed"}
-FORBIDDEN_REPORT_TERMS = ("Proceed", "Walk Away")
+UNAUTHORIZED_RECOMMENDATION_TERMS = ("Proceed", "Proceed with Conditions", "Renegotiate", "Defer", "Walk Away")
+MAIN_BODY_FORBIDDEN_MARKERS = (
+    "CL-",
+    "RE-",
+    "claim_id",
+    "raw_evidence_id",
+    "certification_status",
+    "claim_node",
+    "evidence_record",
+    "support_level",
+)
+
+SECTION_FINDING_MAP = {
+    "executive_summary": ("transaction_terms_analysis", "milestone_economics_analysis", "entity_and_asset_lineage_analysis"),
+    "transaction_snapshot": ("transaction_terms_analysis", "deal_structure", "transaction_logic"),
+    "buyer_mandate_and_decision_context": ("decision_readiness_assessment",),
+    "target_overview": ("entity_and_asset_lineage_analysis", "target_business_quality"),
+    "strategic_rationale": ("strategic_fit", "buyer_strategic_objectives", "transaction_logic"),
+    "market_and_competitive_context": ("industry_and_competitive_position",),
+    "deal_structure_and_transaction_economics": ("transaction_terms_analysis", "milestone_economics_analysis", "deal_structure"),
+    "valuation_and_price_reasonableness": ("valuation_and_acceptable_price", "milestone_economics_analysis"),
+    "synergy_and_value_creation": ("synergy_and_value_creation", "strategic_fit"),
+    "key_risks_and_red_flags": ("evidence_gap_and_risk_analysis", "regulatory_integration_and_downside_risks"),
+    "due_diligence_priorities": ("evidence_gap_and_risk_analysis", "due_diligence_priorities"),
+    "decision_readiness_or_recommendation": ("decision_readiness_assessment",),
+}
 
 
 def load_json_artifact(path: Path) -> dict[str, Any]:
@@ -32,8 +61,9 @@ def render_report_if_allowed(
     analysis_package: dict[str, Any],
     certification_result: dict[str, Any],
     output_dir: Path,
+    audit_package: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    validate_renderer_inputs(report_manifest, analysis_package, certification_result)
+    validate_renderer_inputs(report_manifest, analysis_package, certification_result, audit_package)
     blocked_reasons = rendering_blockers(report_manifest, analysis_package, certification_result)
     if blocked_reasons:
         return {
@@ -43,8 +73,8 @@ def render_report_if_allowed(
             "blocked_reasons": blocked_reasons,
         }
 
-    markdown = build_final_report_markdown(analysis_package, certification_result)
-    _validate_markdown(markdown)
+    markdown = build_final_report_markdown(analysis_package, certification_result, audit_package=audit_package)
+    _validate_markdown(markdown, recommendation_allowed=bool(analysis_package.get("recommendation_allowed")))
     output_dir.mkdir(parents=True, exist_ok=True)
     final_report_path = output_dir / "final_report.md"
     final_report_path.write_text(markdown, encoding="utf-8")
@@ -56,7 +86,12 @@ def render_report_if_allowed(
     }
 
 
-def validate_renderer_inputs(report_manifest: Any, analysis_package: Any, certification_result: Any) -> None:
+def validate_renderer_inputs(
+    report_manifest: Any,
+    analysis_package: Any,
+    certification_result: Any,
+    audit_package: Any | None = None,
+) -> None:
     for name, payload in {
         "report_manifest": report_manifest,
         "analysis_package": analysis_package,
@@ -82,6 +117,13 @@ def validate_renderer_inputs(report_manifest: Any, analysis_package: Any, certif
             raise ReportRendererError(f"analysis_package missing {field}.")
     if "overall_certification_status" not in certification_result or "claim_certifications" not in certification_result:
         raise ReportRendererError("certification_result missing required certification status or claims.")
+    if audit_package is not None:
+        if not isinstance(audit_package, dict):
+            raise ReportRendererError("audit_package must be an object when provided.")
+        if audit_package.get("generated_artifact") != "audit_package.json":
+            raise ReportRendererError("optional audit_package must be audit_package.json.")
+        if audit_package.get("case_id") != analysis_package.get("case_id"):
+            raise ReportRendererError("optional audit_package case_id must match analysis_package case_id.")
 
 
 def rendering_blockers(
@@ -105,114 +147,170 @@ def rendering_blockers(
     return blockers
 
 
-def build_final_report_markdown(analysis_package: dict[str, Any], certification_result: dict[str, Any]) -> str:
+def build_final_report_markdown(
+    analysis_package: dict[str, Any],
+    certification_result: dict[str, Any],
+    audit_package: dict[str, Any] | None = None,
+) -> str:
+    report_structure = _load_report_structure()
+    _load_report_style_guide()
     allowed_claims_by_id = {
         claim["claim_id"]: claim
         for claim in certification_result["claim_certifications"]
         if claim["certification_status"] in ALLOWED_CLAIM_STATUSES
     }
     sections_by_id = {section["section_id"]: section for section in analysis_package["analysis_sections"]}
+    context = {
+        "analysis_package": analysis_package,
+        "allowed_claims_by_id": allowed_claims_by_id,
+        "sections_by_id": sections_by_id,
+        "audit_package": audit_package,
+    }
+
     lines = [
-        "# Evidence-Bounded Acquisition Analysis Report",
+        "# Buyer-Side Acquisition Analysis Report",
         "",
-        f"Case ID: `{analysis_package['case_id']}`",
+        f"Case: {_clean_text(analysis_package['case_id'])}",
         "",
-        "Report status: rendered from gate-approved source-bounded analysis package.",
-        "",
-        "## Source and Certification Basis",
-        "",
-        f"- Analysis readiness: `{analysis_package.get('analysis_readiness_status', 'not_recorded')}`",
-        f"- Certification status: `{certification_result['overall_certification_status']}`",
-        f"- Evidence coverage: `{analysis_package['evidence_coverage_status']}`",
-        "- This report uses only certified or certified-with-caveat claims and analysis package sections.",
-        "",
-        "## Executive Summary",
-        "",
-        _summary_from_sections(sections_by_id),
+        "This report is rendered only from gate-approved, source-bounded analysis artifacts. It is prepared as a buyer-side acquisition memo and remains subject to the limitations noted below.",
         "",
     ]
-    lines.extend(_render_analysis_section("Transaction Background", sections_by_id.get("transaction_terms_analysis"), allowed_claims_by_id))
-    lines.extend(_render_analysis_section("Transaction Terms", sections_by_id.get("transaction_terms_analysis"), allowed_claims_by_id))
-    lines.extend(_render_analysis_section("Milestone Economics", sections_by_id.get("milestone_economics_analysis"), allowed_claims_by_id))
-    lines.extend(_render_analysis_section("Entity and Asset Lineage", sections_by_id.get("entity_and_asset_lineage_analysis"), allowed_claims_by_id))
-    lines.extend(_render_gap_section(sections_by_id.get("evidence_gap_and_risk_analysis")))
-    lines.extend(_render_human_review_notes(analysis_package.get("human_review_items", [])))
-    lines.extend(_render_caveats(analysis_package.get("caveats", [])))
-    lines.extend(_render_claim_appendix(allowed_claims_by_id))
+    for section in report_structure["sections"]:
+        section_id = section["section_id"]
+        if section_id == "cover":
+            continue
+        if section_id == "limitations":
+            lines.extend(_render_limitations(context))
+        elif section_id == "appendix_source_list":
+            lines.extend(_render_source_appendix(audit_package))
+        elif section_id == "decision_readiness_or_recommendation":
+            lines.extend(_render_decision_readiness(context, section["section_title"]))
+        else:
+            lines.extend(_render_professional_section(context, section_id, section["section_title"]))
     return "\n".join(lines).rstrip() + "\n"
 
 
-def _render_analysis_section(title: str, section: dict[str, Any] | None, allowed_claims_by_id: dict[str, dict[str, Any]]) -> list[str]:
+def _render_professional_section(context: dict[str, Any], section_id: str, title: str) -> list[str]:
+    findings = _section_findings(context, section_id)
     lines = [f"## {title}", ""]
-    if not section:
-        return lines + ["No gate-approved analysis section was provided.", ""]
-    rendered = []
-    for finding in section.get("findings", []):
-        related_claim_ids = [claim_id for claim_id in finding.get("related_claim_ids", []) if claim_id in allowed_claims_by_id]
-        if not related_claim_ids:
-            continue
-        status = finding.get("certification_status", "not_recorded")
-        if status not in ALLOWED_CLAIM_STATUSES:
-            continue
-        caveat_marker = " Caveat preserved." if finding.get("caveated") else ""
-        rendered.append(f"- {finding['finding_text']} [{', '.join(related_claim_ids)}; {status}].{caveat_marker}")
-    if not rendered:
-        rendered.append("No certified or certified-with-caveat findings are available for this section.")
-    return lines + rendered + [""]
+    if findings:
+        lines.extend(f"- {_clean_text(finding)}" for finding in findings)
+    else:
+        lines.append(_no_finding_sentence(section_id))
+    return lines + [""]
 
 
-def _render_gap_section(section: dict[str, Any] | None) -> list[str]:
-    lines = ["## Evidence Gaps and Limitations", ""]
-    if not section:
-        return lines + ["No source gap summary was provided.", ""]
-    findings = []
-    for finding in section.get("findings", []):
-        findings.append(f"- {finding['finding_text']} This is a limitation, not a factual finding.")
-    if not findings:
-        findings.append("No source gaps were provided.")
-    return lines + findings + [""]
-
-
-def _render_human_review_notes(human_review_items: list[dict[str, Any]]) -> list[str]:
-    lines = ["## Human Review Notes", ""]
-    if not human_review_items:
-        return lines + ["No unresolved blocking human review items were provided.", ""]
-    rendered = []
-    for item in human_review_items:
-        rendered.append(
-            f"- {item.get('human_review_item_id', 'HR-unlisted')}: {item.get('review_reason', 'review required')} "
-            f"[{', '.join(item.get('related_claim_ids', [])) or 'no claim id'}]."
+def _render_decision_readiness(context: dict[str, Any], title: str) -> list[str]:
+    analysis_package = context["analysis_package"]
+    lines = [f"## {title}", ""]
+    if analysis_package.get("recommendation_allowed") is True and analysis_package.get("recommendation_decision"):
+        lines.append(_clean_text(str(analysis_package["recommendation_decision"])))
+    else:
+        lines.append(
+            "A final acquisition recommendation is not authorized by the upstream gates. The report should be used for decision readiness review, not as a proceed, renegotiate, defer, or walk-away recommendation."
         )
-    return lines + rendered + [""]
+    readiness = _section_summary(context["sections_by_id"].get("decision_readiness_assessment"))
+    if readiness:
+        lines.append(_clean_text(readiness))
+    return lines + [""]
 
 
-def _render_caveats(caveats: list[dict[str, Any]]) -> list[str]:
-    lines = ["## Certification Caveats", ""]
-    if not caveats:
-        return lines + ["No certification caveats were provided.", ""]
-    rendered = [f"- {caveat.get('caveat_id', 'CAV-unlisted')}: {caveat.get('caveat_text', '')}" for caveat in caveats]
-    return lines + rendered + [""]
+def _render_limitations(context: dict[str, Any]) -> list[str]:
+    analysis_package = context["analysis_package"]
+    audit_package = context["audit_package"]
+    lines = ["## Limitations", ""]
+    limitations = []
+    limitations.extend(_gap_limitations(context["sections_by_id"].get("evidence_gap_and_risk_analysis")))
+    limitations.extend(_caveat_texts(analysis_package.get("caveats", [])))
+    if audit_package:
+        limitations.extend(_audit_limitations(audit_package))
+    if not limitations:
+        limitations.append("No additional source-bounded limitations were provided by the upstream artifacts.")
+    lines.extend(f"- {_clean_text(item)}" for item in _dedupe(limitations))
+    return lines + [""]
 
 
-def _render_claim_appendix(allowed_claims_by_id: dict[str, dict[str, Any]]) -> list[str]:
-    lines = ["## Appendix: Claim-Evidence References", ""]
-    if not allowed_claims_by_id:
-        return lines + ["No certified claim references were provided.", ""]
-    rendered = []
-    for claim_id in sorted(allowed_claims_by_id):
-        claim = allowed_claims_by_id[claim_id]
-        evidence_ids = ", ".join(claim.get("supporting_evidence_record_ids", [])) or "no evidence id"
-        rendered.append(f"- {claim_id}: {claim['claim_statement']} Evidence: {evidence_ids}. Status: {claim['certification_status']}.")
-    return lines + rendered + [""]
+def _render_source_appendix(audit_package: dict[str, Any] | None) -> list[str]:
+    lines = ["## Appendix: Source List", ""]
+    if not audit_package:
+        return lines + ["Detailed source traceability is available in audit_package.json when provided.", ""]
+    source_rows = audit_package.get("source_citation_table", [])
+    if not source_rows:
+        return lines + ["The audit package did not include a source citation table.", ""]
+    for row in source_rows:
+        title = _clean_text(row.get("source_title") or row.get("source_id") or "Untitled source")
+        tier = _clean_text(row.get("source_tier") or "source tier not recorded")
+        sections = ", ".join(_title_from_section_id(section_id) for section_id in row.get("report_section_ids", [])) or "report section not recorded"
+        lines.append(f"- {title}. Source tier: {tier}. Used in: {sections}.")
+    lines.append("")
+    lines.append("Detailed claim, evidence, and source mapping remains in audit_package.json.")
+    return lines + [""]
 
 
-def _summary_from_sections(sections_by_id: dict[str, dict[str, Any]]) -> str:
-    summaries = []
-    for section_id in ("transaction_terms_analysis", "milestone_economics_analysis", "entity_and_asset_lineage_analysis"):
+def _section_findings(context: dict[str, Any], professional_section_id: str) -> list[str]:
+    sections_by_id = context["sections_by_id"]
+    allowed_claims_by_id = context["allowed_claims_by_id"]
+    source_section_ids = SECTION_FINDING_MAP.get(professional_section_id, ())
+    findings = []
+    for section_id in source_section_ids:
         section = sections_by_id.get(section_id)
-        if section:
-            summaries.append(section.get("summary", ""))
-    return " ".join(summary for summary in summaries if summary) or "Gate-approved analysis sections were provided."
+        if not section:
+            continue
+        for finding in section.get("findings", []):
+            if _finding_is_allowed_fact(finding, allowed_claims_by_id):
+                findings.append(finding["finding_text"])
+    return _dedupe(findings)
+
+
+def _finding_is_allowed_fact(finding: dict[str, Any], allowed_claims_by_id: dict[str, dict[str, Any]]) -> bool:
+    related_claim_ids = finding.get("related_claim_ids", [])
+    if not related_claim_ids:
+        return False
+    if not all(claim_id in allowed_claims_by_id for claim_id in related_claim_ids):
+        return False
+    return finding.get("certification_status") in ALLOWED_CLAIM_STATUSES
+
+
+def _no_finding_sentence(section_id: str) -> str:
+    if section_id in {"due_diligence_priorities", "key_risks_and_red_flags"}:
+        return "No additional source-bounded finding was available; this area should remain a diligence priority if material to the buyer's decision."
+    return "No source-bounded finding was available for this section in the upstream analysis package."
+
+
+def _gap_limitations(section: dict[str, Any] | None) -> list[str]:
+    if not section:
+        return []
+    limitations = []
+    for finding in section.get("findings", []):
+        text = finding.get("finding_text")
+        if text:
+            limitations.append(f"{text} This is a limitation, not a factual report finding.")
+    limitations.extend(section.get("caveats", []))
+    return limitations
+
+
+def _caveat_texts(caveats: list[dict[str, Any]]) -> list[str]:
+    return [caveat.get("caveat_text", "") for caveat in caveats if caveat.get("caveat_text")]
+
+
+def _audit_limitations(audit_package: dict[str, Any]) -> list[str]:
+    limitations = []
+    for item in audit_package.get("caveat_map", []):
+        if item.get("caveat_text"):
+            limitations.append(item["caveat_text"])
+    human_review = audit_package.get("human_review_summary", {})
+    if human_review.get("human_review_required"):
+        limitations.append("Human review remains required for one or more upstream items before recommendation use.")
+    summary = audit_package.get("audit_summary", {})
+    if summary.get("excluded_claim_count", 0):
+        limitations.append("One or more excluded claims remain audit-traceable but are not used as report facts.")
+    return limitations
+
+
+def _section_summary(section: dict[str, Any] | None) -> str:
+    if not section:
+        return ""
+    return section.get("summary", "")
 
 
 def _blocking_human_review_items(analysis_package: dict[str, Any]) -> list[dict[str, Any]]:
@@ -221,10 +319,57 @@ def _blocking_human_review_items(analysis_package: dict[str, Any]) -> list[dict[
     return [item for item in analysis_package.get("human_review_items", []) if item.get("severity") == "high" or item.get("blocks_report") is True]
 
 
-def _validate_markdown(markdown: str) -> None:
-    for term in FORBIDDEN_REPORT_TERMS:
-        if term in markdown:
-            raise ReportRendererError(f"Generated report contains forbidden recommendation term: {term}")
+def _validate_markdown(markdown: str, recommendation_allowed: bool) -> None:
+    main_body = markdown.split("## Appendix: Source List", maxsplit=1)[0]
+    for marker in MAIN_BODY_FORBIDDEN_MARKERS:
+        if marker in main_body:
+            raise ReportRendererError(f"Generated report main body contains forbidden internal marker: {marker}")
+    if not recommendation_allowed:
+        for term in UNAUTHORIZED_RECOMMENDATION_TERMS:
+            if term in markdown:
+                raise ReportRendererError(f"Generated report contains forbidden recommendation term: {term}")
+
+
+def _load_report_structure() -> dict[str, Any]:
+    structure = load_json_artifact(REPORT_STRUCTURE_PATH)
+    if not isinstance(structure.get("sections"), list) or not structure["sections"]:
+        raise ReportRendererError("professional_report_structure.json must include sections.")
+    return structure
+
+
+def _load_report_style_guide() -> dict[str, Any]:
+    style_guide = load_json_artifact(REPORT_STYLE_GUIDE_PATH)
+    if not style_guide.get("principles"):
+        raise ReportRendererError("report_style_guide.json must include principles.")
+    return style_guide
+
+
+def _clean_text(value: Any) -> str:
+    text = str(value).strip()
+    replacements = {
+        "certified-with-caveat": "subject to caveat",
+        "certified_with_caveat": "subject to caveat",
+        "certified": "source-supported",
+        "certification": "source review",
+    }
+    for old, new in replacements.items():
+        text = text.replace(old, new)
+    return text
+
+
+def _title_from_section_id(section_id: str) -> str:
+    return section_id.replace("_", " ").title()
+
+
+def _dedupe(values: Any) -> list[str]:
+    seen = set()
+    result = []
+    for value in values:
+        if not value or value in seen:
+            continue
+        seen.add(value)
+        result.append(value)
+    return result
 
 
 def _blocker(blocker_id: str, reason: str, gate: str) -> dict[str, str]:
