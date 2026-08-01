@@ -13,6 +13,7 @@ from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m4 import run_m4_pipe
 from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m5 import run_m5_pipeline
 from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m6 import run_m6_pipeline
 from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m7 import run_m7_pipeline
+from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m7_render import main as render_main
 from v3_lite_buyer_acquisition_runtime.runtime.run_v3_lite_m7_render import run_m7_render_pipeline
 
 
@@ -64,6 +65,11 @@ class V3LiteM71ReportRendererTest(unittest.TestCase):
         self.ready_report_manifest_path = self.ready_fixture_dir / "report_manifest.json"
         self.ready_analysis_package_path = self.ready_fixture_dir / "analysis_package.json"
         self.ready_certification_result_path = self.ready_fixture_dir / "certification_result.json"
+        self.ready_m6b_fixture_dir = RUNTIME_ROOT / "tests" / "fixtures" / "report_ready_m6b_case"
+        self.ready_m6b_report_manifest_path = self.ready_m6b_fixture_dir / "report_manifest.json"
+        self.ready_m6b_analysis_package_path = self.ready_m6b_fixture_dir / "analysis_package.json"
+        self.ready_m6b_certification_result_path = self.ready_m6b_fixture_dir / "certification_result.json"
+        self.ready_m6b_audit_package_path = self.ready_m6b_fixture_dir / "audit_package.json"
 
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
@@ -151,17 +157,16 @@ class V3LiteM71ReportRendererTest(unittest.TestCase):
 
         self.assertNotIn("Unsupported fixture claim should never appear as a factual report finding", report)
         self.assertNotIn("CL-RF-999", report)
-        self.assertIn("Open source gap: management interview transcript not available", report)
 
     def test_renderer_includes_caveats_and_source_gaps_when_provided(self) -> None:
-        output_dir = self.root / "caveats_and_gaps"
+        output_dir = self.root / "m6b_caveats_and_gaps"
 
-        self._run_ready_fixture(output_dir)
+        self._run_ready_m6b_fixture(output_dir)
         report = (output_dir / "final_report.md").read_text(encoding="utf-8")
 
-        self.assertIn("Milestone consideration is a cap and remains caveated", report)
+        self.assertIn("Return threshold remains unavailable", report)
+        self.assertIn("Confirm buyer-specific return threshold before recommendation use", report)
         self.assertIn("Limitations", report)
-        self.assertIn("This is a limitation, not a factual report finding", report)
 
     def test_main_body_hides_internal_engineering_markers(self) -> None:
         output_dir = self.root / "clean_main_body"
@@ -172,6 +177,70 @@ class V3LiteM71ReportRendererTest(unittest.TestCase):
 
         for marker in ("CL-RF-001", "ER-RF-001", "certification_status", "raw_evidence_id", "claim_node", "evidence_record"):
             self.assertNotIn(marker, main_body)
+
+    def test_m6b_fixture_renders_from_professional_structure_mapping(self) -> None:
+        output_dir = self.root / "ready_m6b_fixture"
+
+        result = self._run_ready_m6b_fixture(output_dir)
+
+        self.assertEqual(result["rendering_status"], "rendered")
+        report = (output_dir / "final_report.md").read_text(encoding="utf-8")
+        self.assertIn("Analyst interpretation: the transaction perimeter is sufficiently defined for a limited buyer-side review", report)
+        self.assertIn("Buyer implication: price reasonableness should be treated as a diligence question", report)
+        self.assertIn("Decision impact: unresolved gates prevent final recommendation language", report)
+        self.assertNotIn("transaction_terms_analysis", report)
+        self.assertNotIn("milestone_economics_analysis", report)
+        self.assertNotIn("entity_and_asset_lineage_analysis", report)
+
+    def test_m6b_main_body_hides_internal_ids_and_unauthorized_recommendations(self) -> None:
+        output_dir = self.root / "ready_m6b_clean"
+
+        self._run_ready_m6b_fixture(output_dir)
+        report = (output_dir / "final_report.md").read_text(encoding="utf-8")
+        main_body = report.split("## Appendix: Source List", maxsplit=1)[0]
+
+        for marker in ("CL-", "ER-", "claim_id", "raw_evidence_id", "certification_status", "claim_node", "evidence_record", "support_level"):
+            self.assertNotIn(marker, main_body)
+        for term in ("Proceed", "Proceed with Conditions", "Renegotiate", "Defer", "Walk Away", "proceed", "renegotiate", "defer", "walk-away"):
+            self.assertNotIn(term, report)
+        self.assertIn("A final acquisition recommendation is not authorized by the upstream gates. This report should be used only for decision-readiness review.", report)
+
+    def test_m6b_optional_audit_package_populates_source_appendix(self) -> None:
+        output_dir = self.root / "ready_m6b_audit_package"
+
+        result = run_m7_render_pipeline(
+            self.ready_m6b_report_manifest_path,
+            self.ready_m6b_analysis_package_path,
+            self.ready_m6b_certification_result_path,
+            output_dir,
+            audit_package_path=self.ready_m6b_audit_package_path,
+        )
+
+        self.assertEqual(result["rendering_status"], "rendered")
+        report = (output_dir / "final_report.md").read_text(encoding="utf-8")
+        self.assertIn("M6B fixture source memorandum", report)
+        self.assertIn("Detailed claim, evidence, and source mapping remains in audit_package.json", report)
+
+    def test_m6b_optional_audit_package_cli_argument(self) -> None:
+        output_dir = self.root / "ready_m6b_cli_audit_package"
+
+        exit_code = render_main(
+            [
+                "--report-manifest",
+                str(self.ready_m6b_report_manifest_path),
+                "--analysis-package",
+                str(self.ready_m6b_analysis_package_path),
+                "--certification-result",
+                str(self.ready_m6b_certification_result_path),
+                "--audit-package",
+                str(self.ready_m6b_audit_package_path),
+                "--output-dir",
+                str(output_dir),
+            ]
+        )
+
+        self.assertEqual(exit_code, 0)
+        self.assertTrue((output_dir / "final_report.md").exists())
 
     def test_no_recommendation_decision_generated(self) -> None:
         output_dir = self.root / "no_recommendation_decision"
@@ -193,6 +262,14 @@ class V3LiteM71ReportRendererTest(unittest.TestCase):
             self.ready_report_manifest_path,
             self.ready_analysis_package_path,
             self.ready_certification_result_path,
+            output_dir,
+        )
+
+    def _run_ready_m6b_fixture(self, output_dir: Path) -> dict:
+        return run_m7_render_pipeline(
+            self.ready_m6b_report_manifest_path,
+            self.ready_m6b_analysis_package_path,
+            self.ready_m6b_certification_result_path,
             output_dir,
         )
 

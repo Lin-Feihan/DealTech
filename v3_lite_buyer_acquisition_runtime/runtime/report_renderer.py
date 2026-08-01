@@ -15,9 +15,20 @@ REPORT_STYLE_GUIDE_PATH = RUNTIME_ROOT / "config" / "report_style_guide.json"
 
 ALLOWED_CLAIM_STATUSES = {"certified", "certified_with_caveat"}
 BLOCKING_CERTIFICATION_STATUSES = {"repair_required", "failed"}
-UNAUTHORIZED_RECOMMENDATION_TERMS = ("Proceed", "Proceed with Conditions", "Renegotiate", "Defer", "Walk Away")
+UNAUTHORIZED_RECOMMENDATION_TERMS = (
+    "Proceed",
+    "Proceed with Conditions",
+    "Renegotiate",
+    "Defer",
+    "Walk Away",
+    "proceed",
+    "renegotiate",
+    "defer",
+    "walk-away",
+)
 MAIN_BODY_FORBIDDEN_MARKERS = (
     "CL-",
+    "ER-",
     "RE-",
     "claim_id",
     "raw_evidence_id",
@@ -26,21 +37,6 @@ MAIN_BODY_FORBIDDEN_MARKERS = (
     "evidence_record",
     "support_level",
 )
-
-SECTION_FINDING_MAP = {
-    "executive_summary": ("transaction_terms_analysis", "milestone_economics_analysis", "entity_and_asset_lineage_analysis"),
-    "transaction_snapshot": ("transaction_terms_analysis", "deal_structure", "transaction_logic"),
-    "buyer_mandate_and_decision_context": ("decision_readiness_assessment",),
-    "target_overview": ("entity_and_asset_lineage_analysis", "target_business_quality"),
-    "strategic_rationale": ("strategic_fit", "buyer_strategic_objectives", "transaction_logic"),
-    "market_and_competitive_context": ("industry_and_competitive_position",),
-    "deal_structure_and_transaction_economics": ("transaction_terms_analysis", "milestone_economics_analysis", "deal_structure"),
-    "valuation_and_price_reasonableness": ("valuation_and_acceptable_price", "milestone_economics_analysis"),
-    "synergy_and_value_creation": ("synergy_and_value_creation", "strategic_fit"),
-    "key_risks_and_red_flags": ("evidence_gap_and_risk_analysis", "regulatory_integration_and_downside_risks"),
-    "due_diligence_priorities": ("evidence_gap_and_risk_analysis", "due_diligence_priorities"),
-    "decision_readiness_or_recommendation": ("decision_readiness_assessment",),
-}
 
 
 def load_json_artifact(path: Path) -> dict[str, Any]:
@@ -180,47 +176,54 @@ def build_final_report_markdown(
         if section_id == "cover":
             continue
         if section_id == "limitations":
-            lines.extend(_render_limitations(context))
+            lines.extend(_render_limitations(context, section))
         elif section_id == "appendix_source_list":
             lines.extend(_render_source_appendix(audit_package))
         elif section_id == "decision_readiness_or_recommendation":
-            lines.extend(_render_decision_readiness(context, section["section_title"]))
+            lines.extend(_render_decision_readiness(context, section))
         else:
-            lines.extend(_render_professional_section(context, section_id, section["section_title"]))
+            lines.extend(_render_professional_section(context, section))
     return "\n".join(lines).rstrip() + "\n"
 
 
-def _render_professional_section(context: dict[str, Any], section_id: str, title: str) -> list[str]:
-    findings = _section_findings(context, section_id)
-    lines = [f"## {title}", ""]
-    if findings:
-        lines.extend(f"- {_clean_text(finding)}" for finding in findings)
+def _render_professional_section(context: dict[str, Any], report_section: dict[str, Any]) -> list[str]:
+    source_sections = _mapped_source_sections(context, report_section)
+    narratives = _professional_narratives(source_sections)
+    findings = _supporting_findings(context, source_sections)
+    lines = [f"## {report_section['section_title']}", ""]
+    if narratives:
+        lines.extend(f"- {_clean_text(item)}" for item in narratives)
+        if findings:
+            lines.append("")
+            lines.append("Supporting detail:")
+            lines.extend(f"- {_clean_text(finding)}" for finding in findings)
     else:
-        lines.append(_no_finding_sentence(section_id))
+        lines.append(_no_finding_sentence(report_section["section_id"]))
     return lines + [""]
 
 
-def _render_decision_readiness(context: dict[str, Any], title: str) -> list[str]:
+def _render_decision_readiness(context: dict[str, Any], report_section: dict[str, Any]) -> list[str]:
     analysis_package = context["analysis_package"]
-    lines = [f"## {title}", ""]
+    source_sections = _mapped_source_sections(context, report_section)
+    lines = [f"## {report_section['section_title']}", ""]
     if analysis_package.get("recommendation_allowed") is True and analysis_package.get("recommendation_decision"):
         lines.append(_clean_text(str(analysis_package["recommendation_decision"])))
     else:
         lines.append(
-            "A final acquisition recommendation is not authorized by the upstream gates. The report should be used for decision readiness review, not as a proceed, renegotiate, defer, or walk-away recommendation."
+            "A final acquisition recommendation is not authorized by the upstream gates. This report should be used only for decision-readiness review."
         )
-    readiness = _section_summary(context["sections_by_id"].get("decision_readiness_assessment"))
-    if readiness:
-        lines.append(_clean_text(readiness))
+    for item in _professional_narratives(source_sections):
+        lines.append(f"- {_clean_text(item)}")
     return lines + [""]
 
 
-def _render_limitations(context: dict[str, Any]) -> list[str]:
+def _render_limitations(context: dict[str, Any], report_section: dict[str, Any]) -> list[str]:
     analysis_package = context["analysis_package"]
     audit_package = context["audit_package"]
+    source_sections = _mapped_source_sections(context, report_section)
     lines = ["## Limitations", ""]
     limitations = []
-    limitations.extend(_gap_limitations(context["sections_by_id"].get("evidence_gap_and_risk_analysis")))
+    limitations.extend(_source_section_limitations(source_sections))
     limitations.extend(_caveat_texts(analysis_package.get("caveats", [])))
     if audit_package:
         limitations.extend(_audit_limitations(audit_package))
@@ -247,15 +250,25 @@ def _render_source_appendix(audit_package: dict[str, Any] | None) -> list[str]:
     return lines + [""]
 
 
-def _section_findings(context: dict[str, Any], professional_section_id: str) -> list[str]:
+def _mapped_source_sections(context: dict[str, Any], report_section: dict[str, Any]) -> list[dict[str, Any]]:
     sections_by_id = context["sections_by_id"]
-    allowed_claims_by_id = context["allowed_claims_by_id"]
-    source_section_ids = SECTION_FINDING_MAP.get(professional_section_id, ())
+    return [sections_by_id[section_id] for section_id in report_section.get("source_analysis_section_ids", []) if section_id in sections_by_id]
+
+
+def _professional_narratives(source_sections: list[dict[str, Any]]) -> list[str]:
+    narratives = []
+    for section in source_sections:
+        for field in ("analyst_interpretation", "buyer_implication", "decision_impact", "analysis_boundary"):
+            value = section.get(field)
+            if value:
+                narratives.append(value)
+    return _dedupe(narratives)
+
+
+def _supporting_findings(context: dict[str, Any], source_sections: list[dict[str, Any]]) -> list[str]:
     findings = []
-    for section_id in source_section_ids:
-        section = sections_by_id.get(section_id)
-        if not section:
-            continue
+    allowed_claims_by_id = context["allowed_claims_by_id"]
+    for section in source_sections:
         for finding in section.get("findings", []):
             if _finding_is_allowed_fact(finding, allowed_claims_by_id):
                 findings.append(finding["finding_text"])
@@ -277,15 +290,25 @@ def _no_finding_sentence(section_id: str) -> str:
     return "No source-bounded finding was available for this section in the upstream analysis package."
 
 
-def _gap_limitations(section: dict[str, Any] | None) -> list[str]:
-    if not section:
-        return []
+def _source_section_limitations(source_sections: list[dict[str, Any]]) -> list[str]:
     limitations = []
-    for finding in section.get("findings", []):
-        text = finding.get("finding_text")
-        if text:
-            limitations.append(f"{text} This is a limitation, not a factual report finding.")
-    limitations.extend(section.get("caveats", []))
+    for section in source_sections:
+        limitations.extend(section.get("caveats", []))
+        limitations.extend(section.get("missing_inputs", []))
+        for item in section.get("pending_diligence_items", []):
+            if isinstance(item, dict):
+                limitations.append(item.get("diligence_item") or item.get("description") or item.get("reason") or "")
+            else:
+                limitations.append(str(item))
+        for item in section.get("imported_limitations_from_m5", []):
+            if isinstance(item, dict):
+                limitations.append(item.get("reason") or item.get("limitation") or item.get("description") or "")
+            else:
+                limitations.append(str(item))
+        for finding in section.get("findings", []):
+            text = finding.get("finding_text")
+            if text and not _finding_is_allowed_fact(finding, {}):
+                limitations.append(f"{text} This is a limitation, not a factual report finding.")
     return limitations
 
 
@@ -305,12 +328,6 @@ def _audit_limitations(audit_package: dict[str, Any]) -> list[str]:
     if summary.get("excluded_claim_count", 0):
         limitations.append("One or more excluded claims remain audit-traceable but are not used as report facts.")
     return limitations
-
-
-def _section_summary(section: dict[str, Any] | None) -> str:
-    if not section:
-        return ""
-    return section.get("summary", "")
 
 
 def _blocking_human_review_items(analysis_package: dict[str, Any]) -> list[dict[str, Any]]:

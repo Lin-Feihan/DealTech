@@ -24,12 +24,14 @@ def run_m7_render_pipeline(
     analysis_package_path: Path,
     certification_result_path: Path,
     output_dir: Path,
+    audit_package_path: Path | None = None,
 ) -> dict:
     try:
         report_manifest = load_json_artifact(report_manifest_path)
         analysis_package = load_json_artifact(analysis_package_path)
         certification_result = load_json_artifact(certification_result_path)
-        return render_report_if_allowed(report_manifest, analysis_package, certification_result, output_dir)
+        audit_package = load_json_artifact(audit_package_path) if audit_package_path else None
+        return render_report_if_allowed(report_manifest, analysis_package, certification_result, output_dir, audit_package=audit_package)
     except ReportRendererError as exc:
         raise M7RenderFailClosed(f"M7.1 render failed closed: {exc}") from exc
 
@@ -39,6 +41,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--report-manifest", required=True, type=Path)
     parser.add_argument("--analysis-package", required=True, type=Path)
     parser.add_argument("--certification-result", required=True, type=Path)
+    parser.add_argument("--audit-package", required=False, type=Path)
     parser.add_argument("--output-dir", required=True, type=Path)
     return parser.parse_args(argv)
 
@@ -50,6 +53,7 @@ def main(argv: list[str] | None = None) -> int:
             report_manifest_path=args.report_manifest,
             analysis_package_path=args.analysis_package,
             certification_result_path=args.certification_result,
+            audit_package_path=args.audit_package,
             output_dir=args.output_dir,
         )
     except M7RenderFailClosed as exc:
