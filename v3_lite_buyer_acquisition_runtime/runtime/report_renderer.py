@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -364,6 +365,13 @@ def _load_report_style_guide() -> dict[str, Any]:
 def _clean_text(value: Any) -> str:
     text = str(value).strip()
     replacements = {
+        "overall_certification_status": "overall source review status",
+        "certification_status": "source review status",
+        "raw_evidence_id": "source evidence reference",
+        "claim_id": "claim reference",
+        "claim_node": "claim record",
+        "evidence_record": "evidence record",
+        "support_level": "support level",
         "certified-with-caveat": "subject to caveat",
         "certified_with_caveat": "subject to caveat",
         "certified": "source-supported",
@@ -371,6 +379,8 @@ def _clean_text(value: Any) -> str:
     }
     for old, new in replacements.items():
         text = text.replace(old, new)
+    text = re.sub(r"\bClaim\s+CL-\d+\s+\(([^)]+)\)", r"A source-supported \1 claim", text)
+    text = re.sub(r"\b(?:CL|ER|RE)-\d+\b", "upstream artifact", text)
     return text
 
 

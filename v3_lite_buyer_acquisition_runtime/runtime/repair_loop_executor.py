@@ -299,7 +299,7 @@ def _targeted_source_need(
     certs_by_id: dict[str, dict[str, Any]],
     case_context: dict[str, str],
 ) -> dict[str, Any]:
-    gap_id = research_gap["research_gap_id"] if research_gap else step["related_research_gap_ids"][0]
+    gap_id = research_gap["research_gap_id"] if research_gap else _claim_level_gap_id(step)
     fact_types = _fact_types_for_step(step, research_gap, certs_by_id)
     target_question = _target_fact_or_question(step, research_gap, fact_types)
     required_source_types = _required_source_types(step, research_gap, fact_types)
@@ -327,6 +327,14 @@ def _blocked_or_deferred_repair(step: dict[str, Any], reason: str) -> dict[str, 
         "reason": reason,
         "related_claim_ids": step["related_claim_ids"],
     }
+
+
+def _claim_level_gap_id(step: dict[str, Any]) -> str:
+    if step.get("related_research_gap_ids"):
+        return step["related_research_gap_ids"][0]
+    if step.get("related_claim_ids"):
+        return f"claim_level_repair:{step['related_claim_ids'][0]}"
+    return f"claim_level_repair:{step['repair_step_id']}"
 
 
 def _first_related_gap(step: dict[str, Any], gaps_by_id: dict[str, dict[str, Any]]) -> dict[str, Any] | None:

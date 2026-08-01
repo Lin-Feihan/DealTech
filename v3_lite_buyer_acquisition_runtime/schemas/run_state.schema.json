@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/schemas/v3-lite/run_state.schema.json",
+  "title": "V3-Lite Agent Run State",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "case_id",
+    "status",
+    "current_stage",
+    "completed_stages",
+    "iteration",
+    "max_repair_iterations",
+    "next_action",
+    "last_error"
+  ],
+  "properties": {
+    "case_id": {"type": "string"},
+    "status": {
+      "type": "string",
+      "enum": [
+        "awaiting_external_research",
+        "report_generated",
+        "blocked_by_missing_evidence",
+        "human_review_required",
+        "failed"
+      ]
+    },
+    "current_stage": {"type": "string", "minLength": 1},
+    "completed_stages": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "iteration": {"type": "integer", "minimum": 0},
+    "max_repair_iterations": {"type": "integer", "minimum": 0},
+    "next_action": {"type": "string"},
+    "last_error": {
+      "type": ["string", "null"]
+    },
+    "updated_at": {"type": "string"}
+  }
+}

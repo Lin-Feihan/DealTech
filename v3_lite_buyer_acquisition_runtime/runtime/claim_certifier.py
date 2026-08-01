@@ -12,6 +12,7 @@ from v3_lite_buyer_acquisition_runtime.runtime.claim_evidence_check import (
     run_claim_evidence_check,
 )
 from v3_lite_buyer_acquisition_runtime.runtime.evidence_check import evidence_results_by_record_id, run_evidence_check
+from v3_lite_buyer_acquisition_runtime.runtime.numeric_verifier import verify_numeric_claims
 from v3_lite_buyer_acquisition_runtime.runtime.sec_companyfacts_provider import SEC_USER_AGENT_ENV, make_sec_companyfacts_provider
 from v3_lite_buyer_acquisition_runtime.runtime.source_refetch_check import run_source_refetch_check, source_refetch_results_by_record_id
 from v3_lite_buyer_acquisition_runtime.runtime.usage_check import run_usage_check, usage_results_by_claim_id
@@ -92,11 +93,12 @@ def build_certification_result(graph: dict[str, Any], evidence_repository: dict[
     usage_check_results = run_usage_check(graph, evidence_repository)
     citation_results = _build_compat_citation_results(graph, claim_evidence_check_results)
     temporal_results = _build_compat_temporal_results(graph)
-    numeric_results: list[dict[str, Any]] = []
+    numeric_results = verify_numeric_claims(graph, evidence_repository)
     records_by_id = {record["evidence_record_id"]: record for record in evidence_repository["evidence_records"]}
     evidence_check_by_record = evidence_results_by_record_id(evidence_check_results)
     source_refetch_by_record = source_refetch_results_by_record_id(source_refetch_check_results)
     xbrl_numeric_by_record = xbrl_results_by_record_id(xbrl_numeric_check_results)
+    deterministic_numeric_by_claim = _deterministic_numeric_results_by_claim_id(numeric_results)
     claim_evidence_check_by_claim = claim_evidence_results_by_claim_id(claim_evidence_check_results)
     temporal_by_claim = {result["claim_id"]: result for result in temporal_results}
     usage_check_by_claim = usage_results_by_claim_id(usage_check_results)
@@ -110,6 +112,7 @@ def build_certification_result(graph: dict[str, Any], evidence_repository: dict[
             evidence_check_by_record=evidence_check_by_record,
             source_refetch_by_record=source_refetch_by_record,
             xbrl_numeric_by_record=xbrl_numeric_by_record,
+            deterministic_numeric_checks=deterministic_numeric_by_claim.get(claim["claim_id"], []),
             claim_evidence_check=claim_evidence_check_by_claim[claim["claim_id"]],
             temporal_result=temporal_by_claim[claim["claim_id"]],
             usage_check=usage_check_by_claim[claim["claim_id"]],
@@ -220,6 +223,7 @@ def certify_claim(
     evidence_check_by_record: dict[str, dict[str, Any]],
     source_refetch_by_record: dict[str, list[dict[str, Any]]],
     xbrl_numeric_by_record: dict[str, list[dict[str, Any]]],
+    deterministic_numeric_checks: list[dict[str, Any]],
     claim_evidence_check: dict[str, Any],
     temporal_result: dict[str, Any],
     usage_check: dict[str, Any],
@@ -229,12 +233,18 @@ def certify_claim(
     source_refetch_checks = [check for record in records for check in source_refetch_by_record.get(record["evidence_record_id"], [])]
     xbrl_numeric_checks = [check for record in records for check in xbrl_numeric_by_record.get(record["evidence_record_id"], [])]
     claim_xbrl_numeric_checks = xbrl_numeric_checks if _claim_uses_numeric_gate(claim) else []
+    deterministic_numeric_passed = _deterministic_numeric_passed(deterministic_numeric_checks)
+    deterministic_numeric_repair_actions = _deterministic_numeric_repair_actions(claim, deterministic_numeric_checks)
     repair_actions = _combine_repair_actions(evidence_checks, source_refetch_checks, claim_xbrl_numeric_checks, claim_evidence_check, usage_check)
+    if deterministic_numeric_passed:
+        repair_actions = [action for action in repair_actions if action["target"] != "M5_numeric_verification"]
+    repair_actions = _dedupe_action_dicts([*repair_actions, *deterministic_numeric_repair_actions])
     caveats = []
     if temporal_result["verification_status"] == "passed_with_caveat":
         caveats.append(temporal_result["caveat"])
     caveats.extend(_check_caveats(evidence_checks))
     caveats.extend(_source_refetch_caveats(source_refetch_checks))
+    caveats.extend(_deterministic_numeric_caveats(deterministic_numeric_checks))
     caveats.extend(claim_evidence_check.get("required_caveats", []))
     caveats.extend(usage_check.get("required_caveats", []))
     if temporal_result["verification_status"] == "failed":
@@ -250,9 +260,16 @@ def certify_claim(
     ):
         status = "failed"
         basis = _blocking_check_basis(evidence_checks, source_refetch_checks, claim_xbrl_numeric_checks, claim_evidence_check)
-    elif claim.get("requires_numeric_verification") is True or claim["claim_type"] == "derived_numeric_candidate":
+    elif _has_blocking_deterministic_numeric(claim, deterministic_numeric_checks):
         status = "requires_numeric_verification"
-        basis = "Usage gate blocks uncaveated financial conclusion until deterministic numeric verification passes."
+        basis = "Deterministic numeric verification did not pass or lacked required formula inputs."
+    elif claim.get("requires_numeric_verification") is True or claim["claim_type"] == "derived_numeric_candidate":
+        if deterministic_numeric_passed and records:
+            status = "certified_with_caveat"
+            basis = "Deterministic numeric formula replay passed with caveat; preserve arithmetic-only limitation."
+        else:
+            status = "requires_numeric_verification"
+            basis = "Numeric claim requires explicit formula inputs before certification expansion."
     elif claim.get("requires_human_review") is True and claim.get("support_level") == "needs_review":
         status = "requires_human_review"
         basis = "Claim requires human review before certification."
@@ -285,6 +302,7 @@ def certify_claim(
         "evidence_check_status": _aggregate_check_status(evidence_checks),
         "source_refetch_check_status": _aggregate_source_refetch_status(source_refetch_checks),
         "xbrl_numeric_check_status": _aggregate_xbrl_numeric_status(claim_xbrl_numeric_checks),
+        "deterministic_numeric_check_status": _aggregate_deterministic_numeric_status(deterministic_numeric_checks),
         "claim_evidence_check_status": claim_evidence_check["check_status"],
         "usage_check_status": usage_check["usage_check_status"],
         "allowed_downstream_uses": usage_check["allowed_downstream_uses"],
@@ -559,6 +577,77 @@ def _aggregate_xbrl_numeric_status(checks: list[dict[str, Any]]) -> str:
     if "verified" in statuses:
         return "verified"
     return "not_applicable"
+
+
+def _deterministic_numeric_results_by_claim_id(results: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for result in results:
+        grouped.setdefault(result["related_claim_id"], []).append(result)
+    return grouped
+
+
+def _aggregate_deterministic_numeric_status(checks: list[dict[str, Any]]) -> str:
+    statuses = {check["verification_status"] for check in checks}
+    if "failed" in statuses:
+        return "failed"
+    if "insufficient_numeric_support" in statuses:
+        return "insufficient_numeric_support"
+    if "passed_with_caveat" in statuses:
+        return "passed_with_caveat"
+    return "not_applicable"
+
+
+def _has_blocking_deterministic_numeric(claim: dict[str, Any], checks: list[dict[str, Any]]) -> bool:
+    if _deterministic_formula_from_claim(claim) is None:
+        return False
+    if not checks:
+        return True
+    return any(check["verification_status"] in {"failed", "insufficient_numeric_support"} for check in checks)
+
+
+def _deterministic_numeric_passed(checks: list[dict[str, Any]]) -> bool:
+    return bool(checks) and all(check["verification_status"] == "passed_with_caveat" for check in checks)
+
+
+def _deterministic_numeric_caveats(checks: list[dict[str, Any]]) -> list[str]:
+    return [str(check["caveat"]) for check in checks if check.get("caveat")]
+
+
+def _deterministic_numeric_repair_actions(claim: dict[str, Any], checks: list[dict[str, Any]]) -> list[dict[str, str]]:
+    if _deterministic_formula_from_claim(claim) is None:
+        return []
+    if not checks:
+        return [
+            {
+                "target": "M5_numeric_verification",
+                "action": "provide_numeric_formula_and_inputs",
+                "reason": "Numeric claim has no replayable formula or explicit formula inputs.",
+                "source_check": "deterministic_numeric_check",
+                "source_id": claim["claim_id"],
+            }
+        ]
+    actions = []
+    for check in checks:
+        if check["verification_status"] in {"failed", "insufficient_numeric_support"}:
+            actions.append(
+                {
+                    "target": "M5_numeric_verification",
+                    "action": "repair_numeric_formula_or_inputs",
+                    "reason": str(check.get("caveat") or "Deterministic numeric verification failed."),
+                    "source_check": "deterministic_numeric_check",
+                    "source_id": str(check.get("numeric_check_id") or claim["claim_id"]),
+                }
+            )
+    return actions
+
+
+def _deterministic_formula_from_claim(claim: dict[str, Any]) -> dict[str, Any] | None:
+    formula = claim.get("numeric_formula") or claim.get("calculation_formula") or claim.get("formula")
+    if isinstance(formula, str) and formula.strip():
+        return {"expression": formula.strip()}
+    if isinstance(formula, dict) and isinstance(formula.get("expression"), str) and formula["expression"].strip():
+        return formula
+    return None
 
 
 def _has_blocking_check(checks: list[dict[str, Any]]) -> bool:

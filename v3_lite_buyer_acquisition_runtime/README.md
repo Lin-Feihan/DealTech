@@ -30,6 +30,48 @@ mandate.json
 -> final_report.md only if gate allows
 ```
 
+## Unified Agent Entrypoint
+
+Use `runtime/run_agent.py` for normal case execution. Users should not manually run M1-M7.1 for a standard Agent run.
+
+Start a case:
+
+```bash
+python v3_lite_buyer_acquisition_runtime/runtime/run_agent.py start \
+  --case v3_lite_buyer_acquisition_runtime/examples/synthetic_acquisition_mandate.json \
+  --output-dir outputs/runs/synthetic_buyer_acquisition_m1
+```
+
+The Agent writes `research_request.json` and stops with:
+
+```text
+status: awaiting_external_research
+```
+
+OpenClaw, GPT-5.5, or a human external research executor then reads `research_request.json`, performs source-bounded research outside the runtime, and saves a structured `deep_research_response.json`. The Agent does not remotely control OpenClaw.
+
+Resume after external research:
+
+```bash
+python v3_lite_buyer_acquisition_runtime/runtime/run_agent.py resume \
+  --run-dir outputs/runs/synthetic_buyer_acquisition_m1 \
+  --research-response <deep_research_response.json>
+```
+
+The unified entrypoint returns exactly one of these statuses:
+
+```text
+awaiting_external_research
+report_generated
+blocked_by_missing_evidence
+human_review_required
+failed
+```
+
+Each run writes `outputs/runs/<case_id>/run_state.json`. `run_state.json` records `case_id`, `status`, `current_stage`, `completed_stages`, `iteration`, `max_repair_iterations`, `next_action`, and `last_error`. If M5 finds evidence or numeric gaps, the Agent writes `repair_request.json`, returns `awaiting_external_research`, and on resume reruns the necessary M2/M3/M4/M5 path. The repair loop is capped at two iterations; unresolved gaps after that return `blocked_by_missing_evidence`.
+
+Run artifacts belong under `outputs/runs/<case_id>/` and are intentionally ignored by git except `outputs/runs/.gitkeep`.
+
 ## Current Scope
 
 Implemented prototype scope:
@@ -59,6 +101,8 @@ Current exclusions and fail-closed boundaries:
 - no V1/V2 runtime changes
 
 ## Run
+
+The unified Agent entrypoint above is the preferred way to run a case. The older milestone runners remain available for debugging individual stages.
 
 ```bash
 python3 v3_lite_buyer_acquisition_runtime/runtime/run_v3_lite.py \

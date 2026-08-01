@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dealtech.local/schemas/v3-lite/research_request.schema.json",
+  "title": "V3-Lite External Research Request",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "case_id",
+    "generated_artifact",
+    "stage",
+    "provider",
+    "model",
+    "created_at",
+    "research_objective",
+    "source_priority_rules",
+    "must_answer_questions",
+    "required_source_categories",
+    "forbidden_source_uses",
+    "output_requirements",
+    "source_manifest_requirements",
+    "raw_evidence_requirements",
+    "handoff_contract"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "generated_artifact": {"type": "string", "enum": ["research_request.json", "repair_request.json"]},
+    "stage": {"type": "string", "minLength": 1},
+    "provider": {"type": "string", "const": "openclaw_external_research"},
+    "model": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "minLength": 1},
+    "research_objective": {"type": "string", "minLength": 1},
+    "source_priority_rules": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "must_answer_questions": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "required_source_categories": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "forbidden_source_uses": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "output_requirements": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "source_manifest_requirements": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "raw_evidence_requirements": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "handoff_contract": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["agent_writes", "external_executor_writes", "resume_command", "agent_does_not_control_openclaw_remotely"],
+      "properties": {
+        "agent_writes": {"type": "string", "const": "research_request.json"},
+        "external_executor_writes": {"type": "string", "const": "deep_research_response.json"},
+        "resume_command": {"type": "string", "minLength": 1},
+        "agent_does_not_control_openclaw_remotely": {"type": "boolean", "const": true}
+      }
+    }
+  }
+}
