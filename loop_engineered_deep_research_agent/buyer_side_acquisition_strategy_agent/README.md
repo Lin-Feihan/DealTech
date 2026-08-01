@@ -65,7 +65,7 @@ External tools may perform research, but they do not directly control the final 
 
 ## Workflow
 
-The runtime follows an M1-M7.1 workflow:
+The runtime follows an M1-M8 workflow:
 
 ```text
 M1   Mandate Intake and Research Planning
